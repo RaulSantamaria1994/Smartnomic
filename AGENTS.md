@@ -14,6 +14,7 @@ el dinero y reciba recordatorios antes de cada pago.
 | ------------------------------------ | ------------------------------------------------------------- |
 | [`CONSTITUTION.md`](CONSTITUTION.md) | Reglas técnicas obligatorias. **Mandan sobre todo lo demás.** |
 | [`docs/PLAN.md`](docs/PLAN.md)       | Producto, modelo de datos y roadmap por fases                 |
+| `specs/NNN-nombre/spec.md`           | Qué debe hacer cada funcionalidad (historias, requisitos)     |
 | `AGENTS.md` (este)                   | Forma de trabajar: flujo, comandos, comunicación              |
 
 Antes de escribir código, lee la constitución. Si una tarea choca con ella, no la
