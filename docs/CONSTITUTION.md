@@ -3,7 +3,8 @@
 Reglas técnicas que no se negocian: arquitectura, stack, modelo de datos, API, seguridad,
 tests y calidad. Están por encima de cualquier plan, especificación, tarea o instrucción
 de un agente. La forma de trabajar (flujo, comandos, comunicación) está en
-[`AGENTS.md`](../AGENTS.md) y la hoja de ruta en [`docs/specs/PLAN.md`](specs/PLAN.md).
+[`AGENTS.md`](../AGENTS.md) y la especificación, el plan y las tareas de cada funcionalidad en
+[`docs/specs/`](specs/).
 
 Las palabras **DEBE**, **NUNCA** y **DEBERÍA** tienen el sentido de la RFC 2119: lo que
 DEBE cumplirse no admite excepciones sin enmendar esta constitución; lo que DEBERÍA
@@ -158,8 +159,8 @@ cumplirse admite excepciones justificadas por escrito en el PR.
 
 ## Gobierno
 
-1. **Precedencia.** Esta constitución está por encima de `AGENTS.md`, `docs/specs/PLAN.md`, las
-   especificaciones y las instrucciones de cualquier tarea. Si chocan, gana la
+1. **Precedencia.** Esta constitución está por encima de `AGENTS.md`, las
+   especificaciones, los planes y las instrucciones de cualquier tarea. Si chocan, gana la
    constitución, y el agente DEBE señalar el conflicto en lugar de resolverlo por su
    cuenta.
 2. **Cumplimiento.** Cada PR DEBE respetar estos artículos. Quien revisa (persona o agente)
@@ -173,9 +174,12 @@ cumplirse admite excepciones justificadas por escrito en el PR.
    - **MENOR**: se añade un artículo o se amplía uno de forma relevante.
    - **PARCHE**: aclaraciones y redacción, sin cambiar el significado.
 
-**Versión**: 1.1.0 · **Ratificada**: 2026-10-26 · **Última enmienda**: 2026-10-26
+**Versión**: 1.1.1 · **Ratificada**: 2026-10-26 · **Última enmienda**: 2026-10-26
 
 ### Historial de enmiendas
+
+- **1.1.1 (2026-10-26)**: las referencias a `docs/specs/PLAN.md`, que desaparece, pasan a
+  `docs/specs/`, donde cada funcionalidad tiene su especificación, plan y tareas.
 
 - **1.1.0 (2026-10-26)**: el artículo IX pasa a ser "App y plataformas". Las reglas de
   uso sin conexión y notificaciones locales se limitan a la app nativa; el navegador
