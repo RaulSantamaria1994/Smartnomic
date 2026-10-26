@@ -6,7 +6,8 @@ repositorio. Las personas también pueden leerlo: es la guía corta de cómo se 
 ## Qué es Smartnomic
 
 App móvil para que un hogar apunte sus ingresos y gastos mensuales, entienda en qué se va
-el dinero y reciba recordatorios antes de cada pago. El plan completo (arquitectura, modelo
+el dinero y reciba recordatorios antes de cada pago. Los principios que no se negocian
+están en [`CONSTITUTION.md`](CONSTITUTION.md). El plan completo (arquitectura, modelo
 de datos y roadmap por fases) está en [`docs/PLAN.md`](docs/PLAN.md). **Léelo antes de
 proponer cambios de arquitectura** y, si una decisión cambia, actualízalo en el mismo PR.
 
@@ -54,31 +55,26 @@ pnpm --filter @smartnomic/mobile start # app con Expo
 **Antes de dar una tarea por terminada, `pnpm check` debe pasar sin errores.** Si un
 comando no existe todavía, dilo en lugar de suponer que ha pasado.
 
-## Reglas del dominio (no negociables)
+## Cómo se aplica la constitución
 
-- **Dinero en céntimos enteros** (`amountCents: number`, entero). Nunca `number` con
-  decimales ni `parseFloat` sobre importes. Formatear solo en la interfaz con
-  `Intl.NumberFormat`.
-- **Fechas de calendario sin hora** (`YYYY-MM-DD`) para movimientos y vencimientos. El
-  "mes" depende de la zona horaria y del `month_start_day` del hogar.
-- `packages/domain` es **puro**: sin React, sin red, sin base de datos, sin `Date.now()`
-  ni `new Date()` sin argumentos. La fecha de "hoy" entra como parámetro.
-- **Toda regla nueva del dominio llega con sus tests**, incluidos los casos límite: día 31
-  en meses cortos, años bisiestos, cambio de hora, importes negativos o cero.
-- Marcar un vencimiento como pagado crea el movimiento con el **importe real**.
+Los principios están en [`CONSTITUTION.md`](CONSTITUTION.md) y mandan sobre este archivo.
+Aquí solo se concreta cómo se cumplen en el código:
 
-## Seguridad y privacidad
-
-Son datos económicos personales:
-
-- **Cada consulta del servidor filtra por `household_id`** y comprueba que el usuario es
-  miembro con el rol necesario. Cualquier endpoint nuevo lleva un test que intenta leer o
-  modificar datos de otro hogar y falla.
-- Valida con zod toda entrada del servidor; no confíes en lo que envía la app.
-- En la app, los tokens van en `expo-secure-store`, nunca en AsyncStorage.
-- Nunca subas secretos (`.env`, claves, URLs de base de datos). Usa `.env.example`.
-- No escribas importes, notas ni datos personales en los logs.
-- Los datos reales de usuarios nunca se usan en tests ni en ejemplos.
+- **Dinero (art. I):** `amountCents: number` siempre entero. Nada de `parseFloat` ni
+  decimales sobre importes; formatear solo en la interfaz con `Intl.NumberFormat`.
+- **Fechas (art. I):** cadenas `YYYY-MM-DD` para movimientos y vencimientos. El mes se
+  calcula con la zona horaria y el `month_start_day` del hogar.
+- **Vencimientos (art. I y IV):** marcar uno como pagado crea el movimiento con el
+  importe real que confirma el usuario.
+- **Dominio puro (art. III):** `packages/domain` no importa React, red ni base de datos,
+  y no llama a `Date.now()` ni a `new Date()` sin argumentos: "hoy" entra como parámetro.
+- **Aislamiento (art. II):** cada consulta del servidor filtra por `household_id` y
+  comprueba el rol. Cada endpoint nuevo lleva un test que intenta acceder a otro hogar y
+  falla.
+- **Entradas (art. II):** valida con zod todo lo que llega al servidor.
+- **Sesión (art. II):** tokens en `expo-secure-store`, nunca en AsyncStorage.
+- **Secretos (art. II):** solo en variables de entorno; en el repositorio, `.env.example`.
+- **Logs (art. II):** nunca importes, notas ni datos personales.
 
 ## Estilo de código
 
@@ -108,6 +104,7 @@ Son datos económicos personales:
 
 Para y pregunta en lugar de decidir por tu cuenta cuando la tarea implique:
 
+- Algo que choque con `CONSTITUTION.md`, o modificar ese archivo.
 - Cambiar una decisión de `docs/PLAN.md` (stack, modelo de datos, alcance de una fase).
 - Añadir un servicio externo de pago, conexión bancaria o algo con coste.
 - Borrar datos o migraciones, o cambios que no se puedan deshacer.
