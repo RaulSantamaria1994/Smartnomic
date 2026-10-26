@@ -1,85 +1,149 @@
-# Constitución de Smartnomic
+# Constitución técnica de Smartnomic
 
-Principios que no se negocian en Smartnomic. Están por encima de cualquier plan,
-especificación, tarea o instrucción de un agente. Dicen **qué** debe cumplirse siempre y
-**por qué**; el **cómo** del día a día (comandos, estructura, estilo) está en
+Reglas técnicas que no se negocian: arquitectura, stack, modelo de datos, API, seguridad,
+tests y calidad. Están por encima de cualquier plan, especificación, tarea o instrucción
+de un agente. La forma de trabajar (flujo, comandos, comunicación) está en
 [`AGENTS.md`](AGENTS.md) y la hoja de ruta en [`docs/PLAN.md`](docs/PLAN.md).
 
 Las palabras **DEBE**, **NUNCA** y **DEBERÍA** tienen el sentido de la RFC 2119: lo que
 DEBE cumplirse no admite excepciones sin enmendar esta constitución; lo que DEBERÍA
 cumplirse admite excepciones justificadas por escrito en el PR.
 
-## Artículo I. El dinero es exacto
+## Artículo I. Stack
 
-Una app de economía que se equivoca en un céntimo pierde la confianza de quien la usa.
+1. El stack es fijo. Cambiar una pieza de esta tabla DEBE hacerse enmendando esta
+   constitución.
 
-1. Los importes DEBEN representarse como enteros en la unidad mínima de la moneda
-   (céntimos). NUNCA se opera con decimales en coma flotante.
-2. Las fechas de movimientos y vencimientos DEBEN ser fechas de calendario sin hora. El
-   mes al que pertenece un movimiento lo deciden la zona horaria y el día de inicio de mes
-   del hogar, nunca la hora del dispositivo ni la del servidor.
-3. Todo total que vea el usuario DEBE poder reconstruirse sumando los movimientos que lo
-   forman. No hay saldos "mágicos" guardados aparte que puedan desincronizarse.
+   | Pieza          | Elección                                                |
+   | -------------- | ------------------------------------------------------- |
+   | Lenguaje       | TypeScript (modo `strict`) en todo el proyecto, Node 22 |
+   | Monorepo       | pnpm workspaces                                         |
+   | App            | Expo + Expo Router, TanStack Query, Zustand             |
+   | Servidor       | Fastify, API REST                                       |
+   | Base de datos  | PostgreSQL + Drizzle ORM                                |
+   | Autenticación  | Better Auth                                             |
+   | Validación     | zod                                                     |
+   | Tests          | Vitest                                                  |
+   | Notificaciones | expo-notifications (locales) y Expo Push (servidor)     |
+   | Despliegue     | Railway (región UE) y EAS Build                         |
 
-## Artículo II. Los datos del hogar son del hogar
+2. Una dependencia nueva DEBE justificarse en el PR que la añade (qué resuelve y por qué
+   no basta lo que ya hay). NUNCA se añaden dependencias abandonadas, sin tipos o que
+   dupliquen una existente.
 
-Los ingresos y gastos de una familia son de lo más privado que tiene.
+## Artículo II. Arquitectura por capas
 
-1. Ningún usuario DEBE poder leer ni modificar datos de un hogar del que no es miembro, ni
-   hacer lo que su rol no permite. Esto se comprueba en el servidor, en cada operación, y
-   se prueba con tests que intentan saltárselo.
-2. Los datos se guardan en la Unión Europea y la app cumple el RGPD: el usuario DEBE poder
-   exportar todos sus datos y borrar su cuenta desde la propia app.
-3. NUNCA se venden, comparten ni usan los datos para publicidad. NUNCA se envían a
-   terceros salvo lo imprescindible para que la app funcione, y eso se declara en la
-   política de privacidad.
-4. NUNCA se escriben importes, notas ni datos personales en logs, ni se usan datos reales
-   de usuarios en tests, ejemplos o capturas.
-5. Los secretos (claves, contraseñas, URLs de base de datos) NUNCA entran en el
-   repositorio.
+1. El repositorio tiene cuatro paquetes, con este sentido de dependencias y ningún otro:
 
-## Artículo III. La lógica de negocio es pura y está probada
+   ```
+   apps/mobile ──┐
+                 ├──> packages/api ──> packages/domain
+   apps/server ──┘
+   ```
 
-Los cálculos de dinero y fechas son el corazón de la app y DEBEN poder verificarse
-aislados.
+   - `packages/domain`: toda la lógica de negocio (dinero, periodos, recurrencias,
+     resúmenes, presupuestos, avisos).
+   - `packages/api`: el contrato entre app y servidor (esquemas zod).
+   - `apps/server`: HTTP, base de datos, autenticación y trabajos programados.
+   - `apps/mobile`: interfaz, caché y notificaciones locales.
 
-1. Los cálculos (balances, periodos, recurrencias, presupuestos, avisos) DEBEN vivir en
-   un paquete de dominio sin interfaz, sin red, sin base de datos y sin leer el reloj del
-   sistema: la fecha de "hoy" entra como dato.
-2. Toda regla del dominio DEBE llegar con tests, incluidos los casos límite (días que no
-   existen en un mes, años bisiestos, cambios de hora, importes cero). Un error encontrado
-   DEBE quedar cubierto por un test que lo reproduzca antes de corregirlo.
-3. `main` DEBE estar siempre en verde: nada se fusiona sin pasar las comprobaciones del CI.
+2. `packages/domain` DEBE ser puro: NUNCA importa React, Fastify, Drizzle ni nada de red o
+   disco, y NUNCA lee el reloj (`Date.now()`, `new Date()` sin argumentos) ni usa azar. La
+   fecha de "hoy" y cualquier dato externo entran como parámetros.
+3. La lógica de negocio NUNCA se duplica en la app ni en el servidor: si un cálculo hace
+   falta en los dos, vive en `packages/domain`.
+4. Las abstracciones se crean cuando hay al menos dos usos reales, no antes. NUNCA se
+   envuelven librerías del stack en capas propias sin una razón escrita en el PR.
 
-## Artículo IV. El usuario manda
+## Artículo III. Dinero y fechas
 
-Smartnomic ayuda a decidir; no decide por nadie.
+1. Los importes DEBEN ser enteros en céntimos (`amountCents`). NUNCA se usan decimales en
+   coma flotante, `parseFloat` ni `toFixed` para calcular. En Postgres, columnas
+   `bigint` (o `integer`), nunca `float`, `real` ni `money`.
+2. El formateo de importes (`1.234,56 €`) DEBE hacerse solo en la interfaz, con
+   `Intl.NumberFormat` y la moneda del hogar.
+3. Las fechas de movimientos y vencimientos DEBEN ser fechas de calendario sin hora
+   (`YYYY-MM-DD`; columna `date` en Postgres). Los instantes (`created_at`, auditoría) se
+   guardan en UTC (`timestamptz`).
+4. El mes al que pertenece un movimiento lo deciden la zona horaria y el
+   `month_start_day` del hogar, nunca la zona del dispositivo ni la del servidor.
+5. Los totales DEBEN calcularse a partir de los movimientos. NUNCA se guardan saldos
+   acumulados que puedan desincronizarse.
 
-1. La app registra y avisa; NUNCA mueve dinero ni paga nada en nombre del usuario.
-2. Ningún movimiento DEBE crearse ni cambiar de importe sin una acción del usuario o una
-   regla que el usuario haya creado y pueda ver, editar y desactivar.
-3. NUNCA se usan patrones oscuros: nada de suscripciones difíciles de cancelar, avisos
-   alarmistas para retener al usuario ni opciones de privacidad escondidas.
-4. Las acciones que borran datos DEBEN pedir confirmación o poder deshacerse.
+## Artículo IV. Datos y persistencia
 
-## Artículo V. Los recordatorios son fiables
+1. Toda tabla con datos de usuario DEBE tener `household_id`, y toda consulta DEBE
+   filtrar por él.
+2. Todo cambio de esquema DEBE ir en una migración de Drizzle nueva. NUNCA se edita una
+   migración ya fusionada en `main`, y NUNCA se cambia el esquema a mano en producción.
+3. Las migraciones DEBERÍAN ser compatibles hacia atrás (añadir antes de quitar), porque
+   puede haber versiones antiguas de la app en uso.
+4. Los movimientos se borran de forma lógica (`deleted_at`). El borrado físico solo
+   ocurre al borrar la cuenta o al cumplir un plazo de retención documentado.
+5. Las agregaciones (sumas por mes, por categoría) DEBEN hacerse en SQL o en
+   `packages/domain`, nunca recorriendo listas completas en la interfaz.
 
-Un recordatorio que no llega es peor que no tener ninguno, porque el usuario confió en él.
+## Artículo V. API
 
-1. Los avisos de pagos DEBEN funcionar sin conexión, con notificaciones locales en el
-   dispositivo.
-2. Si el sistema impide programar o mostrar avisos (permisos denegados, ahorro de
-   batería), la app DEBE decírselo al usuario en lugar de fallar en silencio.
+1. Toda petición y respuesta DEBE tener su esquema zod en `packages/api`. Los tipos se
+   derivan con `z.infer`; NUNCA se escriben a mano en paralelo.
+2. El servidor DEBE validar toda entrada con esos esquemas antes de usarla. La app nunca
+   es de confianza.
+3. Recursos REST en plural (`/households/:id/transactions`), códigos HTTP estándar y un
+   formato único de error: `{ "error": { "code": string, "message": string } }`.
+4. Los cambios incompatibles en la API DEBEN versionarse o hacerse en dos pasos, porque
+   la app instalada no se actualiza a la vez que el servidor.
+5. Las operaciones que crean datos desde la app DEBERÍAN aceptar una clave de
+   idempotencia, para que un reintento sin conexión no duplique un gasto.
 
-## Artículo VI. Simple antes que completo
+## Artículo VI. Seguridad y privacidad
 
-Una app de gastos solo sirve si se usa todos los días.
+1. Cada operación del servidor DEBE comprobar que el usuario es miembro del hogar y que
+   su rol (`propietario`, `editor`, `lector`) la permite.
+2. Las sesiones en la app DEBEN guardarse en `expo-secure-store`, NUNCA en AsyncStorage.
+3. Los secretos (claves, contraseñas, `DATABASE_URL`) NUNCA entran en el repositorio:
+   solo variables de entorno y un `.env.example` sin valores reales.
+4. Los logs NUNCA contienen importes, notas, emails ni otros datos personales; solo
+   identificadores.
+5. Los endpoints de autenticación DEBEN tener límite de peticiones.
+6. Los datos se alojan en la Unión Europea. El sistema DEBE permitir exportar todos los
+   datos de un usuario (JSON/CSV) y borrar su cuenta por completo.
 
-1. Apuntar un gasto DEBERÍA llevar como mucho tres toques desde la pantalla principal.
-2. Solo se construye lo que pide la fase actual del roadmap. Las abstracciones,
-   dependencias y servicios nuevos DEBEN justificar su coste en el PR que los introduce.
-3. La interfaz está en español, con lenguaje claro y sin jerga financiera, y DEBERÍA ser
-   accesible (lectores de pantalla, tamaño de texto del sistema, contraste suficiente).
+## Artículo VII. Tests
+
+1. Todo código de `packages/domain` DEBE llegar con tests, incluidos los casos límite: día
+   31 en meses cortos, 29 de febrero, cambios de hora, importes cero y negativos.
+2. Cada error corregido DEBE llevar un test que lo reproduzca y que falle antes de la
+   corrección.
+3. Cada endpoint DEBE tener tests que comprueben que un usuario de otro hogar, o con un
+   rol insuficiente, recibe un error.
+4. Los tests del servidor DEBEN ejecutarse contra un PostgreSQL real (por ejemplo, en
+   Docker), no contra mocks de la base de datos.
+5. Los tests NUNCA dependen del reloj real, de la red externa ni de datos reales de
+   usuarios.
+
+## Artículo VIII. Calidad y CI
+
+1. TypeScript en modo `strict`. NUNCA se usa `any` (se usa `unknown` y se estrecha el
+   tipo) ni `@ts-ignore`; `@ts-expect-error` solo con un comentario que explique por qué.
+2. Prettier y ESLint DEBEN pasar. NUNCA se desactivan reglas para un archivo entero.
+3. `pnpm check` (formato, lint, tipos y tests) es lo que ejecuta el CI. `main` DEBE estar
+   siempre en verde y nada se fusiona con el CI en rojo.
+4. NUNCA se salta, desactiva ni borra un test para conseguir que el CI pase.
+5. Identificadores del código en inglés; textos de la interfaz en español, centralizados
+   para poder traducirlos en el futuro.
+
+## Artículo IX. App móvil
+
+1. La app DEBE poder mostrar los últimos datos cargados sin conexión (caché persistida de
+   TanStack Query).
+2. Los recordatorios de pagos DEBEN programarse como notificaciones locales, de forma que
+   funcionen sin conexión. Como iOS limita las notificaciones programadas, se programa una
+   ventana corta (60 días) y se renueva al abrir la app.
+3. Si faltan permisos de notificaciones, la app DEBE detectarlo y avisar al usuario; NUNCA
+   falla en silencio.
+4. Los componentes DEBEN ser accesibles: etiquetas para lectores de pantalla, respeto del
+   tamaño de texto del sistema y contraste suficiente.
 
 ## Gobierno
 
@@ -88,7 +152,8 @@ Una app de gastos solo sirve si se usa todos los días.
    constitución, y el agente DEBE señalar el conflicto en lugar de resolverlo por su
    cuenta.
 2. **Cumplimiento.** Cada PR DEBE respetar estos artículos. Quien revisa (persona o agente)
-   comprueba el cumplimiento, y un incumplimiento bloquea la fusión.
+   lo comprueba, y un incumplimiento bloquea la fusión. Una excepción a un DEBERÍA se
+   justifica en la descripción del PR.
 3. **Enmiendas.** Solo se cambia mediante un PR propio que explique el motivo, el impacto
    en el código existente y el plan para adaptarlo. Lo aprueba el propietario del
    repositorio. Un agente NUNCA modifica este archivo sin que se lo pidan expresamente.

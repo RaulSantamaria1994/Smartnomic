@@ -13,6 +13,18 @@ y **gastos** de cada mes y sepa en todo momento cómo va su economía:
 - Qué pagos están por llegar (alquiler, luz, seguros, suscripciones…) y **avisos** antes de
   que venzan.
 
+### Principios de producto
+
+- **El usuario manda.** La app registra y avisa; nunca mueve dinero ni crea o cambia
+  movimientos sin una acción del usuario o una regla que él pueda ver y desactivar.
+- **Sin trucos.** Nada de suscripciones difíciles de cancelar, avisos alarmistas para
+  retener ni opciones de privacidad escondidas. Los datos nunca se venden ni se usan para
+  publicidad.
+- **Rápido de usar.** Apuntar un gasto lleva como mucho tres toques desde la pantalla
+  principal.
+- **Claro.** Español sencillo, sin jerga financiera.
+- **Borrar es seguro.** Borrar pide confirmación o se puede deshacer.
+
 ### Fuera de alcance al principio
 
 - Conexión automática con el banco (se estudia en la fase 5).
