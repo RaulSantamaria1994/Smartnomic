@@ -115,17 +115,17 @@ apps/server ──┘                         ▲
 ```
 users            id, email, name, created_at
 households       id, name, currency ('EUR'), month_start_day (1-28), timezone
-memberships      household_id, user_id, role
+memberships      household_id, user_id, role, reminders_enabled
 categories       id, household_id, name, kind (income|expense), parent_id, icon, color, archived
 transactions     id, household_id, kind, amount_cents, date, category_id, member_id,
                  note, recurring_id?, occurrence_date?, created_by, created_at, updated_at, deleted_at
 recurring_rules  id, household_id, kind, name, amount_cents, category_id,
                  frequency (weekly|monthly|yearly), interval, day_of_month?, start_date, end_date?,
                  remind_days_before, autopay (bool)
-occurrences      recurring_id, due_date, status (pending|paid|skipped), transaction_id?
+occurrences      recurring_id, due_date, status (pending|paid|skipped), transaction_id?, resolved_by
 budgets          household_id, category_id, month (YYYY-MM), limit_cents
 push_tokens      user_id, token, platform            (fase 3)
-invitations      household_id, email, role, code, expires_at   (fase 3)
+invitations      household_id, role, code, expires_at, status
 ```
 
 - Los vencimientos (`occurrences`) solo se guardan cuando cambian de estado; los pendientes
@@ -174,20 +174,27 @@ para una persona a tiempo parcial.
 
 **Hecho cuando:** el CI pasa y la app abre una pantalla que habla con `GET /health`.
 
-### Fase 1 — MVP personal (≈3-4 semanas)
+### Fase 1 — MVP del hogar (≈5-6 semanas)
 
-- Registro e inicio de sesión; al registrarse se crea un hogar de una persona.
+Especificación: [`docs/specs/001-mvp-hogar/spec.md`](001-mvp-hogar/spec.md).
+Plataformas: Android y navegador.
+
+- Registro e inicio de sesión; al registrarse se crea un hogar del que el usuario es
+  propietario.
 - Categorías predefinidas (editables).
 - Apuntar, editar y borrar ingresos y gastos (formulario rápido: importe → categoría →
   guardar en 3 toques).
 - Pantalla **Mes**: ingresos, gastos, balance, lista de movimientos, cambiar de mes.
 - Pagos recurrentes: crear la regla, ver los próximos vencimientos y marcarlos como
   pagados.
-- **Recordatorios locales** de vencimientos.
+- **Recordatorios locales** de vencimientos en Android; en el navegador, vencimientos
+  destacados en la pantalla principal.
+- **Hogar compartido:** invitar miembros por enlace o código, roles (propietario, editor,
+  lector), quién apuntó o pagó cada cosa.
 - Ajustes: moneda, día de inicio del mes.
 
-**Hecho cuando:** una persona puede llevar su mes completo y recibe el aviso del alquiler el
-día antes.
+**Hecho cuando:** dos personas llevan juntas el mes de su hogar, desde Android o el
+navegador, y reciben en Android el aviso del alquiler el día antes.
 
 ### Fase 2 — Entender el dinero (≈2-3 semanas)
 
@@ -197,10 +204,11 @@ día antes.
 - Búsqueda y filtros de movimientos.
 - Exportar a CSV.
 
-### Fase 3 — Hogar compartido (≈3 semanas)
+### Fase 3 — Hogar en tiempo real (≈2-3 semanas)
 
-- Invitar miembros por enlace o código; roles.
-- Quién ha pagado qué; filtro por miembro.
+- Cambios de otros miembros al instante, sin actualizar la pantalla.
+- Filtro de movimientos por miembro.
+- Pertenecer a varios hogares.
 - Notificaciones push desde el servidor (vencimientos y cambios de otros miembros).
 - Modo sin conexión mejorado: cola de cambios pendientes que se envía al volver la red.
 
@@ -210,7 +218,8 @@ día antes.
 - Bloqueo con biometría, exportar y borrar cuenta, política de privacidad.
 - Inicio de sesión con Google y Apple (Apple es obligatorio en iOS si hay otros sociales).
 - Monitorización de errores (Sentry) y copias de seguridad de Postgres.
-- Publicación en Google Play (y App Store si hay cuenta de desarrollador).
+- Publicación en Google Play.
+- App para iOS (y App Store si hay cuenta de desarrollador).
 
 ### Fase 5 — Más adelante (ideas, sin orden)
 
@@ -231,10 +240,14 @@ día antes.
 | Errores de redondeo o de mes por zona horaria         | Céntimos enteros y fechas sin hora, con tests en `packages/domain`     |
 | Fuga de datos entre hogares                           | Filtro por `household_id` en todas las consultas y tests específicos   |
 
-## 6. Decisiones a confirmar antes de empezar
+## 6. Decisiones
 
-1. **Hogar compartido desde el MVP o en la fase 3:** la propuesta es diseñar el modelo
-   para varios miembros desde el principio, pero activar las invitaciones en la fase 3.
-2. **Plataformas:** Android primero (APK con EAS); ¿iOS y web también?
-3. **Publicación:** si se piensa publicar en tiendas o es de uso propio/familiar (cambia
+Tomadas (2026-10-26):
+
+1. **Hogar compartido en el MVP:** sí, con invitaciones y roles desde la fase 1.
+2. **Plataformas del MVP:** Android y navegador. iOS más adelante.
+
+Pendiente:
+
+1. **Publicación:** si se piensa publicar en tiendas o es de uso propio/familiar (cambia
    la prioridad de la fase 4).
