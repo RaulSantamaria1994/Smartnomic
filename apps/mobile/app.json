@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Smartnomic",
+    "slug": "smartnomic",
+    "scheme": "smartnomic",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "package": "com.raulsantamaria.smartnomic",
+      "versionCode": 1
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router"]
+  }
+}

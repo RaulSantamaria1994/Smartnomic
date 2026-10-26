@@ -1,0 +1,22 @@
+# PostgreSQL para desarrollo y tests: `docker compose up -d`.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: smartnomic
+      POSTGRES_PASSWORD: smartnomic
+      POSTGRES_DB: smartnomic
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Crea también la base de datos de los tests.
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smartnomic']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:

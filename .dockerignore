@@ -1,0 +1,9 @@
+**/node_modules
+**/.expo
+**/dist
+**/coverage
+.git
+apps/mobile/*
+!apps/mobile/package.json
+*.log
+.env*
