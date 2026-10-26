@@ -14,18 +14,18 @@ cumplirse admite excepciones justificadas por escrito en el PR.
 1. El stack es fijo. Cambiar una pieza de esta tabla DEBE hacerse enmendando esta
    constitución.
 
-   | Pieza          | Elección                                                |
-   | -------------- | ------------------------------------------------------- |
-   | Lenguaje       | TypeScript (modo `strict`) en todo el proyecto, Node 22 |
-   | Monorepo       | pnpm workspaces                                         |
-   | App            | Expo + Expo Router, TanStack Query, Zustand             |
-   | Servidor       | Fastify, API REST                                       |
-   | Base de datos  | PostgreSQL + Drizzle ORM                                |
-   | Autenticación  | Better Auth                                             |
-   | Validación     | zod                                                     |
-   | Tests          | Vitest                                                  |
-   | Notificaciones | expo-notifications (locales) y Expo Push (servidor)     |
-   | Despliegue     | Railway (región UE) y EAS Build                         |
+   | Pieza          | Elección                                                    |
+   | -------------- | ----------------------------------------------------------- |
+   | Lenguaje       | TypeScript (modo `strict`) en todo el proyecto, Node 22     |
+   | Monorepo       | pnpm workspaces                                             |
+   | App            | Expo + Expo Router (Android y web), TanStack Query, Zustand |
+   | Servidor       | Fastify, API REST                                           |
+   | Base de datos  | PostgreSQL + Drizzle ORM                                    |
+   | Autenticación  | Better Auth                                                 |
+   | Validación     | zod                                                         |
+   | Tests          | Vitest                                                      |
+   | Notificaciones | expo-notifications (locales) y Expo Push (servidor)         |
+   | Despliegue     | Railway (región UE) y EAS Build                             |
 
 2. Una dependencia nueva DEBE justificarse en el PR que la añade (qué resuelve y por qué
    no basta lo que ya hay). NUNCA se añaden dependencias abandonadas, sin tipos o que
@@ -100,7 +100,8 @@ cumplirse admite excepciones justificadas por escrito en el PR.
 
 1. Cada operación del servidor DEBE comprobar que el usuario es miembro del hogar y que
    su rol (`propietario`, `editor`, `lector`) la permite.
-2. Las sesiones en la app DEBEN guardarse en `expo-secure-store`, NUNCA en AsyncStorage.
+2. Las sesiones en la app nativa DEBEN guardarse en `expo-secure-store`, NUNCA en
+   AsyncStorage; en el navegador, según el artículo IX.
 3. Los secretos (claves, contraseñas, `DATABASE_URL`) NUNCA entran en el repositorio:
    solo variables de entorno y un `.env.example` sin valores reales.
 4. Los logs NUNCA contienen importes, notas, emails ni otros datos personales; solo
@@ -133,17 +134,27 @@ cumplirse admite excepciones justificadas por escrito en el PR.
 5. Identificadores del código en inglés; textos de la interfaz en español, centralizados
    para poder traducirlos en el futuro.
 
-## Artículo IX. App móvil
+## Artículo IX. App y plataformas
 
-1. La app DEBE poder mostrar los últimos datos cargados sin conexión (caché persistida de
-   TanStack Query).
-2. Los recordatorios de pagos DEBEN programarse como notificaciones locales, de forma que
-   funcionen sin conexión. Como iOS limita las notificaciones programadas, se programa una
-   ventana corta (60 días) y se renueva al abrir la app.
-3. Si faltan permisos de notificaciones, la app DEBE detectarlo y avisar al usuario; NUNCA
-   falla en silencio.
-4. Los componentes DEBEN ser accesibles: etiquetas para lectores de pantalla, respeto del
-   tamaño de texto del sistema y contraste suficiente.
+1. Hay una sola base de código de interfaz (Expo) para todas las plataformas. Las
+   diferencias entre plataformas DEBEN aislarse en módulos específicos (`*.native.ts`,
+   `*.web.ts` o comprobaciones de `Platform.OS`), nunca repartidas por las pantallas.
+2. **App nativa (Android, y iOS cuando llegue):**
+   1. DEBE poder mostrar los últimos datos cargados sin conexión (caché persistida de
+      TanStack Query).
+   2. Los recordatorios de pagos DEBEN programarse como notificaciones locales, de forma
+      que funcionen sin conexión. Como el sistema limita las notificaciones programadas,
+      se programa una ventana corta (60 días) y se renueva al abrir la app.
+   3. Si faltan permisos de notificaciones, la app DEBE detectarlo y avisar al usuario;
+      NUNCA falla en silencio.
+3. **Navegador:**
+   1. Necesita conexión: no se exige caché sin conexión ni notificaciones.
+   2. Los vencimientos próximos y atrasados DEBEN mostrarse destacados en la pantalla
+      principal, como sustituto de los recordatorios.
+   3. La sesión DEBE guardarse en una cookie `HttpOnly`, `Secure` y `SameSite`, nunca en
+      `localStorage` ni `sessionStorage`.
+4. Los componentes DEBEN ser accesibles en todas las plataformas: etiquetas para lectores
+   de pantalla, respeto del tamaño de texto del sistema y contraste suficiente.
 
 ## Gobierno
 
@@ -162,4 +173,13 @@ cumplirse admite excepciones justificadas por escrito en el PR.
    - **MENOR**: se añade un artículo o se amplía uno de forma relevante.
    - **PARCHE**: aclaraciones y redacción, sin cambiar el significado.
 
-**Versión**: 1.0.0 · **Ratificada**: 2026-10-26 · **Última enmienda**: 2026-10-26
+**Versión**: 1.1.0 · **Ratificada**: 2026-10-26 · **Última enmienda**: 2026-10-26
+
+### Historial de enmiendas
+
+- **1.1.0 (2026-10-26)**: el artículo IX pasa a ser "App y plataformas". Las reglas de
+  uso sin conexión y notificaciones locales se limitan a la app nativa; el navegador
+  destaca los vencimientos y guarda la sesión en una cookie segura. El artículo VI
+  remite al IX para la sesión en el navegador. Motivo: el MVP funciona en Android y
+  navegador (`docs/specs/001-mvp-hogar/spec.md`). Sin impacto en código: aún no
+  existe.
