@@ -42,19 +42,21 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`** (especificación, plan y tareas escritos). Todavía no hay
-código: se empieza por la fase 1 de `tasks.md`. No inventes comandos,
-rutas ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando
-cambien la estructura o los comandos, actualiza este archivo en el mismo PR.
+Funcionalidad en curso: **`001-mvp-hogar`**. Fase 1 de `tasks.md` (preparación del
+monorepo) terminada; la siguiente es la fase 2 (base común). No inventes comandos, rutas
+ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
+la estructura o los comandos, actualiza este archivo en el mismo PR.
 
 ## Comandos
 
 ```sh
 pnpm install
+docker compose up -d                   # PostgreSQL en local
 pnpm check                             # formato + lint + tipos + tests (lo mismo que el CI)
 pnpm test                              # solo tests
-pnpm --filter @smartnomic/server dev   # servidor en local
-pnpm --filter @smartnomic/mobile start # app con Expo
+pnpm format                            # arregla el formato
+pnpm --filter @smartnomic/server dev   # servidor en http://localhost:3000
+pnpm --filter @smartnomic/mobile start # app con Expo (Android y web)
 ```
 
 ## Cómo trabajar una tarea

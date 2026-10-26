@@ -21,27 +21,27 @@ escriben primero y deben fallar antes de implementar.
 **Objetivo**: un repositorio que compila, pasa el CI y arranca un servidor y una app
 vacíos.
 
-- [ ] T001 Crear el monorepo: `package.json` (scripts `lint`, `format`, `format:check`,
+- [x] T001 Crear el monorepo: `package.json` (scripts `lint`, `format`, `format:check`,
       `typecheck`, `test`, `check`), `pnpm-workspace.yaml`, `.nvmrc` (22) y `.gitignore`
-- [ ] T002 [P] Configurar TypeScript estricto en `tsconfig.base.json`
-- [ ] T003 [P] Configurar ESLint en `eslint.config.js` (prohíbe `any` y `@ts-ignore`) y
+- [x] T002 [P] Configurar TypeScript estricto en `tsconfig.base.json`
+- [x] T003 [P] Configurar ESLint en `eslint.config.js` (prohíbe `any` y `@ts-ignore`) y
       Prettier en `.prettierrc.json` y `.prettierignore`
-- [ ] T004 [P] Configurar Vitest en `vitest.config.ts` (proyectos por paquete)
-- [ ] T005 [P] Crear `packages/domain` (`@smartnomic/domain`) con `package.json`,
+- [x] T004 [P] Configurar Vitest en `vitest.config.ts` (proyectos por paquete)
+- [x] T005 [P] Crear `packages/domain` (`@smartnomic/domain`) con `package.json`,
       `tsconfig.json` y `src/index.ts`; regla de ESLint que le impide importar React,
       Fastify, Drizzle o módulos de Node
-- [ ] T006 [P] Crear `packages/api` (`@smartnomic/api`) con zod y `src/index.ts`
-- [ ] T007 [P] Crear `apps/server` (`@smartnomic/server`) con Fastify, `GET /health` en
+- [x] T006 [P] Crear `packages/api` (`@smartnomic/api`) con zod y `src/index.ts`
+- [x] T007 [P] Crear `apps/server` (`@smartnomic/server`) con Fastify, `GET /health` en
       `src/index.ts` y script `dev`
-- [ ] T008 [P] Crear `apps/mobile` (`@smartnomic/mobile`) con Expo, Expo Router y
+- [x] T008 [P] Crear `apps/mobile` (`@smartnomic/mobile`) con Expo, Expo Router y
       soporte web; pantalla inicial en `app/index.tsx` que llama a `/health`
-- [ ] T009 Añadir `docker-compose.yml` con PostgreSQL 16 para desarrollo y tests
-- [ ] T010 Crear `.github/workflows/ci.yml`: Node 22, pnpm, servicio PostgreSQL y
+- [x] T009 Añadir `docker-compose.yml` con PostgreSQL 16 para desarrollo y tests
+- [x] T010 Crear `.github/workflows/ci.yml`: Node 22, pnpm, servicio PostgreSQL y
       `pnpm check`
-- [ ] T011 [P] Añadir `Dockerfile` (servidor + web exportada) y `railway.json` con
-      comprobación en `/health`
-- [ ] T012 [P] Añadir `apps/mobile/eas.json` con el perfil `preview` (APK)
-- [ ] T013 Actualizar `README.md` y la sección de comandos de `AGENTS.md`
+- [x] T011 [P] Añadir `Dockerfile` del servidor y `railway.json` con comprobación en
+      `/health` (la web exportada se añade a la imagen en T031)
+- [x] T012 [P] Añadir `apps/mobile/eas.json` con el perfil `preview` (APK)
+- [x] T013 Actualizar `README.md` y la sección de comandos de `AGENTS.md`
 
 **Punto de control**: `pnpm check` pasa en local y en el CI; la app (Android y web)
 muestra la respuesta de `/health`.
@@ -95,6 +95,7 @@ cliente de la API en la app.
 - [ ] T030 Tests de registro, entrada, `GET /api/me` y límite de peticiones en
       `apps/server/test/auth.test.ts`
 - [ ] T031 Servir la web exportada en `/` desde el servidor en `apps/server/src/index.ts`
+      y añadir la exportación de la web al `Dockerfile`
 
 ### App
 
