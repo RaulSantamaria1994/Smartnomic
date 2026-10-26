@@ -1,114 +1,86 @@
 # AGENTS.md
 
-Instrucciones para agentes de código (Claude Code, Codex, Copilot…) que trabajan en este
-repositorio. Las personas también pueden leerlo: es la guía corta de cómo se trabaja aquí.
+Cómo trabajar en este repositorio si eres un agente de código (Claude Code, Codex,
+Copilot…). Las personas también pueden leerlo.
 
 ## Qué es Smartnomic
 
 App móvil para que un hogar apunte sus ingresos y gastos mensuales, entienda en qué se va
-el dinero y reciba recordatorios antes de cada pago. El plan completo (arquitectura, modelo
-de datos y roadmap por fases) está en [`docs/PLAN.md`](docs/PLAN.md). **Léelo antes de
-proponer cambios de arquitectura** y, si una decisión cambia, actualízalo en el mismo PR.
+el dinero y reciba recordatorios antes de cada pago.
+
+## Documentos que debes conocer
+
+| Documento                            | Para qué                                                      |
+| ------------------------------------ | ------------------------------------------------------------- |
+| [`CONSTITUTION.md`](CONSTITUTION.md) | Reglas técnicas obligatorias. **Mandan sobre todo lo demás.** |
+| [`docs/PLAN.md`](docs/PLAN.md)       | Producto, modelo de datos y roadmap por fases                 |
+| `AGENTS.md` (este)                   | Forma de trabajar: flujo, comandos, comunicación              |
+
+Antes de escribir código, lee la constitución. Si una tarea choca con ella, no la
+resuelvas por tu cuenta: explica el conflicto y pregunta.
 
 ## Estado actual
 
-El proyecto está en **fase 0** (fundaciones): todavía no hay código. Mientras una parte no
-exista, no inventes comandos ni rutas: crea lo que pida la tarea siguiendo `docs/PLAN.md` y
-actualiza este archivo cuando cambie la estructura o los comandos.
-
-## Stack
-
-- TypeScript en todo, monorepo con **pnpm workspaces**. Node 22.
-- **App:** Expo + Expo Router, TanStack Query (datos del servidor), Zustand (estado de UI).
-- **Servidor:** Fastify (API REST), PostgreSQL con Drizzle ORM y migraciones.
-- **Autenticación:** Better Auth.
-- **Validación:** zod. **Tests:** Vitest. **Notificaciones:** expo-notifications.
-- **Despliegue:** Railway (servidor y Postgres, región UE) y EAS Build (app).
-
-No añadas dependencias nuevas sin explicar por qué en el PR; prefiere lo que ya está en el
-stack.
-
-## Estructura
-
-| Carpeta           | Qué contiene                                                                 |
-| ----------------- | ---------------------------------------------------------------------------- |
-| `packages/domain` | Lógica pura: dinero, periodos, recurrencias, resúmenes, presupuestos, avisos |
-| `packages/api`    | Contrato app ↔ servidor: esquemas zod de peticiones y respuestas             |
-| `apps/server`     | API REST (Fastify), acceso a Postgres, trabajos programados                  |
-| `apps/mobile`     | App Expo: pantallas, formularios, gráficas y notificaciones                  |
-| `docs/`           | Plan, decisiones y documentación                                             |
-
-Dependencias permitidas: `apps/*` → `packages/api` → `packages/domain`. El dominio no
-importa nada de `apps/` ni de `packages/api`.
+El proyecto está en **fase 0** (fundaciones): todavía no hay código. No inventes comandos,
+rutas ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando
+cambien la estructura o los comandos, actualiza este archivo en el mismo PR.
 
 ## Comandos
 
 ```sh
 pnpm install
-pnpm check      # formato + lint + tipos + tests: lo mismo que el CI
-pnpm test       # solo tests
+pnpm check                             # formato + lint + tipos + tests (lo mismo que el CI)
+pnpm test                              # solo tests
 pnpm --filter @smartnomic/server dev   # servidor en local
 pnpm --filter @smartnomic/mobile start # app con Expo
 ```
 
-**Antes de dar una tarea por terminada, `pnpm check` debe pasar sin errores.** Si un
-comando no existe todavía, dilo en lugar de suponer que ha pasado.
+## Cómo trabajar una tarea
 
-## Reglas del dominio (no negociables)
+1. **Entiende antes de tocar.** Lee el código relacionado y la parte de `docs/PLAN.md`
+   que afecta. Comprueba en qué fase del roadmap encaja la tarea.
+2. **Empieza por el dominio.** Si la tarea tiene lógica de negocio, escríbela primero en
+   `packages/domain` con sus tests; después la API, después la interfaz.
+3. **Cambios pequeños.** Haz solo lo que pide la tarea. Si ves algo más que arreglar,
+   apúntalo en tu respuesta en lugar de arreglarlo en el mismo cambio.
+4. **Verifica.** Ejecuta `pnpm check`. Si tocas la app, pruébala en Expo cuando sea
+   posible.
+5. **Informa con honestidad.** Di qué has hecho, qué has comprobado y qué no. Si un test
+   falla o un paso no se pudo hacer, dilo con la salida del error; nunca lo des por bueno.
 
-- **Dinero en céntimos enteros** (`amountCents: number`, entero). Nunca `number` con
-  decimales ni `parseFloat` sobre importes. Formatear solo en la interfaz con
-  `Intl.NumberFormat`.
-- **Fechas de calendario sin hora** (`YYYY-MM-DD`) para movimientos y vencimientos. El
-  "mes" depende de la zona horaria y del `month_start_day` del hogar.
-- `packages/domain` es **puro**: sin React, sin red, sin base de datos, sin `Date.now()`
-  ni `new Date()` sin argumentos. La fecha de "hoy" entra como parámetro.
-- **Toda regla nueva del dominio llega con sus tests**, incluidos los casos límite: día 31
-  en meses cortos, años bisiestos, cambio de hora, importes negativos o cero.
-- Marcar un vencimiento como pagado crea el movimiento con el **importe real**.
+## Definición de terminado
 
-## Seguridad y privacidad
+Una tarea está terminada cuando:
 
-Son datos económicos personales:
-
-- **Cada consulta del servidor filtra por `household_id`** y comprueba que el usuario es
-  miembro con el rol necesario. Cualquier endpoint nuevo lleva un test que intenta leer o
-  modificar datos de otro hogar y falla.
-- Valida con zod toda entrada del servidor; no confíes en lo que envía la app.
-- En la app, los tokens van en `expo-secure-store`, nunca en AsyncStorage.
-- Nunca subas secretos (`.env`, claves, URLs de base de datos). Usa `.env.example`.
-- No escribas importes, notas ni datos personales en los logs.
-- Los datos reales de usuarios nunca se usan en tests ni en ejemplos.
-
-## Estilo de código
-
-- TypeScript estricto; nada de `any` (usa `unknown` y estrecha el tipo).
-- Tipos derivados de los esquemas zod (`z.infer`) en lugar de duplicarlos.
-- Nombres de código en inglés; **textos de la interfaz, commits y documentación en
-  español**.
-- Funciones pequeñas y con nombre claro; comentarios solo para explicar el _porqué_.
-- Formato con Prettier y lint con ESLint: no los desactives para un archivo entero.
-
-## Base de datos
-
-- Todo cambio de esquema va en una **migración de Drizzle** nueva; nunca edites una
-  migración ya fusionada en `main`.
-- Los movimientos se borran de forma lógica (`deleted_at`).
-- Las sumas por mes y categoría se hacen en SQL o en el dominio, no en la interfaz.
+- `pnpm check` pasa sin errores.
+- Cumple la constitución (repasa los artículos que toca el cambio).
+- Hay tests para lo nuevo y para cualquier error corregido.
+- La documentación afectada (`AGENTS.md`, `docs/PLAN.md`, README) está actualizada.
 
 ## Git y PRs
 
 - `main` siempre en verde. Cada cambio en su rama: `feat/…`, `fix/…`, `chore/…`,
   `docs/…`.
 - Commits pequeños, en español e imperativo: `Añade el cálculo del balance mensual`.
-- Un PR por cambio coherente o por hito del roadmap; mejor pequeños.
+- Un PR por cambio coherente o por hito del roadmap. La descripción explica qué cambia,
+  por qué y cómo se ha probado, y justifica cualquier dependencia nueva o excepción a un
+  DEBERÍA de la constitución.
 - No hagas `push --force` sobre ramas compartidas ni reescribas el historial de `main`.
+- No abras PRs ni hagas merge si no te lo piden.
+
+## Comunicación
+
+- Responde y escribe documentación, commits y PRs en **español**.
+- Sé concreto: rutas de archivo, nombres de función, comandos exactos.
+- Si tienes dudas sobre lo que se quiere, pregunta una sola vez con opciones claras y tu
+  recomendación, en lugar de suponer.
 
 ## Qué preguntar antes de hacer
 
-Para y pregunta en lugar de decidir por tu cuenta cuando la tarea implique:
+Para y pregunta cuando la tarea implique:
 
-- Cambiar una decisión de `docs/PLAN.md` (stack, modelo de datos, alcance de una fase).
-- Añadir un servicio externo de pago, conexión bancaria o algo con coste.
-- Borrar datos o migraciones, o cambios que no se puedan deshacer.
-- Funcionalidades fuera del roadmap.
+- Algo que choque con `CONSTITUTION.md`, o modificar ese archivo.
+- Cambiar una decisión de `docs/PLAN.md` (modelo de datos, alcance de una fase).
+- Añadir un servicio externo, algo con coste o una conexión bancaria.
+- Borrar datos o migraciones, o cualquier cambio que no se pueda deshacer.
+- Funcionalidades que no están en el roadmap.
