@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`** (especificación y plan escritos; falta
-`tasks.md`). Todavía no hay código. No inventes comandos,
+Funcionalidad en curso: **`001-mvp-hogar`** (especificación, plan y tareas escritos). Todavía no hay
+código: se empieza por la fase 1 de `tasks.md`. No inventes comandos,
 rutas ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando
 cambien la estructura o los comandos, actualiza este archivo en el mismo PR.
 
