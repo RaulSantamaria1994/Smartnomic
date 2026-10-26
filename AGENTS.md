@@ -10,19 +10,40 @@ el dinero y reciba recordatorios antes de cada pago.
 
 ## Documentos que debes conocer
 
-| Documento                                      | Para qué                                                      |
-| ---------------------------------------------- | ------------------------------------------------------------- |
-| [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md) | Reglas técnicas obligatorias. **Mandan sobre todo lo demás.** |
-| [`docs/specs/PLAN.md`](docs/specs/PLAN.md)     | Producto, modelo de datos y roadmap por fases                 |
-| `docs/specs/NNN-nombre/spec.md`                | Qué debe hacer cada funcionalidad (historias, requisitos)     |
-| `AGENTS.md` (este)                             | Forma de trabajar: flujo, comandos, comunicación              |
+| Documento                                      | Para qué                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------ |
+| [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md) | Reglas técnicas obligatorias. **Mandan sobre todo lo demás.**      |
+| `docs/specs/NNN-nombre/spec.md`                | Qué debe hacer una funcionalidad y por qué (historias, requisitos) |
+| `docs/specs/NNN-nombre/plan.md`                | Cómo se construye: decisiones, datos, API, estructura              |
+| `docs/specs/NNN-nombre/tasks.md`               | Tareas ordenadas para implementarla                                |
+| `AGENTS.md` (este)                             | Forma de trabajar: flujo, comandos, comunicación                   |
 
 Antes de escribir código, lee la constitución. Si una tarea choca con ella, no la
 resuelvas por tu cuenta: explica el conflicto y pregunta.
 
+## Flujo de cada funcionalidad
+
+Ninguna funcionalidad se programa sin antes tener, en este orden, sus tres documentos en
+`docs/specs/NNN-nombre/` (`NNN` es un número correlativo: `001`, `002`…):
+
+1. **`spec.md`**: qué y por qué, desde el punto de vista del usuario, sin tecnología.
+   Historias priorizadas, escenarios de aceptación, casos límite, requisitos y criterios
+   de éxito. Las dudas se marcan como `[NECESITA ACLARACIÓN: …]` y se resuelven con el
+   propietario antes de seguir.
+2. **`plan.md`**: cómo se construye. Contexto técnico, comprobación de la constitución,
+   investigación y decisiones, modelo de datos, contratos de la API y estructura de
+   archivos.
+3. **`tasks.md`**: tareas pequeñas y ordenadas por historia, cada una con los archivos
+   que toca y cómo se comprueba.
+
+Cada documento se revisa y aprueba antes de pasar al siguiente. Después se implementa
+siguiendo `tasks.md`, marcando las tareas hechas. Si al implementar algo cambia, se
+actualizan primero los documentos.
+
 ## Estado actual
 
-El proyecto está en **fase 0** (fundaciones): todavía no hay código. No inventes comandos,
+Funcionalidad en curso: **`001-mvp-hogar`** (especificación, plan y tareas escritos). Todavía no hay
+código: se empieza por la fase 1 de `tasks.md`. No inventes comandos,
 rutas ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando
 cambien la estructura o los comandos, actualiza este archivo en el mismo PR.
 
@@ -38,8 +59,8 @@ pnpm --filter @smartnomic/mobile start # app con Expo
 
 ## Cómo trabajar una tarea
 
-1. **Entiende antes de tocar.** Lee el código relacionado y la parte de `docs/specs/PLAN.md`
-   que afecta. Comprueba en qué fase del roadmap encaja la tarea.
+1. **Entiende antes de tocar.** Lee el código relacionado y la `spec.md`, el `plan.md` y
+   la tarea de `tasks.md` de la funcionalidad.
 2. **Empieza por el dominio.** Si la tarea tiene lógica de negocio, escríbela primero en
    `packages/domain` con sus tests; después la API, después la interfaz.
 3. **Cambios pequeños.** Haz solo lo que pide la tarea. Si ves algo más que arreglar,
@@ -56,14 +77,14 @@ Una tarea está terminada cuando:
 - `pnpm check` pasa sin errores.
 - Cumple la constitución (repasa los artículos que toca el cambio).
 - Hay tests para lo nuevo y para cualquier error corregido.
-- La documentación afectada (`AGENTS.md`, `docs/specs/PLAN.md`, README) está actualizada.
+- La documentación afectada (`AGENTS.md`, `spec.md`, `plan.md`, `tasks.md`, README) está actualizada.
 
 ## Git y PRs
 
 - `main` siempre en verde. Cada cambio en su rama: `feat/…`, `fix/…`, `chore/…`,
   `docs/…`.
 - Commits pequeños, en español e imperativo: `Añade el cálculo del balance mensual`.
-- Un PR por cambio coherente o por hito del roadmap. La descripción explica qué cambia,
+- Un PR por cambio coherente o por funcionalidad. La descripción explica qué cambia,
   por qué y cómo se ha probado, y justifica cualquier dependencia nueva o excepción a un
   DEBERÍA de la constitución.
 - No hagas `push --force` sobre ramas compartidas ni reescribas el historial de `main`.
@@ -81,7 +102,7 @@ Una tarea está terminada cuando:
 Para y pregunta cuando la tarea implique:
 
 - Algo que choque con `docs/CONSTITUTION.md`, o modificar ese archivo.
-- Cambiar una decisión de `docs/specs/PLAN.md` (modelo de datos, alcance de una fase).
+- Cambiar una decisión de una `spec.md` o un `plan.md` ya aprobados.
 - Añadir un servicio externo, algo con coste o una conexión bancaria.
 - Borrar datos o migraciones, o cualquier cambio que no se pueda deshacer.
-- Funcionalidades que no están en el roadmap.
+- Programar algo que no tenga su `spec.md`, `plan.md` y `tasks.md`.

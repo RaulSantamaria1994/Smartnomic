@@ -3,7 +3,7 @@
 **Rama de la funcionalidad**: `001-mvp-hogar`
 **Creada**: 2026-10-26
 **Estado**: Borrador
-**Fase del roadmap**: Fase 1 de [`docs/specs/PLAN.md`](../PLAN.md)
+**Plan**: [`plan.md`](plan.md)
 **Entrada**: "La gente pone sus ingresos y sus gastos mensuales y la app le permite llevar
 un control de su economía. Debe dar recordatorios de pagos."
 
@@ -416,15 +416,15 @@ categoría; se exportan los datos y se borra una cuenta.
 - Los movimientos son del hogar: si un miembro sale, se conservan sin su nombre.
 - Los cambios de otros miembros se ven al actualizar o reabrir la app; las
   actualizaciones en tiempo real y los avisos push de cambios de otros miembros quedan
-  para la fase 3.
+  para más adelante.
 - En el navegador no hay notificaciones ni uso sin conexión en el MVP.
 - Una sola moneda por hogar, euro por defecto; no hay conversión entre monedas.
 - Los importes se introducen a mano; no hay conexión con el banco ni importación de
   extractos en el MVP.
-- Inicio de sesión solo con email y contraseña; Google llega en la fase 4.
+- Inicio de sesión solo con email y contraseña; Google llega más adelante.
 - Sin conexión solo se consultan datos; guardar cambios sin conexión y sincronizarlos
-  después llega en la fase 3.
+  después llega más adelante.
 - La interfaz está solo en español en el MVP.
-- Presupuestos, gráficas, búsqueda y exportación a CSV con filtros quedan para la fase 2;
+- Presupuestos, gráficas, búsqueda y exportación a CSV con filtros quedan para más adelante;
   el MVP solo incluye la exportación completa de datos que exige el RGPD.
 - Los usuarios tienen un móvil Android o un navegador con soporte actual.
