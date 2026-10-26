@@ -176,7 +176,7 @@ para una persona a tiempo parcial.
 
 ### Fase 1 — MVP del hogar (≈5-6 semanas)
 
-Especificación: [`specs/001-mvp-hogar/spec.md`](../specs/001-mvp-hogar/spec.md).
+Especificación: [`docs/specs/001-mvp-hogar/spec.md`](001-mvp-hogar/spec.md).
 Plataformas: Android y navegador.
 
 - Registro e inicio de sesión; al registrarse se crea un hogar del que el usuario es

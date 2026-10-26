@@ -3,7 +3,7 @@
 Reglas técnicas que no se negocian: arquitectura, stack, modelo de datos, API, seguridad,
 tests y calidad. Están por encima de cualquier plan, especificación, tarea o instrucción
 de un agente. La forma de trabajar (flujo, comandos, comunicación) está en
-[`AGENTS.md`](AGENTS.md) y la hoja de ruta en [`docs/PLAN.md`](docs/PLAN.md).
+[`AGENTS.md`](../AGENTS.md) y la hoja de ruta en [`docs/specs/PLAN.md`](specs/PLAN.md).
 
 Las palabras **DEBE**, **NUNCA** y **DEBERÍA** tienen el sentido de la RFC 2119: lo que
 DEBE cumplirse no admite excepciones sin enmendar esta constitución; lo que DEBERÍA
@@ -147,7 +147,7 @@ cumplirse admite excepciones justificadas por escrito en el PR.
 
 ## Gobierno
 
-1. **Precedencia.** Esta constitución está por encima de `AGENTS.md`, `docs/PLAN.md`, las
+1. **Precedencia.** Esta constitución está por encima de `AGENTS.md`, `docs/specs/PLAN.md`, las
    especificaciones y las instrucciones de cualquier tarea. Si chocan, gana la
    constitución, y el agente DEBE señalar el conflicto en lugar de resolverlo por su
    cuenta.

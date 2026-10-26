@@ -10,12 +10,12 @@ el dinero y reciba recordatorios antes de cada pago.
 
 ## Documentos que debes conocer
 
-| Documento                            | Para qué                                                      |
-| ------------------------------------ | ------------------------------------------------------------- |
-| [`CONSTITUTION.md`](CONSTITUTION.md) | Reglas técnicas obligatorias. **Mandan sobre todo lo demás.** |
-| [`docs/PLAN.md`](docs/PLAN.md)       | Producto, modelo de datos y roadmap por fases                 |
-| `specs/NNN-nombre/spec.md`           | Qué debe hacer cada funcionalidad (historias, requisitos)     |
-| `AGENTS.md` (este)                   | Forma de trabajar: flujo, comandos, comunicación              |
+| Documento                                      | Para qué                                                      |
+| ---------------------------------------------- | ------------------------------------------------------------- |
+| [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md) | Reglas técnicas obligatorias. **Mandan sobre todo lo demás.** |
+| [`docs/specs/PLAN.md`](docs/specs/PLAN.md)     | Producto, modelo de datos y roadmap por fases                 |
+| `docs/specs/NNN-nombre/spec.md`                | Qué debe hacer cada funcionalidad (historias, requisitos)     |
+| `AGENTS.md` (este)                             | Forma de trabajar: flujo, comandos, comunicación              |
 
 Antes de escribir código, lee la constitución. Si una tarea choca con ella, no la
 resuelvas por tu cuenta: explica el conflicto y pregunta.
@@ -38,7 +38,7 @@ pnpm --filter @smartnomic/mobile start # app con Expo
 
 ## Cómo trabajar una tarea
 
-1. **Entiende antes de tocar.** Lee el código relacionado y la parte de `docs/PLAN.md`
+1. **Entiende antes de tocar.** Lee el código relacionado y la parte de `docs/specs/PLAN.md`
    que afecta. Comprueba en qué fase del roadmap encaja la tarea.
 2. **Empieza por el dominio.** Si la tarea tiene lógica de negocio, escríbela primero en
    `packages/domain` con sus tests; después la API, después la interfaz.
@@ -56,7 +56,7 @@ Una tarea está terminada cuando:
 - `pnpm check` pasa sin errores.
 - Cumple la constitución (repasa los artículos que toca el cambio).
 - Hay tests para lo nuevo y para cualquier error corregido.
-- La documentación afectada (`AGENTS.md`, `docs/PLAN.md`, README) está actualizada.
+- La documentación afectada (`AGENTS.md`, `docs/specs/PLAN.md`, README) está actualizada.
 
 ## Git y PRs
 
@@ -80,8 +80,8 @@ Una tarea está terminada cuando:
 
 Para y pregunta cuando la tarea implique:
 
-- Algo que choque con `CONSTITUTION.md`, o modificar ese archivo.
-- Cambiar una decisión de `docs/PLAN.md` (modelo de datos, alcance de una fase).
+- Algo que choque con `docs/CONSTITUTION.md`, o modificar ese archivo.
+- Cambiar una decisión de `docs/specs/PLAN.md` (modelo de datos, alcance de una fase).
 - Añadir un servicio externo, algo con coste o una conexión bancaria.
 - Borrar datos o migraciones, o cualquier cambio que no se pueda deshacer.
 - Funcionalidades que no están en el roadmap.

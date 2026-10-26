@@ -3,13 +3,13 @@
 **Rama de la funcionalidad**: `001-mvp-hogar`
 **Creada**: 2026-10-26
 **Estado**: Borrador
-**Fase del roadmap**: Fase 1 de [`docs/PLAN.md`](../../docs/PLAN.md)
+**Fase del roadmap**: Fase 1 de [`docs/specs/PLAN.md`](../PLAN.md)
 **Entrada**: "La gente pone sus ingresos y sus gastos mensuales y la app le permite llevar
 un control de su economía. Debe dar recordatorios de pagos."
 
 > Esta especificación describe **qué** debe hacer el MVP y **por qué**, desde el punto de
 > vista de quien lo usa. El **cómo** (tecnología, arquitectura, datos) va en el plan
-> técnico, que debe cumplir [`CONSTITUTION.md`](../../CONSTITUTION.md).
+> técnico, que debe cumplir [`docs/CONSTITUTION.md`](../../CONSTITUTION.md).
 
 ## Aclaraciones
 
