@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`**. Fase 1 de `tasks.md` (preparación del
-monorepo) terminada; la siguiente es la fase 2 (base común). No inventes comandos, rutas
+Funcionalidad en curso: **`001-mvp-hogar`**. Fase 1 terminada; fase 2 hecha hasta T023.
+La siguiente tarea es T024 (envío de emails), pendiente de elegir proveedor. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 
@@ -52,6 +52,8 @@ la estructura o los comandos, actualiza este archivo en el mismo PR.
 ```sh
 pnpm install
 docker compose up -d                   # PostgreSQL en local
+pnpm --filter @smartnomic/server db:generate  # migración nueva tras cambiar el esquema
+pnpm --filter @smartnomic/server db:migrate   # aplica las migraciones (usa DATABASE_URL)
 pnpm check                             # formato + lint + tipos + tests (lo mismo que el CI)
 pnpm test                              # solo tests
 pnpm format                            # arregla el formato

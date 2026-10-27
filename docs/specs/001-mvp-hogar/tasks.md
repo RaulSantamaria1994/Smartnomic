@@ -57,28 +57,28 @@ cliente de la API en la app.
 
 ### Dominio
 
-- [ ] T014 [P] Tests de `parseAmount` (vacío, cero, negativo, más de 2 decimales, comas y
+- [x] T014 [P] Tests de `parseAmount` (vacío, cero, negativo, más de 2 decimales, comas y
       puntos, importes grandes) en `packages/domain/src/money.test.ts`
-- [ ] T015 [P] Implementar céntimos y `parseAmount` en `packages/domain/src/money.ts`
-- [ ] T016 [P] Tests de fechas civiles (sumar días y meses, fin de mes, bisiestos,
+- [x] T015 [P] Implementar céntimos y `parseAmount` en `packages/domain/src/money.ts`
+- [x] T016 [P] Tests de fechas civiles (sumar días y meses, fin de mes, bisiestos,
       comparar) en `packages/domain/src/dates.test.ts`
-- [ ] T017 [P] Implementar fechas civiles `YYYY-MM-DD` en `packages/domain/src/dates.ts`
-- [ ] T018 [P] Tests de `can(role, action)` para propietario, editor y lector en
+- [x] T017 [P] Implementar fechas civiles `YYYY-MM-DD` en `packages/domain/src/dates.ts`
+- [x] T018 [P] Tests de `can(role, action)` para propietario, editor y lector en
       `packages/domain/src/permissions.test.ts`
-- [ ] T019 [P] Implementar roles y permisos en `packages/domain/src/permissions.ts`
+- [x] T019 [P] Implementar roles y permisos en `packages/domain/src/permissions.ts`
 
 ### Contrato de la API
 
-- [ ] T020 [P] Definir el formato de error y sus códigos en `packages/api/src/errors.ts`
-- [ ] T021 [P] Definir esquemas zod comunes (ids UUIDv7, fecha, céntimos, rol) en
+- [x] T020 [P] Definir el formato de error y sus códigos en `packages/api/src/errors.ts`
+- [x] T021 [P] Definir esquemas zod comunes (ids UUIDv7, fecha, céntimos, rol) en
       `packages/api/src/schemas/common.ts`
 
 ### Servidor
 
-- [ ] T022 Configurar Drizzle y el esquema de `households` y `members` (un hogar por
+- [x] T022 Configurar Drizzle y el esquema de `households` y `members` (un hogar por
       usuario, un solo propietario) en `apps/server/src/db/schema.ts`; primera migración
       en `apps/server/src/db/migrations/`
-- [ ] T023 Integrar Better Auth (email y contraseña, recuperación, plugin de Expo, cookie
+- [x] T023 Integrar Better Auth (email y contraseña, recuperación, plugin de Expo, cookie
       `HttpOnly`/`Secure`/`SameSite=Lax`) en `apps/server/src/auth.ts` y migración de
       sus tablas
 - [ ] T024 Configurar el envío de emails (proveedor aprobado) en

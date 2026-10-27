@@ -4,18 +4,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
     "start": "tsx src/index.ts",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate-cli.ts"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.7.14",
     "@fastify/cors": "^11.3.1",
     "@smartnomic/api": "workspace:*",
     "@smartnomic/domain": "workspace:*",
+    "better-auth": "^1.7.14",
+    "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.7",
+    "pg": "^8.23.1",
     "tsx": "^4.23.15"
   },
   "devDependencies": {
-    "@types/node": "^22.20.5"
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11"
   }
 }

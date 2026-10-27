@@ -1,6 +1,7 @@
 import cors from '@fastify/cors';
 import type { HealthResponse } from '@smartnomic/api';
 import Fastify, { type FastifyInstance } from 'fastify';
+import { registerAuthRoutes, type Auth } from './auth';
 
 export interface ServerOptions {
   logger?: boolean;
@@ -10,6 +11,8 @@ export interface ServerOptions {
    * comparten origen.
    */
   corsOrigins?: string[];
+  /** Autenticación. Sin ella (por ejemplo, sin base de datos) solo responde `/health`. */
+  auth?: Auth;
 }
 
 export async function buildServer(options: ServerOptions = {}): Promise<FastifyInstance> {
@@ -20,6 +23,8 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
   }
 
   app.get('/health', async (): Promise<HealthResponse> => ({ ok: true }));
+
+  if (options.auth) registerAuthRoutes(app, options.auth);
 
   return app;
 }
