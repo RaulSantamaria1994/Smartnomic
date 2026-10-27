@@ -81,7 +81,7 @@ cliente de la API en la app.
 - [x] T023 Integrar Better Auth (email y contraseña, recuperación, plugin de Expo, cookie
       `HttpOnly`/`Secure`/`SameSite=Lax`) en `apps/server/src/auth.ts` y migración de
       sus tablas
-- [ ] T024 Configurar el envío de emails (proveedor aprobado) en
+- [x] T024 Configurar el envío de emails (Brevo) en
       `apps/server/src/email.ts`, sin escribir emails en los logs
 - [ ] T025 Añadir `@fastify/rate-limit` a `/api/auth/*` en `apps/server/src/index.ts`
 - [ ] T026 Crear el plugin de errores (zod → 400, formato único) en
@@ -383,5 +383,3 @@ siguiente: US1 → US2 → US3 → US4 → US5. Un PR por fase o por historia.
 - `[P]` = archivos distintos y sin dependencias pendientes.
 - Hacer commit después de cada tarea o grupo lógico, con `pnpm check` en verde.
 - Si una tarea obliga a cambiar `spec.md` o `plan.md`, se actualizan primero y se avisa.
-- T024 necesita aprobado el proveedor de email (ver "Pendiente de confirmar" en
-  `plan.md`).

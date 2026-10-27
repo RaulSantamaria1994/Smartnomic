@@ -41,7 +41,23 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
   | `BETTER_AUTH_SECRET` | Firma las sesiones. Obligatoria en producción                 |
   | `BETTER_AUTH_URL`    | URL pública del servidor                                      |
   | `CORS_ORIGINS`       | Orígenes de la web de Expo en desarrollo, separados por comas |
+  | `BREVO_API_KEY`      | Clave de la API de Brevo para enviar emails                   |
+  | `EMAIL_FROM`         | Remitente verificado en Brevo («Smartnomic <no-reply@…>»)     |
   | `PORT`, `HOST`       | Puerto (3000) e interfaz (`0.0.0.0`)                          |
+
+### Emails (Brevo)
+
+Los emails (por ahora, recuperar la contraseña) se envían con [Brevo](https://www.brevo.com),
+que guarda los datos en la UE. Sin `BREVO_API_KEY` y `EMAIL_FROM`, el servidor arranca
+pero no envía emails.
+
+1. Crea una cuenta en Brevo (el plan gratuito permite unos 300 emails al día).
+2. **Senders, Domains & Dedicated IPs → Domains**: añade tu dominio y crea los registros
+   DNS que indica (DKIM, DMARC) para que los emails no lleguen como spam.
+3. **Senders**: añade el remitente, por ejemplo `no-reply@tudominio.com`.
+4. **SMTP & API → API Keys**: crea una clave y ponla en `BREVO_API_KEY`.
+
+### Base de datos
 
 Cambiar el esquema de la base de datos: edita `apps/server/src/db/schema.ts` y ejecuta
 `pnpm --filter @smartnomic/server db:generate`. Nunca se edita una migración ya fusionada.
@@ -71,7 +87,8 @@ El repositorio trae un `Dockerfile` y un `railway.json` (comprobación de salud 
 2. **New → Database → Add PostgreSQL**, en la misma región.
 3. En el servicio del servidor, **Variables**: `PORT` = `3000`, `DATABASE_URL` como
    referencia a la de PostgreSQL, `BETTER_AUTH_SECRET` (`openssl rand -hex 32`) y
-   `BETTER_AUTH_URL` con el dominio público.
+   `BETTER_AUTH_URL` con el dominio público. Para los emails, `BREVO_API_KEY` y
+   `EMAIL_FROM`.
 4. **Settings → Networking → Generate Domain** con el puerto `3000`.
 5. Comprueba `https://<tu-dominio>/health`.
 

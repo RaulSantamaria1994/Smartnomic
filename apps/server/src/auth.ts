@@ -21,12 +21,17 @@ export interface AuthOptions {
   trustedOrigins?: string[];
   /** En producción las cookies solo viajan por HTTPS. */
   production: boolean;
-  /** Sin él, recuperar la contraseña no está disponible (se añade en T024). */
+  /** Sin él, recuperar la contraseña no está disponible. */
   sendResetPassword?: SendResetPassword;
+  /** Se llama si falla un envío. Nunca recibe la dirección del destinatario. */
+  onEmailError?: (error: unknown) => void;
 }
 
+/** Validez del enlace para restablecer la contraseña, en segundos. */
+export const RESET_PASSWORD_EXPIRES_IN = 60 * 60;
+
 export function createAuth(options: AuthOptions) {
-  const { sendResetPassword } = options;
+  const { sendResetPassword, onEmailError } = options;
   return betterAuth({
     baseURL: options.baseURL,
     basePath: AUTH_BASE_PATH,
@@ -39,7 +44,13 @@ export function createAuth(options: AuthOptions) {
       enabled: true,
       minPasswordLength: 8,
       ...(sendResetPassword && {
-        sendResetPassword: ({ user, url }) => sendResetPassword({ to: user.email, url }),
+        // Sin esperar al envío: la respuesta tarda lo mismo exista o no la cuenta.
+        sendResetPassword: async ({ user, url }) => {
+          sendResetPassword({ to: user.email, url }).catch((error: unknown) =>
+            onEmailError?.(error),
+          );
+        },
+        resetPasswordTokenExpiresIn: RESET_PASSWORD_EXPIRES_IN,
         revokeSessionsOnPasswordReset: true,
       }),
     },
