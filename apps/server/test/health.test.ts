@@ -29,6 +29,22 @@ describe('GET /health', () => {
     expect(response.headers['access-control-allow-origin']).toBe('http://localhost:8081');
   });
 
+  it('permite los métodos de la API en la consulta previa del navegador', async () => {
+    app = await buildServer({ corsOrigins: ['http://localhost:8081'] });
+    const response = await app.inject({
+      method: 'OPTIONS',
+      url: '/api/households/x/transactions/y',
+      headers: {
+        origin: 'http://localhost:8081',
+        'access-control-request-method': 'PUT',
+        'access-control-request-headers': 'content-type',
+      },
+    });
+
+    const methods = String(response.headers['access-control-allow-methods']).split(/,\s*/);
+    expect(methods).toEqual(expect.arrayContaining(['PUT', 'PATCH', 'DELETE']));
+  });
+
   it('no permite otros orígenes', async () => {
     app = await buildServer({ corsOrigins: ['http://localhost:8081'] });
     const response = await app.inject({

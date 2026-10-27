@@ -1,7 +1,7 @@
 import type { MeResponse } from '@smartnomic/api';
 import type { FastifyInstance } from 'fastify';
 import type { Database } from '../db/client';
-import { ensureHousehold } from '../households';
+import { ensureDefaultCategories, ensureHousehold } from '../households';
 import type { HouseholdAccess } from '../plugins/household-access';
 import { toHousehold } from './households';
 
@@ -16,6 +16,7 @@ export function registerMeRoutes(
       const user = request.user!;
       // Normalmente el hogar se crea al registrarse; si aquel paso falló, se crea aquí.
       const { household, member } = await ensureHousehold(deps.db, user, null);
+      await ensureDefaultCategories(deps.db, household.id);
       return {
         user,
         household: toHousehold(household),

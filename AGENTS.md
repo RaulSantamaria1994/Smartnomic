@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 y 2 terminadas. La siguiente es la fase 3
-(historia 1: movimientos y resumen del mes), desde T037. No inventes comandos, rutas
+Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 a 3 terminadas (la historia 1 funciona). La siguiente es la
+fase 4 (historia 2: pagos recurrentes), desde T053. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 

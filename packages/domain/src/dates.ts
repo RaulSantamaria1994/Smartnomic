@@ -73,6 +73,21 @@ export function dayOfWeek(date: DateString): number {
   return mod(toEpochDays(parseDate(date)) + 4, 7);
 }
 
+/**
+ * Fecha de calendario de un instante en una zona horaria IANA. El instante entra como
+ * parámetro: el dominio no lee el reloj (constitución, art. II.2).
+ */
+export function civilDateIn(instant: Date, timeZone: string): DateString {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(instant);
+  const part = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return formatDate({ year: part('year'), month: part('month'), day: part('day') });
+}
+
 // Algoritmo de Howard Hinnant para pasar de fecha civil a días desde 1970-01-01 y vuelta.
 function toEpochDays({ year, month, day }: CivilDate): number {
   const y = month <= 2 ? year - 1 : year;
