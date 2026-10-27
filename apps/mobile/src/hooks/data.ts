@@ -1,4 +1,4 @@
-import { civilDateIn, periodOf, type DateString } from '@smartnomic/domain';
+import { can, civilDateIn, periodOf, type Action, type DateString } from '@smartnomic/domain';
 import { useQuery } from '@tanstack/react-query';
 import { api, queryKeys } from '../api/client';
 
@@ -46,4 +46,26 @@ export function useUpcoming(householdId: string | undefined, days = 30) {
     queryFn: () => api.upcoming(householdId!, days),
     enabled: Boolean(householdId),
   });
+}
+
+export function useMembers(householdId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.members(householdId ?? ''),
+    queryFn: () => api.members(householdId!),
+    enabled: Boolean(householdId),
+  });
+}
+
+export function useInvitations(householdId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.invitations(householdId ?? ''),
+    queryFn: () => api.invitations(householdId!),
+    enabled: Boolean(householdId) && enabled,
+  });
+}
+
+/** ¿Puede el usuario hacer esto en su hogar? Mismas reglas que el servidor (RF-006). */
+export function useCan(): (action: Action) => boolean {
+  const role = useMe().data?.member.role;
+  return (action) => (role ? can(role, action) : false);
 }

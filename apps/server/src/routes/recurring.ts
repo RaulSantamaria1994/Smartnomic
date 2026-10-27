@@ -11,7 +11,14 @@ import { and, asc, eq, sql, TransactionRollbackError } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Database } from '../db/client';
-import { categories, occurrences, recurringRules, transactions } from '../db/schema';
+import {
+  categories,
+  members,
+  occurrences,
+  recurringRules,
+  transactions,
+  users,
+} from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
 
@@ -224,6 +231,25 @@ export function registerRecurringRoutes(
     return row;
   }
 
+  /** «Este vencimiento ya lo pagó Lucía.» (RF-009, caso límite de dos pagos a la vez). */
+  async function alreadyResolvedMessage(row: OccurrenceRow | undefined): Promise<string> {
+    const [resolver] = row?.resolvedBy
+      ? await db
+          .select({ name: users.name })
+          .from(members)
+          .innerJoin(users, eq(users.id, members.userId))
+          .where(eq(members.id, row.resolvedBy))
+      : [];
+    if (row?.status === 'skipped') {
+      return resolver
+        ? `Este vencimiento ya lo omitió ${resolver.name}.`
+        : 'Este vencimiento ya está omitido.';
+    }
+    return resolver
+      ? `Este vencimiento ya lo pagó ${resolver.name}.`
+      : 'Este vencimiento ya está pagado.';
+  }
+
   // Pagar: crea el movimiento con el importe real (RF-024). Un vencimiento solo se
   // resuelve una vez, aunque dos miembros lo paguen a la vez (RF-015).
   app.post(
@@ -277,12 +303,7 @@ export function registerRecurringRoutes(
       if (existing?.status === 'paid' && existing.transactionId === input.transactionId) {
         return toResolved(existing);
       }
-      throw new ApiError(
-        'conflict',
-        existing?.status === 'skipped'
-          ? 'Este vencimiento ya está marcado como omitido.'
-          : 'Este vencimiento ya está pagado.',
-      );
+      throw new ApiError('conflict', await alreadyResolvedMessage(existing));
     },
   );
 
@@ -310,7 +331,7 @@ export function registerRecurringRoutes(
 
       const existing = await existingResolution(rule.id, dueDate);
       if (existing?.status === 'skipped') return toResolved(existing);
-      throw new ApiError('conflict', 'Este vencimiento ya está pagado.');
+      throw new ApiError('conflict', await alreadyResolvedMessage(existing));
     },
   );
 }

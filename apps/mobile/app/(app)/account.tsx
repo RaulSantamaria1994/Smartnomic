@@ -76,6 +76,11 @@ export default function Account() {
       />
       <Button label={es.settings.save} onPress={saveTime} loading={saving} />
       {message && <Message text={message.text} kind={message.kind} />}
+      <Button
+        variant="link"
+        label={es.household.title}
+        onPress={() => router.push('/household/members')}
+      />
       <Button variant="link" label={es.auth.signOut} onPress={() => void signOut(queryClient)} />
       <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
     </Screen>

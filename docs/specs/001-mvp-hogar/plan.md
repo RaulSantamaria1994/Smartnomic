@@ -122,7 +122,7 @@ apps/
     │   │   ├── occurrence/[id].tsx  # pagar / omitir
     │   │   ├── household/           # miembros, invitar, ajustes, categorías
     │   │   └── account.tsx          # exportar, borrar cuenta, avisos
-    │   └── invite/[code].tsx        # aceptar invitación (enlace)
+    │   └── invitacion/[code].tsx    # aceptar invitación (enlace o código)
     └── src/
         ├── api/             # cliente HTTP tipado con packages/api
         ├── session/         # session.native.ts (secure store) / session.web.ts (cookie)
@@ -170,7 +170,7 @@ fechas de calendario en `date` e instantes en `timestamptz` (UTC).
 | `users`, `sessions`, `accounts`, `verifications` | Gestionadas por Better Auth (email, nombre, hash de contraseña, sesiones)                                                                                                                                                                                            | Email único                                                                              |
 | `households`                                     | `id`, `name`, `currency` (`'EUR'`), `month_start_day` (1–28), `timezone` (IANA), `created_at`                                                                                                                                                                        | `month_start_day BETWEEN 1 AND 28`                                                       |
 | `members`                                        | `id`, `household_id`, `user_id`, `role` (`owner`/`editor`/`viewer`), `reminders_enabled`, `reminder_time` (`'09:00'`), `joined_at`                                                                                                                                   | `user_id` único (un hogar por usuario); un solo `owner` por hogar (índice único parcial) |
-| `invitations`                                    | `id`, `household_id`, `role` (`editor`/`viewer`), `code` (8 caracteres), `token` (para el enlace), `status` (`pending`/`used`/`revoked`), `expires_at`, `created_by`, `used_by`                                                                                      | `code` y `token` únicos; caducan a los 7 días                                            |
+| `invitations`                                    | `id`, `household_id`, `role` (`editor`/`viewer`), `code` (10 caracteres sin 0/O/1/I/L; va también en el enlace), `status` (`pending`/`used`/`revoked`), `expires_at`, `created_by`, `used_by`, `used_at`                                                             | `code` único; caducan a los 7 días                                                       |
 | `categories`                                     | `id`, `household_id`, `kind` (`income`/`expense`), `name`, `icon`, `color`, `archived_at`                                                                                                                                                                            | Nombre único por hogar y tipo entre las no archivadas                                    |
 | `transactions`                                   | `id` (UUIDv7 del cliente), `household_id`, `kind`, `amount_cents` (> 0), `date`, `category_id`, `member_id` (nullable), `note`, `recurring_id`, `occurrence_due_date`, `created_at`, `updated_at`, `deleted_at`                                                      | `amount_cents > 0`; categoría del mismo hogar y tipo; índice `(household_id, date)`      |
 | `recurring_rules`                                | `id`, `household_id`, `kind`, `name`, `amount_cents`, `category_id`, `frequency` (`weekly`/`monthly`/`yearly`), `interval` (≥ 1), `day_of_month` (1–31), `weekday` (0–6), `month_of_year` (1–12), `start_date`, `end_date`, `remind_days_before` (0/1/3/7), `active` | Campos de día coherentes con la frecuencia (`CHECK`)                                     |
@@ -205,7 +205,7 @@ indica el mínimo. Errores: `{ "error": { "code", "message" } }` con 400 (valida
 | `GET/POST /api/households/:id/invitations`                          | propietario     | Listar y crear invitaciones                                      | 004           |
 | `DELETE /api/households/:id/invitations/:invId`                     | propietario     | Anular invitación                                                | 005           |
 | `GET /api/invitations/:code`                                        | sesión          | Ver a qué hogar invita y si el usuario perdería datos            | 008           |
-| `POST /api/invitations/:code/accept`                                | sesión          | Aceptar (con `confirmLeaveCurrent` si hay datos)                 | 004, 008      |
+| `POST /api/invitations/:code/accept`                                | sesión          | Aceptar (con `confirmLoseData` si se borran datos)               | 004, 008      |
 | `GET/POST /api/households/:id/categories`                           | lector / editor | Listar y crear categorías                                        | 020, 021      |
 | `PATCH /api/households/:id/categories/:catId`                       | editor          | Renombrar, archivar o restaurar                                  | 021           |
 | `GET /api/households/:id/periods/:start`                            | lector          | Resumen y movimientos del periodo que empieza en `:start`        | 016–019       |

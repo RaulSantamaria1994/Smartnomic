@@ -10,6 +10,7 @@ import { registerErrorHandler } from './plugins/errors';
 import { createHouseholdAccess } from './plugins/household-access';
 import { registerCategoryRoutes } from './routes/categories';
 import { registerHouseholdRoutes } from './routes/households';
+import { registerInvitationRoutes } from './routes/invitations';
 import { registerMeRoutes } from './routes/me';
 import { registerMemberRoutes } from './routes/members';
 import { registerPeriodRoutes } from './routes/periods';
@@ -37,6 +38,8 @@ export interface ServerOptions {
   webRoot?: string;
   /** Reloj del servidor. Los tests lo fijan (constitución, art. VII.5). */
   now?: () => Date;
+  /** Límite para ver y aceptar invitaciones por IP. Por defecto, 20 por minuto. */
+  invitationRateLimit?: AuthRateLimit;
 }
 
 const DEFAULT_AUTH_RATE_LIMIT: AuthRateLimit = { max: 10, timeWindow: '1 minute' };
@@ -69,7 +72,14 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     registerCategoryRoutes(app, { db, access });
     registerTransactionRoutes(app, { db, access });
     registerPeriodRoutes(app, { db, access });
-    registerRecurringRoutes(app, { db, access, now: options.now ?? (() => new Date()) });
+    const now = options.now ?? (() => new Date());
+    registerRecurringRoutes(app, { db, access, now });
+    registerInvitationRoutes(app, {
+      db,
+      access,
+      now,
+      rateLimit: options.invitationRateLimit ?? { max: 20, timeWindow: '1 minute' },
+    });
   }
 
   const webRoot = options.webRoot && existsSync(options.webRoot) ? options.webRoot : undefined;

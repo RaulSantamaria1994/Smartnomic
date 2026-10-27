@@ -4,7 +4,7 @@ import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { describeSchedule, formatMoney } from '../../../src/format';
-import { useCategories, useMe, useRecurring } from '../../../src/hooks/data';
+import { useCan, useCategories, useMe, useRecurring } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { colors, spacing } from '../../../src/theme';
 
@@ -14,7 +14,7 @@ export default function RecurringList() {
   const household = me.data?.household;
   const rules = useRecurring(household?.id);
   const categories = useCategories(household?.id);
-  const canWrite = me.data?.member.role !== 'viewer';
+  const canWrite = useCan()('recurring.write');
   const byId = new Map((categories.data?.categories ?? []).map((c) => [c.id, c]));
 
   return (

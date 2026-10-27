@@ -1,5 +1,9 @@
 import {
   categoriesResponseSchema,
+  invitationPreviewSchema,
+  invitationSchema,
+  invitationsResponseSchema,
+  membersResponseSchema,
   healthResponseSchema,
   memberSchema,
   meResponseSchema,
@@ -74,6 +78,48 @@ export const api = {
       body: input,
       schema: memberSchema,
     }),
+  members: (householdId: string) =>
+    request(`${household(householdId)}/members`, { schema: membersResponseSchema }),
+  changeRole: (householdId: string, memberId: string, role: 'editor' | 'viewer') =>
+    request(`${household(householdId)}/members/${memberId}`, {
+      method: 'PATCH',
+      body: { role },
+      schema: memberSchema,
+    }),
+  removeMember: (householdId: string, memberId: string) =>
+    request(`${household(householdId)}/members/${memberId}`, {
+      method: 'DELETE',
+      schema: z.null(),
+    }),
+  leaveHousehold: (householdId: string) =>
+    request(`${household(householdId)}/leave`, { method: 'POST', schema: meResponseSchema }),
+  transferOwnership: (householdId: string, memberId: string) =>
+    request(`${household(householdId)}/transfer-ownership`, {
+      method: 'POST',
+      body: { memberId },
+      schema: meResponseSchema,
+    }),
+  invitations: (householdId: string) =>
+    request(`${household(householdId)}/invitations`, { schema: invitationsResponseSchema }),
+  createInvitation: (householdId: string, role: 'editor' | 'viewer') =>
+    request(`${household(householdId)}/invitations`, {
+      method: 'POST',
+      body: { role },
+      schema: invitationSchema,
+    }),
+  revokeInvitation: (householdId: string, invitationId: string) =>
+    request(`${household(householdId)}/invitations/${invitationId}`, {
+      method: 'DELETE',
+      schema: z.null(),
+    }),
+  previewInvitation: (code: string) =>
+    request(`/api/invitations/${encodeURIComponent(code)}`, { schema: invitationPreviewSchema }),
+  acceptInvitation: (code: string, confirmLoseData: boolean) =>
+    request(`/api/invitations/${encodeURIComponent(code)}/accept`, {
+      method: 'POST',
+      body: { confirmLoseData },
+      schema: meResponseSchema,
+    }),
   restoreTransaction: (householdId: string, id: string) =>
     request(`${household(householdId)}/transactions/${id}/restore`, {
       method: 'POST',
@@ -88,6 +134,8 @@ export const queryKeys = {
   periods: (householdId: string) => ['periods', householdId] as const,
   period: (householdId: string, start: string) => ['periods', householdId, start] as const,
   recurring: (householdId: string) => ['recurring', householdId] as const,
+  members: (householdId: string) => ['members', householdId] as const,
+  invitations: (householdId: string) => ['invitations', householdId] as const,
   upcoming: (householdId: string, days?: number) =>
     (days === undefined
       ? ['upcoming', householdId]
