@@ -1,10 +1,73 @@
 // Textos de la interfaz (constitución, art. VIII.5).
 export const es = {
   appName: 'Smartnomic',
+  common: {
+    loading: 'Cargando…',
+    retry: 'Reintentar',
+  },
   health: {
     checking: 'Comprobando el servidor…',
     ok: 'Servidor conectado',
     error: 'No se puede conectar con el servidor',
     retry: 'Reintentar',
+  },
+  auth: {
+    name: 'Nombre',
+    email: 'Email',
+    password: 'Contraseña',
+    newPassword: 'Contraseña nueva',
+    repeatPassword: 'Repite la contraseña',
+    passwordHint: 'Al menos 8 caracteres.',
+    signIn: {
+      title: 'Entrar',
+      submit: 'Entrar',
+      noAccount: '¿No tienes cuenta? Regístrate',
+      forgot: '¿Has olvidado la contraseña?',
+    },
+    signUp: {
+      title: 'Crear cuenta',
+      submit: 'Crear cuenta',
+      haveAccount: '¿Ya tienes cuenta? Entra',
+    },
+    forgot: {
+      title: 'Recuperar la contraseña',
+      explanation: 'Escribe tu email y te enviaremos un enlace para elegir una contraseña nueva.',
+      submit: 'Enviar enlace',
+      sent: 'Si hay una cuenta con ese email, te hemos enviado un enlace. Mira también en spam.',
+      back: 'Volver a entrar',
+    },
+    reset: {
+      title: 'Elige una contraseña nueva',
+      submit: 'Guardar contraseña',
+      done: 'Contraseña cambiada. Ya puedes entrar con la nueva.',
+      goToSignIn: 'Ir a entrar',
+      missingToken: 'Este enlace no es válido. Pide uno nuevo.',
+      requestNew: 'Pedir un enlace nuevo',
+    },
+    signOut: 'Cerrar sesión',
+    validation: {
+      nameRequired: 'Escribe tu nombre.',
+      emailRequired: 'Escribe tu email.',
+      passwordTooShort: 'La contraseña debe tener al menos 8 caracteres.',
+      passwordsDontMatch: 'Las contraseñas no coinciden.',
+    },
+    errors: {
+      invalidCredentials: 'Email o contraseña incorrectos.',
+      emailInUse: 'Ya hay una cuenta con ese email.',
+      passwordTooShort: 'La contraseña debe tener al menos 8 caracteres.',
+      passwordTooLong: 'La contraseña es demasiado larga.',
+      invalidEmail: 'El email no es válido.',
+      invalidToken: 'El enlace ha caducado o ya se ha usado. Pide uno nuevo.',
+      resetDisabled: 'Ahora mismo no se pueden enviar emails. Inténtalo más tarde.',
+      tooManyRequests: 'Demasiados intentos. Espera un minuto y vuelve a probar.',
+      network: 'No se puede conectar con el servidor. Comprueba tu conexión.',
+      unknown: 'Algo ha fallado. Inténtalo de nuevo.',
+    },
+  },
+  home: {
+    greeting: (name: string) => `Hola, ${name}`,
+    household: 'Tu hogar',
+    roles: { owner: 'Propietario', editor: 'Editor', viewer: 'Lector' },
+    comingSoon: 'Pronto podrás apuntar aquí tus ingresos y gastos.',
   },
 } as const;

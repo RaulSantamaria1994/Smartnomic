@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`**. Fase 1 terminada; fase 2 hecha hasta T024.
-La siguiente tarea es T025 (límite de peticiones). No inventes comandos, rutas
+Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 y 2 terminadas. La siguiente es la fase 3
+(historia 1: movimientos y resumen del mes), desde T037. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 
@@ -59,7 +59,11 @@ pnpm test                              # solo tests
 pnpm format                            # arregla el formato
 pnpm --filter @smartnomic/server dev   # servidor en http://localhost:3000
 pnpm --filter @smartnomic/mobile start # app con Expo (Android y web)
+pnpm --filter @smartnomic/mobile export:web  # web para producción en apps/mobile/dist
 ```
+
+Los tests del servidor usan PostgreSQL real (`TEST_DATABASE_URL`, por defecto la base
+`smartnomic_test` de `docker compose`). Sin la base de datos en marcha, fallan.
 
 ## Cómo trabajar una tarea
 

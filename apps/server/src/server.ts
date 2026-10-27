@@ -1,7 +1,15 @@
+import { existsSync } from 'node:fs';
 import cors from '@fastify/cors';
-import type { HealthResponse } from '@smartnomic/api';
+import rateLimit from '@fastify/rate-limit';
+import fastifyStatic from '@fastify/static';
+import { errorResponse, type HealthResponse } from '@smartnomic/api';
 import Fastify, { type FastifyInstance } from 'fastify';
-import { registerAuthRoutes, type Auth } from './auth';
+import { registerAuthRoutes, type Auth, type AuthRateLimit } from './auth';
+import type { Database } from './db/client';
+import { registerErrorHandler } from './plugins/errors';
+import { createHouseholdAccess } from './plugins/household-access';
+import { registerHouseholdRoutes } from './routes/households';
+import { registerMeRoutes } from './routes/me';
 
 export interface ServerOptions {
   logger?: boolean;
@@ -11,20 +19,56 @@ export interface ServerOptions {
    * comparten origen.
    */
   corsOrigins?: string[];
-  /** Autenticación. Sin ella (por ejemplo, sin base de datos) solo responde `/health`. */
-  auth?: Auth;
+  /** Base de datos y autenticación. Sin ellas solo responde `/health` (y la web). */
+  api?: { db: Database; auth: Auth };
+  /** Límite de peticiones POST a `/api/auth/*` por IP. Por defecto, 10 por minuto. */
+  authRateLimit?: AuthRateLimit;
+  /**
+   * El servidor está detrás de un proxy (Railway) que indica la IP real del cliente en
+   * `X-Forwarded-For`. Sin esto, el límite de peticiones vería la IP del proxy.
+   */
+  trustProxy?: boolean;
+  /** Carpeta con la web exportada de Expo. Si existe, se sirve en `/`. */
+  webRoot?: string;
 }
 
+const DEFAULT_AUTH_RATE_LIMIT: AuthRateLimit = { max: 10, timeWindow: '1 minute' };
+
 export async function buildServer(options: ServerOptions = {}): Promise<FastifyInstance> {
-  const app = Fastify({ logger: options.logger ?? false });
+  const app = Fastify({ logger: options.logger ?? false, trustProxy: options.trustProxy ?? false });
+  registerErrorHandler(app);
 
   if (options.corsOrigins && options.corsOrigins.length > 0) {
     await app.register(cors, { origin: options.corsOrigins, credentials: true });
   }
+  // Solo se limitan las rutas que lo piden en su configuración.
+  await app.register(rateLimit, { global: false });
 
   app.get('/health', async (): Promise<HealthResponse> => ({ ok: true }));
 
-  if (options.auth) registerAuthRoutes(app, options.auth);
+  if (options.api) {
+    const { db, auth } = options.api;
+    const access = createHouseholdAccess({ auth, db });
+    registerAuthRoutes(app, auth, {
+      rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
+    });
+    registerMeRoutes(app, { db, access });
+    registerHouseholdRoutes(app, { access });
+  }
+
+  const webRoot = options.webRoot && existsSync(options.webRoot) ? options.webRoot : undefined;
+  if (webRoot) {
+    await app.register(fastifyStatic, { root: webRoot, wildcard: false });
+  }
+
+  app.setNotFoundHandler((request, reply) => {
+    const path = request.url.split('?')[0] ?? '';
+    // La web es una sola página: cualquier ruta que no sea de la API la resuelve la app.
+    if (webRoot && request.method === 'GET' && !path.startsWith('/api/')) {
+      return reply.sendFile('index.html');
+    }
+    return reply.status(404).send(errorResponse('not_found', 'No existe esta ruta.'));
+  });
 
   return app;
 }
