@@ -143,6 +143,8 @@ plataforma vive en `src/session`, `src/reminders` y `src/cache`.
 | Fechas civiles                      | Utilidades propias en `domain/dates.ts` sobre cadenas `YYYY-MM-DD` (aritmética de días y meses, último día del mes). El "hoy" del hogar se calcula fuera del dominio con `Intl.DateTimeFormat` y la zona horaria del hogar.                                                                       | `Date` (arrastra hora y zona); date-fns-tz (dependencia para algo pequeño); Temporal (aún no disponible en Node 22 sin flag)              |
 | Recurrencias                        | Implementación propia en `domain/recurrence.ts` para semanal, mensual, cada N meses y anual, con ajuste al último día del mes.                                                                                                                                                                    | `rrule` (cubre mucho más de lo necesario y trabaja con `Date`)                                                                            |
 | Vencimientos                        | Se calculan al vuelo con el dominio. Solo se guarda una fila en `occurrences` cuando se pagan u omiten, con clave única `(recurring_id, due_date)`.                                                                                                                                               | Generar filas por adelantado (quedan obsoletas al editar la regla)                                                                        |
+| Editar una regla                    | Cambiar el importe, el nombre o el aviso no toca el calendario. Cambiar el día, la frecuencia o el inicio hace que la regla empiece hoy (si empezaba antes): así los vencimientos ya pagados con el día anterior no reaparecen como pendientes.                                                   | Versionar las reglas (más tablas y lógica para el MVP)                                                                                    |
+| Reloj del servidor                  | `buildServer({ now })`: los tests fijan la hora (art. VII.5); en producción, `new Date()`.                                                                                                                                                                                                        | Leer el reloj en cada ruta (tests dependientes de la fecha real)                                                                          |
 | Idempotencia (RF-015)               | El cliente genera el `id` (UUIDv7) de cada movimiento; el servidor inserta con `ON CONFLICT (id) DO NOTHING` y devuelve el existente. Pagar un vencimiento usa la clave única de `occurrences` dentro de una transacción.                                                                         | Cabecera `Idempotency-Key` con tabla aparte (más piezas para el mismo resultado)                                                          |
 | Ediciones simultáneas               | Gana el último cambio. La respuesta de cada escritura devuelve el registro actualizado y la app invalida la caché.                                                                                                                                                                                | Bloqueo optimista con versión (más fricción para el usuario en el MVP)                                                                    |
 | Autenticación                       | Better Auth con email y contraseña, recuperación por email y el plugin de Expo: token en `expo-secure-store` en Android y cookie `HttpOnly`/`Secure`/`SameSite=Lax` en web.                                                                                                                       | Auth propia (riesgo); proveedores externos (Auth0, Clerk) (coste y datos fuera)                                                           |
@@ -188,35 +190,35 @@ Todas las rutas bajo `/api`. Las de hogar exigen sesión y pertenencia; la colum
 indica el mínimo. Errores: `{ "error": { "code", "message" } }` con 400 (validación),
 401 (sin sesión), 403 (rol o hogar ajeno), 404, 409 (conflicto) y 429 (límite).
 
-| Método y ruta                                                       | Rol             | Uso                                                         | RF            |
-| ------------------------------------------------------------------- | --------------- | ----------------------------------------------------------- | ------------- |
-| `POST /api/auth/*`                                                  | —               | Registro, entrar, salir, recuperar contraseña (Better Auth) | 001           |
-| `GET /api/me`                                                       | sesión          | Usuario, hogar y rol actuales                               | 002           |
-| `GET /api/households/:id`                                           | lector          | Datos y ajustes del hogar                                   | —             |
-| `PATCH /api/households/:id`                                         | propietario     | Nombre, `month_start_day`, `reminder_time`                  | 003           |
-| `GET /api/households/:id/members`                                   | lector          | Miembros y roles                                            | 009           |
-| `PATCH /api/households/:id/members/:memberId`                       | propietario     | Cambiar rol                                                 | 005           |
-| `DELETE /api/households/:id/members/:memberId`                      | propietario     | Quitar miembro                                              | 005           |
-| `POST /api/households/:id/transfer-ownership`                       | propietario     | Pasar la propiedad                                          | 005, 039      |
-| `POST /api/households/:id/leave`                                    | editor/lector   | Salir del hogar (se crea uno propio vacío)                  | 007           |
-| `PATCH /api/households/:id/members/me`                              | lector          | Activar o desactivar mis avisos                             | 031           |
-| `GET/POST /api/households/:id/invitations`                          | propietario     | Listar y crear invitaciones                                 | 004           |
-| `DELETE /api/households/:id/invitations/:invId`                     | propietario     | Anular invitación                                           | 005           |
-| `GET /api/invitations/:code`                                        | sesión          | Ver a qué hogar invita y si el usuario perdería datos       | 008           |
-| `POST /api/invitations/:code/accept`                                | sesión          | Aceptar (con `confirmLeaveCurrent` si hay datos)            | 004, 008      |
-| `GET/POST /api/households/:id/categories`                           | lector / editor | Listar y crear categorías                                   | 020, 021      |
-| `PATCH /api/households/:id/categories/:catId`                       | editor          | Renombrar, archivar o restaurar                             | 021           |
-| `GET /api/households/:id/periods/:start`                            | lector          | Resumen y movimientos del periodo que empieza en `:start`   | 016–019       |
-| `PUT /api/households/:id/transactions/:txId`                        | editor          | Crear o editar (idempotente por `id`)                       | 011, 013, 015 |
-| `DELETE /api/households/:id/transactions/:txId`                     | editor          | Borrado lógico                                              | 011, 014      |
-| `POST /api/households/:id/transactions/:txId/restore`               | editor          | Deshacer el borrado                                         | 014           |
-| `GET/POST /api/households/:id/recurring`                            | lector / editor | Listar y crear pagos recurrentes                            | 022           |
-| `PATCH/DELETE /api/households/:id/recurring/:ruleId`                | editor          | Editar, desactivar o borrar                                 | 027           |
-| `GET /api/households/:id/occurrences?from&to`                       | lector          | Vencimientos (pendientes calculados + resueltos)            | 023, 036      |
-| `POST /api/households/:id/recurring/:ruleId/occurrences/:date/pay`  | editor          | Pagar con importe y fecha reales (crea movimiento)          | 024, 015      |
-| `POST /api/households/:id/recurring/:ruleId/occurrences/:date/skip` | editor          | Omitir                                                      | 025           |
-| `GET /api/households/:id/export`                                    | lector          | Exportación completa en JSON                                | 038           |
-| `DELETE /api/account`                                               | sesión          | Borrar la cuenta (409 si es propietario con más miembros)   | 039           |
+| Método y ruta                                                       | Rol             | Uso                                                              | RF            |
+| ------------------------------------------------------------------- | --------------- | ---------------------------------------------------------------- | ------------- |
+| `POST /api/auth/*`                                                  | —               | Registro, entrar, salir, recuperar contraseña (Better Auth)      | 001           |
+| `GET /api/me`                                                       | sesión          | Usuario, hogar y rol actuales                                    | 002           |
+| `GET /api/households/:id`                                           | lector          | Datos y ajustes del hogar                                        | —             |
+| `PATCH /api/households/:id`                                         | propietario     | Nombre, `month_start_day`, `reminder_time`                       | 003           |
+| `GET /api/households/:id/members`                                   | lector          | Miembros y roles                                                 | 009           |
+| `PATCH /api/households/:id/members/:memberId`                       | propietario     | Cambiar rol                                                      | 005           |
+| `DELETE /api/households/:id/members/:memberId`                      | propietario     | Quitar miembro                                                   | 005           |
+| `POST /api/households/:id/transfer-ownership`                       | propietario     | Pasar la propiedad                                               | 005, 039      |
+| `POST /api/households/:id/leave`                                    | editor/lector   | Salir del hogar (se crea uno propio vacío)                       | 007           |
+| `PATCH /api/households/:id/members/me`                              | lector          | Activar o desactivar mis avisos                                  | 031           |
+| `GET/POST /api/households/:id/invitations`                          | propietario     | Listar y crear invitaciones                                      | 004           |
+| `DELETE /api/households/:id/invitations/:invId`                     | propietario     | Anular invitación                                                | 005           |
+| `GET /api/invitations/:code`                                        | sesión          | Ver a qué hogar invita y si el usuario perdería datos            | 008           |
+| `POST /api/invitations/:code/accept`                                | sesión          | Aceptar (con `confirmLeaveCurrent` si hay datos)                 | 004, 008      |
+| `GET/POST /api/households/:id/categories`                           | lector / editor | Listar y crear categorías                                        | 020, 021      |
+| `PATCH /api/households/:id/categories/:catId`                       | editor          | Renombrar, archivar o restaurar                                  | 021           |
+| `GET /api/households/:id/periods/:start`                            | lector          | Resumen y movimientos del periodo que empieza en `:start`        | 016–019       |
+| `PUT /api/households/:id/transactions/:txId`                        | editor          | Crear o editar (idempotente por `id`)                            | 011, 013, 015 |
+| `DELETE /api/households/:id/transactions/:txId`                     | editor          | Borrado lógico                                                   | 011, 014      |
+| `POST /api/households/:id/transactions/:txId/restore`               | editor          | Deshacer el borrado                                              | 014           |
+| `GET /api/households/:id/recurring`                                 | lector          | Listar pagos recurrentes                                         | 022           |
+| `PUT/DELETE /api/households/:id/recurring/:ruleId`                  | editor          | Crear o editar (idempotente por UUIDv7), desactivar o borrar     | 022, 027      |
+| `GET /api/households/:id/upcoming?days`                             | lector          | Vencimientos pendientes: atrasados y de los próximos días (0–60) | 023, 036      |
+| `POST /api/households/:id/recurring/:ruleId/occurrences/:date/pay`  | editor          | Pagar con importe y fecha reales (crea movimiento)               | 024, 015      |
+| `POST /api/households/:id/recurring/:ruleId/occurrences/:date/skip` | editor          | Omitir                                                           | 025           |
+| `GET /api/households/:id/export`                                    | lector          | Exportación completa en JSON                                     | 038           |
+| `DELETE /api/account`                                               | sesión          | Borrar la cuenta (409 si es propietario con más miembros)        | 039           |
 
 ### Funciones del dominio
 
@@ -295,6 +297,12 @@ stack, justificadas según el artículo I.2:
 | `uuid` (v7)                | Ids generados en el cliente para la idempotencia  | `crypto.randomUUID` (v4, sin orden temporal)                                    |
 
 ## Decisiones confirmadas
+
+- **Pagos recurrentes (2026-10-27):** crear y editar con `PUT` e id generado en la app,
+  igual que los movimientos (art. V.5), en lugar de `POST` + `PATCH`. Los vencimientos
+  pendientes se piden con `GET /upcoming` en lugar de `GET /occurrences?from&to`, que el
+  MVP no necesita. La relación movimiento ↔ vencimiento se guarda en
+  `occurrences.transaction_id` (sin `recurring_id` en `transactions`).
 
 - **Proveedor de email (2026-10-27):** Brevo. Se descartó Resend porque guarda en EE. UU.
   los destinatarios y los registros de envío. Antes de publicar, revisar la lista de

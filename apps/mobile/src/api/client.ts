@@ -3,7 +3,13 @@ import {
   healthResponseSchema,
   meResponseSchema,
   periodResponseSchema,
+  recurringListSchema,
+  recurringRuleSchema,
+  resolvedOccurrenceSchema,
   transactionSchema,
+  upcomingResponseSchema,
+  type PayOccurrenceInput,
+  type RecurringInput,
   type TransactionInput,
 } from '@smartnomic/api';
 import { z } from 'zod';
@@ -37,6 +43,29 @@ export const api = {
       method: 'DELETE',
       schema: z.null(),
     }),
+  recurring: (householdId: string) =>
+    request(`${household(householdId)}/recurring`, { schema: recurringListSchema }),
+  saveRule: (householdId: string, id: string, input: RecurringInput) =>
+    request(`${household(householdId)}/recurring/${id}`, {
+      method: 'PUT',
+      body: input,
+      schema: recurringRuleSchema,
+    }),
+  deleteRule: (householdId: string, id: string) =>
+    request(`${household(householdId)}/recurring/${id}`, { method: 'DELETE', schema: z.null() }),
+  upcoming: (householdId: string, days = 30) =>
+    request(`${household(householdId)}/upcoming?days=${days}`, { schema: upcomingResponseSchema }),
+  pay: (householdId: string, ruleId: string, dueDate: string, input: PayOccurrenceInput) =>
+    request(`${household(householdId)}/recurring/${ruleId}/occurrences/${dueDate}/pay`, {
+      method: 'POST',
+      body: input,
+      schema: resolvedOccurrenceSchema,
+    }),
+  skip: (householdId: string, ruleId: string, dueDate: string) =>
+    request(`${household(householdId)}/recurring/${ruleId}/occurrences/${dueDate}/skip`, {
+      method: 'POST',
+      schema: resolvedOccurrenceSchema,
+    }),
   restoreTransaction: (householdId: string, id: string) =>
     request(`${household(householdId)}/transactions/${id}/restore`, {
       method: 'POST',
@@ -50,4 +79,6 @@ export const queryKeys = {
   categories: (householdId: string) => ['categories', householdId] as const,
   periods: (householdId: string) => ['periods', householdId] as const,
   period: (householdId: string, start: string) => ['periods', householdId, start] as const,
+  recurring: (householdId: string) => ['recurring', householdId] as const,
+  upcoming: (householdId: string) => ['upcoming', householdId] as const,
 };

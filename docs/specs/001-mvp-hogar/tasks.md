@@ -174,34 +174,34 @@ vencimientos y pagar uno con un importe distinto del previsto.
 
 ### Tests de la historia 2
 
-- [ ] T053 [P] [US2] Tests de `occurrencesBetween` (semanal, mensual, cada N meses,
+- [x] T053 [P] [US2] Tests de `occurrencesBetween` (semanal, mensual, cada N meses,
       anual, día 31 en meses cortos, 29 de febrero, inicio y fin) en
       `packages/domain/src/recurrence.test.ts`
-- [ ] T054 [P] [US2] Tests de `upcoming` (30 días, atrasados, resueltos excluidos) en
+- [x] T054 [P] [US2] Tests de `upcoming` (30 días, atrasados, resueltos excluidos) en
       `packages/domain/src/upcoming.test.ts`
-- [ ] T055 [P] [US2] Tests de pagos recurrentes: crear, editar (solo futuros), desactivar,
+- [x] T055 [P] [US2] Tests de pagos recurrentes: crear, editar (solo futuros), desactivar,
       borrar conservando movimientos, pagar con importe real, omitir, doble pago
       simultáneo crea un solo gasto, permisos y otro hogar en
       `apps/server/test/recurring.test.ts`
 
 ### Implementación de la historia 2
 
-- [ ] T056 [P] [US2] Implementar `occurrencesBetween` en
+- [x] T056 [P] [US2] Implementar `occurrencesBetween` en
       `packages/domain/src/recurrence.ts`
-- [ ] T057 [P] [US2] Implementar `upcoming` en `packages/domain/src/upcoming.ts`
-- [ ] T058 [P] [US2] Esquemas zod de pagos recurrentes y vencimientos en
+- [x] T057 [P] [US2] Implementar `upcoming` en `packages/domain/src/upcoming.ts`
+- [x] T058 [P] [US2] Esquemas zod de pagos recurrentes y vencimientos en
       `packages/api/src/schemas/recurring.ts`
-- [ ] T059 [US2] Tablas `recurring_rules` (con `CHECK` por frecuencia) y `occurrences`
+- [x] T059 [US2] Tablas `recurring_rules` (con `CHECK` por frecuencia) y `occurrences`
       (clave `(recurring_id, due_date)`) y migración en `apps/server/src/db/schema.ts`
-- [ ] T060 [US2] Rutas de pagos recurrentes en `apps/server/src/routes/recurring.ts`
-- [ ] T061 [US2] `GET /occurrences` y `pay`/`skip` en una transacción en
-      `apps/server/src/routes/occurrences.ts`
-- [ ] T062 [US2] Pantallas de lista, alta y edición en
+- [x] T060 [US2] Rutas de pagos recurrentes en `apps/server/src/routes/recurring.ts`
+- [x] T061 [US2] `GET /upcoming` y `pay`/`skip` en una transacción en
+      `apps/server/src/routes/recurring.ts`
+- [x] T062 [US2] Pantallas de lista, alta y edición en
       `apps/mobile/app/(app)/recurring/`
-- [ ] T063 [US2] "Próximos pagos" en la pantalla "Mes" en
+- [x] T063 [US2] "Próximos pagos" en la pantalla "Mes" en
       `apps/mobile/app/(app)/index.tsx`
-- [ ] T064 [US2] Pagar u omitir un vencimiento en
-      `apps/mobile/app/(app)/occurrence/[id].tsx`
+- [x] T064 [US2] Pagar u omitir un vencimiento en
+      `apps/mobile/app/(app)/occurrence/[ruleId]/[dueDate].tsx`
 
 **Punto de control**: historias 1 y 2 funcionan; RF-022…RF-028 cubiertos.
 

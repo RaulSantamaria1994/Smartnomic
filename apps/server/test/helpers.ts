@@ -19,6 +19,9 @@ export const TEST_DATABASE_URL =
 export const TEST_ORIGIN = 'http://localhost:3000';
 export const TEST_PASSWORD = 'contrasena-de-prueba';
 
+/** Hora fija de los tests: martes 27 de octubre de 2026, 11:00 en Madrid. */
+export const TEST_NOW = new Date('2026-10-27T10:00:00Z');
+
 export interface TestContext {
   db: Database;
   app: FastifyInstance;
@@ -31,7 +34,7 @@ export interface TestContext {
  * de otro (ver vitest.config.ts) porque comparten la base de datos.
  */
 export function useTestServer(
-  options: { authRateLimit?: AuthRateLimit; trustProxy?: boolean } = {},
+  options: { authRateLimit?: AuthRateLimit; trustProxy?: boolean; now?: () => Date } = {},
 ) {
   const context = {} as TestContext;
   let close: () => Promise<void>;
@@ -54,6 +57,7 @@ export function useTestServer(
     context.app = await buildServer({
       api: context.api,
       authRateLimit: options.authRateLimit ?? { max: 1000, timeWindow: '1 minute' },
+      now: options.now ?? (() => TEST_NOW),
       ...(options.trustProxy !== undefined && { trustProxy: options.trustProxy }),
     });
   });

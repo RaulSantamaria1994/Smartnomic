@@ -7,5 +7,7 @@ export * from './ids';
 export * from './money';
 export * from './periods';
 export * from './permissions';
+export * from './recurrence';
 export * from './result';
 export * from './summary';
+export * from './upcoming';

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  describeSchedule,
   formatAmountInput,
   formatDay,
+  formatDueDate,
   formatMoney,
   formatPeriod,
   formatShortDate,
@@ -58,5 +60,36 @@ describe('formatPeriod', () => {
 
   it('con otro día de inicio, las dos fechas', () => {
     expect(formatPeriod({ start: '2026-10-25', end: '2026-11-24' }, 25)).toBe('25 oct – 24 nov');
+  });
+});
+
+describe('describeSchedule', () => {
+  const base = { interval: 1, dayOfMonth: null, monthOfYear: null, weekday: null };
+
+  it('describe cada frecuencia', () => {
+    expect(describeSchedule({ ...base, frequency: 'monthly', dayOfMonth: 1 })).toBe(
+      'Cada mes, el día 1',
+    );
+    expect(describeSchedule({ ...base, frequency: 'monthly', interval: 3, dayOfMonth: 15 })).toBe(
+      'Cada 3 meses, el día 15',
+    );
+    expect(describeSchedule({ ...base, frequency: 'yearly', dayOfMonth: 15, monthOfYear: 3 })).toBe(
+      'Cada año, el 15 de marzo',
+    );
+    expect(describeSchedule({ ...base, frequency: 'weekly', weekday: 5 })).toBe(
+      'Cada semana, los viernes',
+    );
+    expect(describeSchedule({ ...base, frequency: 'weekly', interval: 2, weekday: 6 })).toBe(
+      'Cada 2 semanas, los sábados',
+    );
+  });
+});
+
+describe('formatDueDate', () => {
+  it('usa hoy, mañana y ayer, y si no la fecha', () => {
+    expect(formatDueDate('2026-10-27', '2026-10-27')).toBe('Hoy');
+    expect(formatDueDate('2026-10-28', '2026-10-27')).toBe('Mañana');
+    expect(formatDueDate('2026-10-26', '2026-10-27')).toBe('Ayer');
+    expect(formatDueDate('2026-11-01', '2026-10-27')).toBe('1 de noviembre');
   });
 });

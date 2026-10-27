@@ -1,4 +1,4 @@
-import { ROLES, TRANSACTION_KINDS } from '@smartnomic/domain';
+import { FREQUENCIES, ROLES, TRANSACTION_KINDS } from '@smartnomic/domain';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -9,6 +9,7 @@ import {
   index,
   pgEnum,
   pgTable,
+  primaryKey,
   smallint,
   text,
   timestamp,
@@ -200,5 +201,91 @@ export const transactions = pgTable(
     check('transactions_amount_check', sql`${table.amountCents} > 0`),
     check('transactions_note_check', sql`${table.note} IS NULL OR length(${table.note}) <= 500`),
     index('transactions_household_date_idx').on(table.householdId, table.date),
+  ],
+);
+
+// ---------------------------------------------------------------------------------------
+// Pagos recurrentes y vencimientos (especificación 001, historia 2). Los vencimientos
+// pendientes se calculan con el dominio; solo se guardan los pagados u omitidos.
+// ---------------------------------------------------------------------------------------
+
+export const frequency = pgEnum('frequency', FREQUENCIES);
+
+export const recurringRules = pgTable(
+  'recurring_rules',
+  {
+    /** UUIDv7 que genera la app: crear dos veces la misma regla no la duplica. */
+    id: uuid('id').primaryKey(),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    kind: transactionKind('kind').notNull(),
+    name: text('name').notNull(),
+    amountCents: bigint('amount_cents', { mode: 'number' }).notNull(),
+    categoryId: uuid('category_id').notNull(),
+    frequency: frequency('frequency').notNull(),
+    interval: smallint('interval').notNull().default(1),
+    dayOfMonth: smallint('day_of_month'),
+    monthOfYear: smallint('month_of_year'),
+    weekday: smallint('weekday'),
+    startDate: date('start_date', { mode: 'string' }).notNull(),
+    endDate: date('end_date', { mode: 'string' }),
+    remindDaysBefore: smallint('remind_days_before').notNull().default(1),
+    active: boolean('active').notNull().default(true),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    foreignKey({
+      name: 'recurring_rules_category_fk',
+      columns: [table.categoryId, table.householdId, table.kind],
+      foreignColumns: [categories.id, categories.householdId, categories.kind],
+    }).onDelete('no action'),
+    check('recurring_rules_amount_check', sql`${table.amountCents} > 0`),
+    check('recurring_rules_name_check', sql`length(trim(${table.name})) BETWEEN 1 AND 60`),
+    check('recurring_rules_interval_check', sql`${table.interval} BETWEEN 1 AND 12`),
+    check('recurring_rules_remind_check', sql`${table.remindDaysBefore} IN (0, 1, 3, 7)`),
+    check(
+      'recurring_rules_end_check',
+      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
+    ),
+    // Cada frecuencia usa sus campos de día y deja los demás vacíos.
+    check(
+      'recurring_rules_days_check',
+      sql`(${table.frequency} = 'weekly' AND ${table.weekday} BETWEEN 0 AND 6 AND ${table.dayOfMonth} IS NULL AND ${table.monthOfYear} IS NULL)
+        OR (${table.frequency} = 'monthly' AND ${table.dayOfMonth} BETWEEN 1 AND 31 AND ${table.weekday} IS NULL AND ${table.monthOfYear} IS NULL)
+        OR (${table.frequency} = 'yearly' AND ${table.dayOfMonth} BETWEEN 1 AND 31 AND ${table.monthOfYear} BETWEEN 1 AND 12 AND ${table.weekday} IS NULL)`,
+    ),
+    index('recurring_rules_household_idx').on(table.householdId),
+  ],
+);
+
+export const occurrenceStatus = pgEnum('occurrence_status', ['paid', 'skipped']);
+
+export const occurrences = pgTable(
+  'occurrences',
+  {
+    // Al borrar la regla se borran sus vencimientos; los movimientos se conservan (RF-027).
+    recurringId: uuid('recurring_id')
+      .notNull()
+      .references(() => recurringRules.id, { onDelete: 'cascade' }),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    dueDate: date('due_date', { mode: 'string' }).notNull(),
+    status: occurrenceStatus('status').notNull(),
+    transactionId: uuid('transaction_id').references(() => transactions.id, {
+      onDelete: 'set null',
+    }),
+    resolvedBy: uuid('resolved_by').references(() => members.id, { onDelete: 'set null' }),
+    resolvedAt: instant('resolved_at').notNull().defaultNow(),
+  },
+  (table) => [
+    // Un vencimiento se resuelve una sola vez: dos pagos a la vez no crean dos gastos.
+    primaryKey({ name: 'occurrences_pkey', columns: [table.recurringId, table.dueDate] }),
+    check(
+      'occurrences_skipped_check',
+      sql`${table.status} = 'paid' OR ${table.transactionId} IS NULL`,
+    ),
   ],
 );
