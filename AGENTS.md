@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`**. Fase 1 terminada; fase 2 hecha hasta T023.
-La siguiente tarea es T024 (envío de emails), pendiente de elegir proveedor. No inventes comandos, rutas
+Funcionalidad en curso: **`001-mvp-hogar`**. Fase 1 terminada; fase 2 hecha hasta T024.
+La siguiente tarea es T025 (límite de peticiones). No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 
