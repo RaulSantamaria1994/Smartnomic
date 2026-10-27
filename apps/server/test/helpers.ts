@@ -1,11 +1,14 @@
-import { TIMEZONE_HEADER } from '@smartnomic/api';
-import { sql } from 'drizzle-orm';
+import { randomBytes } from 'node:crypto';
+import { meResponseSchema, TIMEZONE_HEADER, type MeResponse } from '@smartnomic/api';
+import { uuidV7 } from '@smartnomic/domain';
+import { eq, sql } from 'drizzle-orm';
 import type { FastifyInstance, LightMyRequestResponse } from 'fastify';
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 import { createApi, type Api } from '../src/api';
 import type { AuthRateLimit } from '../src/auth';
 import { connectDatabase, type Database } from '../src/db/client';
 import { runMigrations } from '../src/db/migrate';
+import { members } from '../src/db/schema';
 import { buildServer } from '../src/server';
 
 /** Base de datos de los tests: la de docker-compose.yml o la del servicio del CI. */
@@ -108,4 +111,33 @@ export function sessionCookie(response: LightMyRequestResponse): string {
     .find((c) => c?.includes('session_token'));
   if (!session) throw new Error('La respuesta no trae la cookie de sesión');
   return session;
+}
+
+/** Hogar y rol del usuario, según `GET /api/me`. */
+export async function me(app: FastifyInstance, user: TestUser): Promise<MeResponse> {
+  const response = await app.inject({
+    method: 'GET',
+    url: '/api/me',
+    headers: { cookie: user.cookie },
+  });
+  return meResponseSchema.parse(response.json());
+}
+
+/** UUIDv7 nuevo, como los que genera la app. */
+export function newId(): string {
+  return uuidV7(Date.now(), randomBytes(10));
+}
+
+/** Mete a `guest` en el hogar de `owner` con el rol indicado. */
+export async function joinHousehold(
+  db: Database,
+  owner: TestUser,
+  guest: TestUser,
+  role: 'editor' | 'viewer',
+): Promise<void> {
+  const [ownerMember] = await db.select().from(members).where(eq(members.userId, owner.id));
+  await db.delete(members).where(eq(members.userId, guest.id));
+  await db
+    .insert(members)
+    .values({ householdId: ownerMember!.householdId, userId: guest.id, role });
 }

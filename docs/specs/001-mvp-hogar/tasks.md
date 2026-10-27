@@ -122,40 +122,40 @@ comprobar que el resumen cuadra al céntimo y que se puede navegar entre periodo
 
 ### Tests de la historia 1
 
-- [ ] T037 [P] [US1] Tests de `periodOf` y `shiftPeriod` (inicio 1 y 25, 28 en febrero,
+- [x] T037 [P] [US1] Tests de `periodOf` y `shiftPeriod` (inicio 1 y 25, 28 en febrero,
       cambio de año) en `packages/domain/src/periods.test.ts`
-- [ ] T038 [P] [US1] Tests de `summarize` (1.800 € − 1.234,56 € = 565,44 €; vacío; solo
+- [x] T038 [P] [US1] Tests de `summarize` (1.800 € − 1.234,56 € = 565,44 €; vacío; solo
       ingresos) en `packages/domain/src/summary.test.ts`
-- [ ] T039 [P] [US1] Tests de movimientos: crear, editar, borrar, restaurar, idempotencia
+- [x] T039 [P] [US1] Tests de movimientos: crear, editar, borrar, restaurar, idempotencia
       por `id`, importes inválidos, categoría de otro hogar, lector sin permiso y acceso
       desde otro hogar en `apps/server/test/transactions.test.ts`
-- [ ] T040 [P] [US1] Tests del resumen de periodo (totales en SQL iguales a la suma de la
+- [x] T040 [P] [US1] Tests del resumen de periodo (totales en SQL iguales a la suma de la
       lista, movimientos borrados excluidos) en `apps/server/test/periods.test.ts`
 
 ### Implementación de la historia 1
 
-- [ ] T041 [P] [US1] Implementar `periodOf` y `shiftPeriod` en
+- [x] T041 [P] [US1] Implementar `periodOf` y `shiftPeriod` en
       `packages/domain/src/periods.ts`
-- [ ] T042 [P] [US1] Implementar `summarize` en `packages/domain/src/summary.ts`
-- [ ] T043 [P] [US1] Esquemas zod de categorías, movimientos y periodo en
+- [x] T042 [P] [US1] Implementar `summarize` en `packages/domain/src/summary.ts`
+- [x] T043 [P] [US1] Esquemas zod de categorías, movimientos y periodo en
       `packages/api/src/schemas/`
-- [ ] T044 [US1] Tablas `categories` y `transactions` (índice `(household_id, date)`,
+- [x] T044 [US1] Tablas `categories` y `transactions` (índice `(household_id, date)`,
       `amount_cents > 0`, `deleted_at`) y migración en `apps/server/src/db/schema.ts`
-- [ ] T045 [US1] Crear las categorías predefinidas al crear un hogar en
+- [x] T045 [US1] Crear las categorías predefinidas al crear un hogar en
       `apps/server/src/routes/me.ts`
-- [ ] T046 [US1] `GET /api/households/:id/categories` en
+- [x] T046 [US1] `GET /api/households/:id/categories` en
       `apps/server/src/routes/categories.ts`
-- [ ] T047 [US1] `PUT` y `DELETE /transactions/:txId` y `POST …/restore` en
+- [x] T047 [US1] `PUT` y `DELETE /transactions/:txId` y `POST …/restore` en
       `apps/server/src/routes/transactions.ts`
-- [ ] T048 [US1] `GET /api/households/:id/periods/:start` con totales en SQL en
+- [x] T048 [US1] `GET /api/households/:id/periods/:start` con totales en SQL en
       `apps/server/src/routes/periods.ts`
-- [ ] T049 [US1] Pantalla "Mes" (resumen, lista, cambiar de periodo, estado vacío) en
+- [x] T049 [US1] Pantalla "Mes" (resumen, lista, cambiar de periodo, estado vacío) en
       `apps/mobile/app/(app)/index.tsx`
-- [ ] T050 [US1] Apuntar en 3 toques (importe → categoría → guardar, fecha de hoy, id
+- [x] T050 [US1] Apuntar en 3 toques (importe → categoría → guardar, fecha de hoy, id
       UUIDv7, conserva lo escrito si falla) en `apps/mobile/app/(app)/new.tsx`
-- [ ] T051 [US1] Editar y borrar con "Deshacer" en
+- [x] T051 [US1] Editar y borrar con "Deshacer" en
       `apps/mobile/app/(app)/transaction/[id].tsx`
-- [ ] T052 [US1] Caché persistida de TanStack Query solo en nativo en
+- [x] T052 [US1] Caché persistida de TanStack Query solo en nativo en
       `apps/mobile/src/cache/cache.native.ts` y `cache.web.ts`; aviso de "sin conexión" al
       guardar
 

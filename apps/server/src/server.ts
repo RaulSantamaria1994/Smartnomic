@@ -8,8 +8,11 @@ import { registerAuthRoutes, type Auth, type AuthRateLimit } from './auth';
 import type { Database } from './db/client';
 import { registerErrorHandler } from './plugins/errors';
 import { createHouseholdAccess } from './plugins/household-access';
+import { registerCategoryRoutes } from './routes/categories';
 import { registerHouseholdRoutes } from './routes/households';
 import { registerMeRoutes } from './routes/me';
+import { registerPeriodRoutes } from './routes/periods';
+import { registerTransactionRoutes } from './routes/transactions';
 
 export interface ServerOptions {
   logger?: boolean;
@@ -39,7 +42,11 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
   registerErrorHandler(app);
 
   if (options.corsOrigins && options.corsOrigins.length > 0) {
-    await app.register(cors, { origin: options.corsOrigins, credentials: true });
+    await app.register(cors, {
+      origin: options.corsOrigins,
+      credentials: true,
+      methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    });
   }
   // Solo se limitan las rutas que lo piden en su configuración.
   await app.register(rateLimit, { global: false });
@@ -54,6 +61,9 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     });
     registerMeRoutes(app, { db, access });
     registerHouseholdRoutes(app, { access });
+    registerCategoryRoutes(app, { db, access });
+    registerTransactionRoutes(app, { db, access });
+    registerPeriodRoutes(app, { db, access });
   }
 
   const webRoot = options.webRoot && existsSync(options.webRoot) ? options.webRoot : undefined;

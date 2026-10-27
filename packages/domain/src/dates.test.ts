@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addDays,
+  civilDateIn,
   addMonths,
   compareDates,
   dayOfWeek,
@@ -127,5 +128,19 @@ describe('dayOfWeek', () => {
     expect(dayOfWeek('2026-10-27')).toBe(2); // martes
     expect(dayOfWeek('2026-11-01')).toBe(0); // domingo
     expect(dayOfWeek('2000-01-01')).toBe(6); // sábado
+  });
+});
+
+describe('civilDateIn', () => {
+  it('da la fecha de calendario en la zona horaria indicada', () => {
+    const instant = new Date('2026-10-31T23:30:00Z');
+    expect(civilDateIn(instant, 'UTC')).toBe('2026-10-31');
+    expect(civilDateIn(instant, 'Europe/Madrid')).toBe('2026-11-01');
+    expect(civilDateIn(instant, 'Atlantic/Canary')).toBe('2026-10-31');
+    expect(civilDateIn(instant, 'America/New_York')).toBe('2026-10-31');
+  });
+
+  it('un gasto a las 23:50 del último día cuenta en ese día', () => {
+    expect(civilDateIn(new Date('2026-10-31T22:50:00Z'), 'Europe/Madrid')).toBe('2026-10-31');
   });
 });

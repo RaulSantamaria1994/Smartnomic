@@ -1,14 +1,18 @@
-import { ROLES } from '@smartnomic/domain';
+import { ROLES, TRANSACTION_KINDS } from '@smartnomic/domain';
 import { sql } from 'drizzle-orm';
 import {
+  bigint,
   boolean,
   check,
+  date,
+  foreignKey,
   index,
   pgEnum,
   pgTable,
   smallint,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
@@ -131,5 +135,70 @@ export const members = pgTable(
       .on(table.householdId)
       .where(sql`${table.role} = 'owner'`),
     index('members_household_id_idx').on(table.householdId),
+  ],
+);
+
+// ---------------------------------------------------------------------------------------
+// Categorías y movimientos (especificación 001, historia 1).
+// ---------------------------------------------------------------------------------------
+
+export const transactionKind = pgEnum('transaction_kind', TRANSACTION_KINDS);
+
+export const categories = pgTable(
+  'categories',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    kind: transactionKind('kind').notNull(),
+    name: text('name').notNull(),
+    icon: text('icon').notNull(),
+    color: text('color').notNull(),
+    /** Orden en que se muestran dentro de su tipo. */
+    position: smallint('position').notNull().default(0),
+    archivedAt: instant('archived_at'),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    // Destino de la clave compuesta de `transactions`: misma categoría, hogar y tipo.
+    unique('categories_id_household_kind_unique').on(table.id, table.householdId, table.kind),
+    // Sin nombres repetidos por hogar y tipo entre las categorías en uso.
+    uniqueIndex('categories_active_name_unique')
+      .on(table.householdId, table.kind, sql`lower(${table.name})`)
+      .where(sql`${table.archivedAt} IS NULL`),
+    check('categories_name_check', sql`length(trim(${table.name})) BETWEEN 1 AND 40`),
+  ],
+);
+
+export const transactions = pgTable(
+  'transactions',
+  {
+    /** UUIDv7 que genera la app, para que reenviar no duplique (art. V.5). */
+    id: uuid('id').primaryKey(),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    kind: transactionKind('kind').notNull(),
+    // Céntimos enteros (art. III.1). `number` es exacto hasta 2^53, muy por encima del máximo.
+    amountCents: bigint('amount_cents', { mode: 'number' }).notNull(),
+    date: date('date', { mode: 'string' }).notNull(),
+    categoryId: uuid('category_id').notNull(),
+    /** Quién lo apuntó. Queda vacío si esa persona sale del hogar. */
+    memberId: uuid('member_id').references(() => members.id, { onDelete: 'set null' }),
+    note: text('note'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+    deletedAt: instant('deleted_at'),
+  },
+  (table) => [
+    foreignKey({
+      name: 'transactions_category_fk',
+      columns: [table.categoryId, table.householdId, table.kind],
+      foreignColumns: [categories.id, categories.householdId, categories.kind],
+    }).onDelete('no action'),
+    check('transactions_amount_check', sql`${table.amountCents} > 0`),
+    check('transactions_note_check', sql`${table.note} IS NULL OR length(${table.note}) <= 500`),
+    index('transactions_household_date_idx').on(table.householdId, table.date),
   ],
 );

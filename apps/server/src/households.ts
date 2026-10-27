@@ -1,7 +1,8 @@
 import { DEFAULT_TIMEZONE, timeZoneSchema } from '@smartnomic/api';
-import { eq, TransactionRollbackError } from 'drizzle-orm';
+import { DEFAULT_CATEGORIES } from '@smartnomic/domain';
+import { count, eq, TransactionRollbackError } from 'drizzle-orm';
 import type { Database } from './db/client';
-import { households, members } from './db/schema';
+import { categories, households, members } from './db/schema';
 
 export type HouseholdRow = typeof households.$inferSelect;
 export type MemberRow = typeof members.$inferSelect;
@@ -52,6 +53,7 @@ export async function ensureHousehold(
         tx.rollback();
         return null;
       }
+      await tx.insert(categories).values(defaultCategoryRows(household.id));
       return { household, member };
     })
     .catch((error: unknown) => {
@@ -68,4 +70,21 @@ export async function ensureHousehold(
 function householdName(userName: string): string {
   const name = userName.trim();
   return name ? `Hogar de ${name}` : 'Mi hogar';
+}
+
+/**
+ * Crea las categorías predefinidas si el hogar no tiene ninguna. Cubre los hogares
+ * creados antes de que existieran las categorías.
+ */
+export async function ensureDefaultCategories(db: Database, householdId: string): Promise<void> {
+  const [row] = await db
+    .select({ total: count() })
+    .from(categories)
+    .where(eq(categories.householdId, householdId));
+  if ((row?.total ?? 0) > 0) return;
+  await db.insert(categories).values(defaultCategoryRows(householdId)).onConflictDoNothing();
+}
+
+function defaultCategoryRows(householdId: string) {
+  return DEFAULT_CATEGORIES.map((category, position) => ({ ...category, householdId, position }));
 }

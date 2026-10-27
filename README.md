@@ -35,6 +35,10 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 - `/api/auth/*`: registro, inicio y cierre de sesión y recuperar la contraseña (Better
   Auth). Las peticiones POST tienen un límite de 10 por minuto e IP.
 - `GET /api/me`: usuario, hogar y rol. `GET /api/households/:id`: datos del hogar.
+- `GET /api/households/:id/categories`: categorías del hogar.
+- `PUT|DELETE /api/households/:id/transactions/:txId` y `POST …/restore`: apuntar o
+  editar (idempotente por el UUIDv7 que genera la app), borrar y deshacer.
+- `GET /api/households/:id/periods/:start`: resumen y movimientos de un periodo.
 - Si existe `apps/mobile/dist` (`pnpm --filter @smartnomic/mobile export:web`), sirve la
   web en `/`, en el mismo origen que la API.
 - Variables (ver `apps/server/.env.example`):
@@ -82,6 +86,10 @@ pnpm --filter @smartnomic/mobile start                                    # otra
 Sin sesión, la app abre la pantalla de entrar; desde ahí se puede crear una cuenta o
 recuperar la contraseña. Al registrarse se crea el hogar con la zona horaria del
 dispositivo.
+
+Con sesión, la pantalla principal es el **mes**: ingresos, gastos y balance del periodo,
+la lista de movimientos y el botón **Apuntar**. En Android los últimos datos se guardan
+para verlos sin conexión.
 
 ## Publicar el servidor (Railway)
 

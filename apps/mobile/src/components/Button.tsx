@@ -24,7 +24,7 @@ export function Button({ label, onPress, variant = 'primary', loading, disabled 
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={colors.onPrimary} />
+        <ActivityIndicator color={variant === 'primary' ? colors.onPrimary : colors.primary} />
       ) : (
         <Text style={variant === 'primary' ? styles.primaryText : styles.linkText}>{label}</Text>
       )}
