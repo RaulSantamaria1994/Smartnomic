@@ -11,6 +11,7 @@ import { createHouseholdAccess } from './plugins/household-access';
 import { registerCategoryRoutes } from './routes/categories';
 import { registerHouseholdRoutes } from './routes/households';
 import { registerMeRoutes } from './routes/me';
+import { registerMemberRoutes } from './routes/members';
 import { registerPeriodRoutes } from './routes/periods';
 import { registerRecurringRoutes } from './routes/recurring';
 import { registerTransactionRoutes } from './routes/transactions';
@@ -64,6 +65,7 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     });
     registerMeRoutes(app, { db, access });
     registerHouseholdRoutes(app, { access });
+    registerMemberRoutes(app, { db, access });
     registerCategoryRoutes(app, { db, access });
     registerTransactionRoutes(app, { db, access });
     registerPeriodRoutes(app, { db, access });

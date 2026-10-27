@@ -8,6 +8,7 @@ export * from './money';
 export * from './periods';
 export * from './permissions';
 export * from './recurrence';
+export * from './reminders';
 export * from './result';
 export * from './summary';
 export * from './upcoming';

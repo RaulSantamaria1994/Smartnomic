@@ -39,10 +39,11 @@ export function useRecurring(householdId: string | undefined) {
   });
 }
 
-export function useUpcoming(householdId: string | undefined) {
+/** Vencimientos pendientes: los de los próximos `days` días y los atrasados. */
+export function useUpcoming(householdId: string | undefined, days = 30) {
   return useQuery({
-    queryKey: queryKeys.upcoming(householdId ?? ''),
-    queryFn: () => api.upcoming(householdId!),
+    queryKey: queryKeys.upcoming(householdId ?? '', days),
+    queryFn: () => api.upcoming(householdId!, days),
     enabled: Boolean(householdId),
   });
 }

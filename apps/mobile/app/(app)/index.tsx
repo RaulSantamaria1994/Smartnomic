@@ -14,9 +14,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '../../src/api/http';
-import { clearCache } from '../../src/cache/query-client';
 import { Button } from '../../src/components/Button';
 import { Message } from '../../src/components/Message';
+import { ReminderBanners } from '../../src/components/ReminderBanners';
 import {
   formatDay,
   formatDueDate,
@@ -33,7 +33,7 @@ import {
   useUpcoming,
 } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
-import { authClient } from '../../src/session/auth-client';
+import { signOut } from '../../src/session/sign-out';
 import { colors, spacing } from '../../src/theme';
 
 /** Pantalla «Mes»: resumen del periodo, lista de movimientos y botón para apuntar. */
@@ -73,11 +73,6 @@ export default function Month() {
   const offline = period.error instanceof ApiError && period.error.code === 'network';
   const data = period.data;
 
-  async function signOut() {
-    await authClient.signOut();
-    await clearCache(queryClient);
-  }
-
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -94,6 +89,17 @@ export default function Month() {
           />
         }
       >
+        <View style={styles.topBar}>
+          <Text style={styles.appName}>{es.appName}</Text>
+          <Pressable
+            onPress={() => router.push('/account')}
+            accessibilityRole="link"
+            accessibilityLabel={es.settings.title}
+            style={styles.sectionAction}
+          >
+            <Text style={styles.link}>{es.settings.open}</Text>
+          </Pressable>
+        </View>
         <View style={styles.header}>
           <Pressable
             onPress={() => move(-1)}
@@ -117,6 +123,13 @@ export default function Month() {
         </View>
 
         {offline && <Message text={es.month.offline} />}
+
+        <ReminderBanners
+          occurrences={upcoming.data?.occurrences}
+          today={upcoming.data?.today}
+          hasRules={(rules.data?.rules.length ?? 0) > 0}
+          remindersEnabled={me.data?.member.remindersEnabled ?? true}
+        />
 
         <View style={styles.summary}>
           <Total label={es.month.income} cents={data?.summary.incomeCents} color={colors.success} />
@@ -164,7 +177,7 @@ export default function Month() {
           </View>
         )}
 
-        <Button variant="link" label={es.auth.signOut} onPress={signOut} />
+        <Button variant="link" label={es.auth.signOut} onPress={() => void signOut(queryClient)} />
       </ScrollView>
 
       {canWrite && (
@@ -333,6 +346,8 @@ const styles = StyleSheet.create({
     maxWidth: 640,
     alignSelf: 'center',
   },
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  appName: { fontSize: 15, fontWeight: '700', color: colors.muted },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   arrow: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   arrowText: { fontSize: 32, color: colors.primary },

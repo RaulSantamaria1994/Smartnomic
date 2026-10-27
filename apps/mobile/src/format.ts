@@ -148,6 +148,11 @@ export function formatDueDate(dueDate: DateString, today: DateString): string {
   if (days === 0) return es.recurring.today;
   if (days === 1) return es.recurring.tomorrow;
   if (days === -1) return es.recurring.yesterday;
-  const { day, month } = parseDate(dueDate);
+  return formatDayMonth(dueDate);
+}
+
+/** «1 de noviembre». */
+export function formatDayMonth(date: DateString): string {
+  const { day, month } = parseDate(date);
   return `${day} de ${monthName(month)}`;
 }
