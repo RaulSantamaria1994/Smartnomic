@@ -88,3 +88,66 @@ export function formatPeriod(period: Period, monthStartDay: number): string {
 export function amountErrorMessage(error: AmountError): string {
   return es.transaction.amountErrors[error];
 }
+
+const MONTHS = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+] as const;
+
+/** 0 = domingo … 6 = sábado. */
+export const WEEKDAYS = [
+  'domingo',
+  'lunes',
+  'martes',
+  'miércoles',
+  'jueves',
+  'viernes',
+  'sábado',
+] as const;
+
+export function monthName(month: number): string {
+  return MONTHS[month - 1] ?? '';
+}
+
+interface RuleSchedule {
+  frequency: 'weekly' | 'monthly' | 'yearly';
+  interval: number;
+  dayOfMonth: number | null;
+  monthOfYear: number | null;
+  weekday: number | null;
+}
+
+/** «Cada mes, el día 1», «Cada 3 meses, el día 15», «Cada año, el 15 de marzo»… */
+export function describeSchedule(rule: RuleSchedule): string {
+  const every = (singular: string, plural: string) =>
+    rule.interval === 1 ? `Cada ${singular}` : `Cada ${rule.interval} ${plural}`;
+  if (rule.frequency === 'weekly') {
+    const day = WEEKDAYS[rule.weekday ?? 0]!;
+    const plural = day.endsWith('s') ? day : `${day}s`;
+    return `${every('semana', 'semanas')}, los ${plural}`;
+  }
+  if (rule.frequency === 'monthly') return `${every('mes', 'meses')}, el día ${rule.dayOfMonth}`;
+  return `${every('año', 'años')}, el ${rule.dayOfMonth} de ${monthName(rule.monthOfYear ?? 1)}`;
+}
+
+/** «Hoy», «Mañana», «Ayer» o «1 de noviembre». */
+export function formatDueDate(dueDate: DateString, today: DateString): string {
+  const days = Math.round(
+    (toUtcDate(dueDate).getTime() - toUtcDate(today).getTime()) / (24 * 60 * 60 * 1000),
+  );
+  if (days === 0) return es.recurring.today;
+  if (days === 1) return es.recurring.tomorrow;
+  if (days === -1) return es.recurring.yesterday;
+  const { day, month } = parseDate(dueDate);
+  return `${day} de ${monthName(month)}`;
+}

@@ -15,6 +15,13 @@
       "when": 1793117248914,
       "tag": "0001_transactions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793119500281,
+      "tag": "0002_recurring",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import type { Category, Transaction } from '@smartnomic/api';
+import type { Category, RecurringRule, Transaction, UpcomingOccurrenceDto } from '@smartnomic/api';
 import { periodOf, shiftPeriod, type DateString } from '@smartnomic/domain';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -17,8 +17,21 @@ import { ApiError } from '../../src/api/http';
 import { clearCache } from '../../src/cache/query-client';
 import { Button } from '../../src/components/Button';
 import { Message } from '../../src/components/Message';
-import { formatDay, formatMoney, formatPeriod, formatSignedMoney } from '../../src/format';
-import { currentPeriodStart, useCategories, useMe, usePeriod } from '../../src/hooks/data';
+import {
+  formatDay,
+  formatDueDate,
+  formatMoney,
+  formatPeriod,
+  formatSignedMoney,
+} from '../../src/format';
+import {
+  currentPeriodStart,
+  useCategories,
+  useMe,
+  usePeriod,
+  useRecurring,
+  useUpcoming,
+} from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { colors, spacing } from '../../src/theme';
@@ -34,6 +47,8 @@ export default function Month() {
     (household ? currentPeriodStart(household.timezone, household.monthStartDay) : undefined);
   const period = usePeriod(household?.id, periodStart);
   const categories = useCategories(household?.id);
+  const upcoming = useUpcoming(household?.id);
+  const rules = useRecurring(household?.id);
   const canWrite = me.data?.member.role !== 'viewer';
 
   if (me.isPending) {
@@ -73,6 +88,8 @@ export default function Month() {
             onRefresh={() => {
               void period.refetch();
               void categories.refetch();
+              void upcoming.refetch();
+              void rules.refetch();
             }}
           />
         }
@@ -116,6 +133,14 @@ export default function Month() {
           />
         </View>
 
+        <Upcoming
+          items={upcoming.data?.occurrences}
+          today={upcoming.data?.today}
+          rules={rules.data?.rules}
+          categories={byId}
+          canResolve={canWrite}
+        />
+
         {period.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
         {period.error && !offline && !data && <Message text={period.error.message} />}
 
@@ -148,6 +173,85 @@ export default function Month() {
         </View>
       )}
     </SafeAreaView>
+  );
+}
+
+/** «Próximos pagos»: atrasados y de los próximos 30 días (RF-023). */
+function Upcoming({
+  items,
+  today,
+  rules,
+  categories,
+  canResolve,
+}: {
+  items: UpcomingOccurrenceDto[] | undefined;
+  today: string | undefined;
+  rules: RecurringRule[] | undefined;
+  categories: Map<string, Category>;
+  canResolve: boolean;
+}) {
+  if (!items || !today || !rules) return null;
+  const byId = new Map(rules.map((r) => [r.id, r]));
+  return (
+    <View style={styles.upcoming}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle} accessibilityRole="header">
+          {es.recurring.upcomingTitle}
+        </Text>
+        <Pressable
+          onPress={() => router.push('/recurring')}
+          accessibilityRole="link"
+          accessibilityLabel={es.recurring.title}
+          style={styles.sectionAction}
+        >
+          <Text style={styles.link}>{es.recurring.manage}</Text>
+        </Pressable>
+      </View>
+      {rules.length === 0 && (
+        <Text style={[styles.muted, styles.sectionNote]}>{es.recurring.empty}</Text>
+      )}
+      {rules.length > 0 && items.length === 0 && (
+        <Text style={[styles.muted, styles.sectionNote]}>{es.recurring.noUpcoming}</Text>
+      )}
+      {items.map((item) => {
+        const rule = byId.get(item.ruleId);
+        if (!rule) return null;
+        const category = categories.get(rule.categoryId);
+        const when = formatDueDate(item.dueDate, today);
+        return (
+          <Pressable
+            key={`${item.ruleId}-${item.dueDate}`}
+            disabled={!canResolve}
+            onPress={() => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)}
+            accessibilityRole={canResolve ? 'button' : 'text'}
+            accessibilityLabel={`${rule.name}, ${formatMoney(rule.amountCents)}, ${when}${item.overdue ? `, ${es.recurring.overdue}` : ''}`}
+            style={({ pressed }) => [
+              styles.row,
+              item.overdue && styles.overdueRow,
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={styles.icon}>{category?.icon ?? '•'}</Text>
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>{rule.name}</Text>
+              <Text
+                style={[styles.muted, item.overdue && { color: colors.error, fontWeight: '600' }]}
+              >
+                {item.overdue ? `${es.recurring.overdue} · ${when}` : when}
+              </Text>
+            </View>
+            <Text
+              style={[
+                styles.rowAmount,
+                { color: rule.kind === 'income' ? colors.success : colors.text },
+              ]}
+            >
+              {formatMoney(rule.amountCents)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
@@ -267,5 +371,29 @@ const styles = StyleSheet.create({
   rowText: { flex: 1, gap: 2 },
   rowTitle: { fontSize: 16, color: colors.text, fontWeight: '500' },
   rowAmount: { fontSize: 16, fontWeight: '600' },
+  upcoming: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingTop: spacing.sm,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: spacing.sm,
+  },
+  sectionAction: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
+  link: { color: colors.primary, fontSize: 15, fontWeight: '500' },
+  sectionNote: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: colors.text,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xs,
+  },
+  overdueRow: { backgroundColor: '#FDECEA' },
   fab: { position: 'absolute', right: spacing.md, bottom: spacing.lg, minWidth: 160 },
 });

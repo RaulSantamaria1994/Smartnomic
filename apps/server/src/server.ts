@@ -12,6 +12,7 @@ import { registerCategoryRoutes } from './routes/categories';
 import { registerHouseholdRoutes } from './routes/households';
 import { registerMeRoutes } from './routes/me';
 import { registerPeriodRoutes } from './routes/periods';
+import { registerRecurringRoutes } from './routes/recurring';
 import { registerTransactionRoutes } from './routes/transactions';
 
 export interface ServerOptions {
@@ -33,6 +34,8 @@ export interface ServerOptions {
   trustProxy?: boolean;
   /** Carpeta con la web exportada de Expo. Si existe, se sirve en `/`. */
   webRoot?: string;
+  /** Reloj del servidor. Los tests lo fijan (constitución, art. VII.5). */
+  now?: () => Date;
 }
 
 const DEFAULT_AUTH_RATE_LIMIT: AuthRateLimit = { max: 10, timeWindow: '1 minute' };
@@ -64,6 +67,7 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     registerCategoryRoutes(app, { db, access });
     registerTransactionRoutes(app, { db, access });
     registerPeriodRoutes(app, { db, access });
+    registerRecurringRoutes(app, { db, access, now: options.now ?? (() => new Date()) });
   }
 
   const webRoot = options.webRoot && existsSync(options.webRoot) ? options.webRoot : undefined;

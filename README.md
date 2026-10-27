@@ -39,6 +39,10 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 - `PUT|DELETE /api/households/:id/transactions/:txId` y `POST …/restore`: apuntar o
   editar (idempotente por el UUIDv7 que genera la app), borrar y deshacer.
 - `GET /api/households/:id/periods/:start`: resumen y movimientos de un periodo.
+- `GET|PUT|DELETE /api/households/:id/recurring[/:ruleId]`: pagos y cobros recurrentes.
+- `GET /api/households/:id/upcoming?days=30`: vencimientos atrasados y próximos.
+- `POST …/recurring/:ruleId/occurrences/:fecha/pay|skip`: pagar (crea el movimiento con
+  el importe real) u omitir un vencimiento.
 - Si existe `apps/mobile/dist` (`pnpm --filter @smartnomic/mobile export:web`), sirve la
   web en `/`, en el mismo origen que la API.
 - Variables (ver `apps/server/.env.example`):
@@ -88,7 +92,8 @@ recuperar la contraseña. Al registrarse se crea el hogar con la zona horaria de
 dispositivo.
 
 Con sesión, la pantalla principal es el **mes**: ingresos, gastos y balance del periodo,
-la lista de movimientos y el botón **Apuntar**. En Android los últimos datos se guardan
+los **próximos pagos** (con los atrasados), la lista de movimientos y el botón
+**Apuntar**. Desde «Próximos pagos → Gestionar» se dan de alta los pagos recurrentes. En Android los últimos datos se guardan
 para verlos sin conexión.
 
 ## Publicar el servidor (Railway)

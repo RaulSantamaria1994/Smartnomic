@@ -30,3 +30,19 @@ export function todayIn(timeZone: string): DateString {
 export function currentPeriodStart(timeZone: string, monthStartDay: number): DateString {
   return periodOf(todayIn(timeZone), monthStartDay).start;
 }
+
+export function useRecurring(householdId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.recurring(householdId ?? ''),
+    queryFn: () => api.recurring(householdId!),
+    enabled: Boolean(householdId),
+  });
+}
+
+export function useUpcoming(householdId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.upcoming(householdId ?? ''),
+    queryFn: () => api.upcoming(householdId!),
+    enabled: Boolean(householdId),
+  });
+}
