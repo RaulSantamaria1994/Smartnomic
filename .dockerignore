@@ -2,8 +2,10 @@
 **/.expo
 **/dist
 **/coverage
+**/.env
+**/.env.*
+!**/.env.example
 .git
-apps/mobile/*
-!apps/mobile/package.json
+apps/mobile/android
+apps/mobile/ios
 *.log
-.env*

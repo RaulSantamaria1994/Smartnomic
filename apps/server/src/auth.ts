@@ -2,7 +2,7 @@ import { expo } from '@better-auth/expo';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { fromNodeHeaders } from 'better-auth/node';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Database } from './db/client';
 import { accounts, sessions, users, verifications } from './db/schema';
 
@@ -25,13 +25,18 @@ export interface AuthOptions {
   sendResetPassword?: SendResetPassword;
   /** Se llama si falla un envío. Nunca recibe la dirección del destinatario. */
   onEmailError?: (error: unknown) => void;
+  /** Se llama tras registrarse un usuario, con las cabeceras de la petición. */
+  onUserCreated?: (
+    user: { id: string; name: string },
+    headers: Headers | undefined,
+  ) => Promise<void>;
 }
 
 /** Validez del enlace para restablecer la contraseña, en segundos. */
 export const RESET_PASSWORD_EXPIRES_IN = 60 * 60;
 
 export function createAuth(options: AuthOptions) {
-  const { sendResetPassword, onEmailError } = options;
+  const { sendResetPassword, onEmailError, onUserCreated } = options;
   return betterAuth({
     baseURL: options.baseURL,
     basePath: AUTH_BASE_PATH,
@@ -61,6 +66,15 @@ export function createAuth(options: AuthOptions) {
       ...(options.trustedOrigins ?? []),
     ],
     plugins: [expo()],
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user, context) => {
+            await onUserCreated?.(user, context?.headers);
+          },
+        },
+      },
+    },
     advanced: {
       useSecureCookies: options.production,
       // Constitución, art. IX.3.3: cookie HttpOnly, Secure y SameSite en la web.
@@ -76,33 +90,49 @@ export function createAuth(options: AuthOptions) {
 
 export type Auth = ReturnType<typeof createAuth>;
 
-/** Monta Better Auth en Fastify, traduciendo la petición a la API Fetch y de vuelta. */
-export function registerAuthRoutes(app: FastifyInstance, auth: Auth): void {
-  app.route({
-    method: ['GET', 'POST'],
-    url: `${AUTH_BASE_PATH}/*`,
-    async handler(request, reply) {
-      const url = new URL(request.url, `${request.protocol}://${request.host}`);
-      const body =
-        request.body === undefined || request.body === null
-          ? undefined
-          : JSON.stringify(request.body);
-      const response = await auth.handler(
-        new Request(url, {
-          method: request.method,
-          headers: fromNodeHeaders(request.headers),
-          ...(body !== undefined && { body }),
-        }),
-      );
+export interface AuthRateLimit {
+  /** Peticiones POST permitidas por IP en cada ventana. */
+  max: number;
+  /** Duración de la ventana, por ejemplo «1 minute». */
+  timeWindow: string;
+}
 
-      reply.status(response.status);
-      response.headers.forEach((value, key) => {
-        if (key.toLowerCase() !== 'set-cookie') reply.header(key, value);
-      });
-      // Varias cookies no se pueden unir en una sola cabecera.
-      const cookies = response.headers.getSetCookie();
-      if (cookies.length > 0) reply.header('set-cookie', cookies);
-      return reply.send(response.body ? await response.text() : null);
-    },
+/**
+ * Monta Better Auth en Fastify, traduciendo la petición a la API Fetch y de vuelta. Las
+ * peticiones POST (registro, entrar, recuperar la contraseña…) tienen límite por IP
+ * (constitución, art. VI.5); las GET, como consultar la sesión, no.
+ */
+export function registerAuthRoutes(
+  app: FastifyInstance,
+  auth: Auth,
+  options: { rateLimit: AuthRateLimit },
+): void {
+  const url = `${AUTH_BASE_PATH}/*`;
+  app.get(url, (request, reply) => forward(auth, request, reply));
+  app.post(url, { config: { rateLimit: options.rateLimit } }, (request, reply) =>
+    forward(auth, request, reply),
+  );
+}
+
+/** Traduce la petición de Fastify a la API Fetch de Better Auth y la respuesta de vuelta. */
+async function forward(auth: Auth, request: FastifyRequest, reply: FastifyReply) {
+  const url = new URL(request.url, `${request.protocol}://${request.host}`);
+  const body =
+    request.body === undefined || request.body === null ? undefined : JSON.stringify(request.body);
+  const response = await auth.handler(
+    new Request(url, {
+      method: request.method,
+      headers: fromNodeHeaders(request.headers),
+      ...(body !== undefined && { body }),
+    }),
+  );
+
+  reply.status(response.status);
+  response.headers.forEach((value, key) => {
+    if (key.toLowerCase() !== 'set-cookie') reply.header(key, value);
   });
+  // Varias cookies no se pueden unir en una sola cabecera.
+  const cookies = response.headers.getSetCookie();
+  if (cookies.length > 0) reply.header('set-cookie', cookies);
+  return reply.send(response.body ? await response.text() : null);
 }

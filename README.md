@@ -32,18 +32,22 @@ pnpm --filter @smartnomic/server dev           # http://localhost:3000, se recar
 Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 
 - `GET /health` responde `{"ok":true}`.
-- `/api/auth/*`: registro, inicio y cierre de sesión (Better Auth).
+- `/api/auth/*`: registro, inicio y cierre de sesión y recuperar la contraseña (Better
+  Auth). Las peticiones POST tienen un límite de 10 por minuto e IP.
+- `GET /api/me`: usuario, hogar y rol. `GET /api/households/:id`: datos del hogar.
+- Si existe `apps/mobile/dist` (`pnpm --filter @smartnomic/mobile export:web`), sirve la
+  web en `/`, en el mismo origen que la API.
 - Variables (ver `apps/server/.env.example`):
 
-  | Variable             | Para qué                                                      |
-  | -------------------- | ------------------------------------------------------------- |
-  | `DATABASE_URL`       | PostgreSQL. Sin ella, el servidor solo responde `/health`     |
-  | `BETTER_AUTH_SECRET` | Firma las sesiones. Obligatoria en producción                 |
-  | `BETTER_AUTH_URL`    | URL pública del servidor                                      |
-  | `CORS_ORIGINS`       | Orígenes de la web de Expo en desarrollo, separados por comas |
-  | `BREVO_API_KEY`      | Clave de la API de Brevo para enviar emails                   |
-  | `EMAIL_FROM`         | Remitente verificado en Brevo («Smartnomic <no-reply@…>»)     |
-  | `PORT`, `HOST`       | Puerto (3000) e interfaz (`0.0.0.0`)                          |
+  | Variable             | Para qué                                                                        |
+  | -------------------- | ------------------------------------------------------------------------------- |
+  | `DATABASE_URL`       | PostgreSQL. Sin ella, el servidor solo responde `/health`                       |
+  | `BETTER_AUTH_SECRET` | Firma las sesiones. Obligatoria en producción                                   |
+  | `BETTER_AUTH_URL`    | URL pública (`https://…`). En Railway, si falta, se usa `RAILWAY_PUBLIC_DOMAIN` |
+  | `CORS_ORIGINS`       | Orígenes de la web de Expo en desarrollo, separados por comas                   |
+  | `BREVO_API_KEY`      | Clave de la API de Brevo para enviar emails                                     |
+  | `EMAIL_FROM`         | Remitente verificado en Brevo («Smartnomic <no-reply@…>»)                       |
+  | `PORT`, `HOST`       | Puerto (3000) e interfaz (`0.0.0.0`)                                            |
 
 ### Emails (Brevo)
 
@@ -75,12 +79,14 @@ pnpm --filter @smartnomic/mobile start                                    # otra
 - Para usar otro servidor, copia `apps/mobile/.env.example` como `apps/mobile/.env` y
   define `EXPO_PUBLIC_API_URL`.
 
-La pantalla inicial dice si el servidor responde.
+Sin sesión, la app abre la pantalla de entrar; desde ahí se puede crear una cuenta o
+recuperar la contraseña. Al registrarse se crea el hogar con la zona horaria del
+dispositivo.
 
 ## Publicar el servidor (Railway)
 
-El repositorio trae un `Dockerfile` y un `railway.json` (comprobación de salud en
-`/health`).
+El repositorio trae un `Dockerfile` (exporta la web y la sirve junto con la API) y un
+`railway.json` (comprobación de salud en `/health`).
 
 1. En [railway.com](https://railway.com), **New Project → Deploy from GitHub repo** con
    este repositorio, en una región de la UE.

@@ -83,29 +83,29 @@ cliente de la API en la app.
       sus tablas
 - [x] T024 Configurar el envío de emails (Brevo) en
       `apps/server/src/email.ts`, sin escribir emails en los logs
-- [ ] T025 Añadir `@fastify/rate-limit` a `/api/auth/*` en `apps/server/src/index.ts`
-- [ ] T026 Crear el plugin de errores (zod → 400, formato único) en
+- [x] T025 Añadir `@fastify/rate-limit` a `/api/auth/*` en `apps/server/src/index.ts`
+- [x] T026 Crear el plugin de errores (zod → 400, formato único) en
       `apps/server/src/plugins/errors.ts`
-- [ ] T027 Crear el plugin `household-access` (sesión, pertenencia y rol mínimo por
+- [x] T027 Crear el plugin `household-access` (sesión, pertenencia y rol mínimo por
       ruta) en `apps/server/src/plugins/household-access.ts`
-- [ ] T028 Crear el hogar del usuario al registrarse (propietario, EUR, día 1, zona del
+- [x] T028 Crear el hogar del usuario al registrarse (propietario, EUR, día 1, zona del
       dispositivo) y `GET /api/me` en `apps/server/src/routes/me.ts`
-- [ ] T029 Preparar los tests de integración (base de datos limpia por test, usuarios y
+- [x] T029 Preparar los tests de integración (base de datos limpia por test, usuarios y
       hogares de prueba, reloj inyectado) en `apps/server/test/setup.ts`
-- [ ] T030 Tests de registro, entrada, `GET /api/me` y límite de peticiones en
+- [x] T030 Tests de registro, entrada, `GET /api/me` y límite de peticiones en
       `apps/server/test/auth.test.ts`
-- [ ] T031 Servir la web exportada en `/` desde el servidor en `apps/server/src/index.ts`
+- [x] T031 Servir la web exportada en `/` desde el servidor en `apps/server/src/index.ts`
       y añadir la exportación de la web al `Dockerfile`
 
 ### App
 
-- [ ] T032 [P] Crear el cliente HTTP tipado con `@smartnomic/api` en
+- [x] T032 [P] Crear el cliente HTTP tipado con `@smartnomic/api` en
       `apps/mobile/src/api/client.ts`
-- [ ] T033 [P] Sesión por plataforma en `apps/mobile/src/session/session.native.ts`
+- [x] T033 [P] Sesión por plataforma en `apps/mobile/src/session/session.native.ts`
       (`expo-secure-store`) y `apps/mobile/src/session/session.web.ts` (cookie)
-- [ ] T034 [P] Textos de la interfaz en `apps/mobile/src/i18n/es.ts`
-- [ ] T035 Pantallas de entrar, registro y recuperar contraseña en `apps/mobile/app/(auth)/`
-- [ ] T036 Prototipo de sesión en Android y en web de punta a punta (riesgo del plan)
+- [x] T034 [P] Textos de la interfaz en `apps/mobile/src/i18n/es.ts`
+- [x] T035 Pantallas de entrar, registro y recuperar contraseña en `apps/mobile/app/(auth)/`
+- [x] T036 Prototipo de sesión en Android y en web de punta a punta (riesgo del plan)
 
 **Punto de control**: un usuario se registra en Android o web, entra con su hogar creado y
 las peticiones de otro hogar devuelven 403.

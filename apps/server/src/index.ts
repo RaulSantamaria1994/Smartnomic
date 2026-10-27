@@ -1,7 +1,9 @@
-import { createAuth } from './auth';
+import { fileURLToPath } from 'node:url';
+import { createApi } from './api';
+import { resolveBaseUrl } from './config';
 import { connectDatabase } from './db/client';
-import { createBrevoSender, parseSender, resetPasswordEmail, type SendEmail } from './email';
 import { runMigrations } from './db/migrate';
+import { createBrevoSender, parseSender, type SendEmail } from './email';
 import { buildServer } from './server';
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -12,6 +14,9 @@ const CORS_ORIGINS = (process.env.CORS_ORIGINS ?? '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+// Web exportada de Expo (`pnpm --filter @smartnomic/mobile export:web`).
+const WEB_ROOT =
+  process.env.WEB_ROOT ?? fileURLToPath(new URL('../../mobile/dist', import.meta.url));
 
 async function main() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -21,29 +26,29 @@ async function main() {
   // El logger del servidor se crea después; hasta entonces los errores van a la consola.
   let logEmailError = (error: unknown) => console.error('Error al enviar un email', error);
 
-  let auth;
+  let api;
   if (database) {
     await runMigrations(database.db);
-    auth = createAuth({
+    api = createApi({
       db: database.db,
-      baseURL: process.env.BETTER_AUTH_URL ?? `http://localhost:${PORT}`,
+      baseURL: resolveBaseUrl(process.env, { production: PRODUCTION, port: PORT }),
       secret: requiredSecret(),
       trustedOrigins: CORS_ORIGINS,
       production: PRODUCTION,
-      ...(sendEmail && {
-        sendResetPassword: ({ to, url }) => sendEmail({ to, ...resetPasswordEmail(url) }),
-        onEmailError: (error) => logEmailError(error),
-      }),
+      ...(sendEmail && { sendEmail, onEmailError: (error) => logEmailError(error) }),
     });
   }
 
   const app = await buildServer({
     logger: true,
     corsOrigins: CORS_ORIGINS,
-    ...(auth && { auth }),
+    // En producción (Railway) el servidor está detrás de un proxy.
+    trustProxy: PRODUCTION,
+    webRoot: WEB_ROOT,
+    ...(api && { api }),
   });
   logEmailError = (error) => app.log.error({ err: error }, 'Error al enviar un email');
-  if (!database) app.log.warn('Sin DATABASE_URL: solo responde /health.');
+  if (!database) app.log.warn('Sin DATABASE_URL: solo responde /health y la web.');
   if (database && !sendEmail) {
     app.log.warn('Sin BREVO_API_KEY o EMAIL_FROM: recuperar la contraseña no está disponible.');
   }
