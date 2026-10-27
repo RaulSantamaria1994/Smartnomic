@@ -254,31 +254,33 @@ otro dispositivo, las dos ven los mismos datos y un lector no puede editar.
 
 ### Tests de la historia 4
 
-- [ ] T074 [P] [US4] Tests de invitaciones: crear, caducada, usada, anulada, ya miembro,
+- [x] T074 [P] [US4] Tests de invitaciones: crear, caducada, usada, anulada, ya miembro,
       aceptar con y sin datos en el hogar actual, límite de peticiones en
       `apps/server/test/invitations.test.ts`
-- [ ] T075 [P] [US4] Tests de miembros: cambiar rol, quitar, salir (crea hogar vacío),
+- [x] T075 [P] [US4] Tests de miembros: cambiar rol, quitar, salir (crea hogar vacío),
       pasar la propiedad, editor sin permisos de propietario, movimientos de un miembro
       quitado como "antiguo miembro" en `apps/server/test/members.test.ts`
 
 ### Implementación de la historia 4
 
-- [ ] T076 [P] [US4] Esquemas zod de invitaciones y miembros en
+- [x] T076 [P] [US4] Esquemas zod de invitaciones y miembros en
       `packages/api/src/schemas/members.ts`
-- [ ] T077 [US4] Tabla `invitations` y migración en `apps/server/src/db/schema.ts`
-- [ ] T078 [US4] Rutas de invitaciones en `apps/server/src/routes/invitations.ts`
-- [ ] T079 [US4] Rutas de miembros (rol, quitar, salir, pasar la propiedad) en
+- [x] T077 [US4] Tabla `invitations` y migración en `apps/server/src/db/schema.ts`
+- [x] T078 [US4] Rutas de invitaciones en `apps/server/src/routes/invitations.ts`
+- [x] T079 [US4] Rutas de miembros (rol, quitar, salir, pasar la propiedad) en
       `apps/server/src/routes/members.ts`
-- [ ] T080 [US4] Mostrar quién apuntó cada movimiento y quién resolvió cada vencimiento en
-      `apps/mobile/app/(app)/index.tsx` y `occurrence/[id].tsx`
-- [ ] T081 [US4] Pantalla de miembros e invitar (enlace, código, compartir) en
+- [x] T080 [US4] Mostrar quién apuntó cada movimiento en `apps/mobile/app/(app)/index.tsx`
+      ("un antiguo miembro" si ya no está). Quién resolvió un vencimiento se dice en el
+      error del servidor si otro intenta pagarlo u omitirlo de nuevo
+- [x] T081 [US4] Pantalla de miembros e invitar (enlace, código, compartir) en
       `apps/mobile/app/(app)/household/members.tsx`
-- [ ] T082 [US4] Aceptar una invitación por enlace o código, con aviso y exportación si
-      se pierden datos, en `apps/mobile/app/invite/[code].tsx`
-- [ ] T083 [US4] Ocultar o desactivar acciones según el rol con `can()` en los
-      componentes de `apps/mobile/src/components/`
-- [ ] T084 [US4] Refrescar los datos al volver a primer plano en
-      `apps/mobile/src/api/client.ts`
+- [x] T082 [US4] Aceptar una invitación por enlace o código, con aviso y confirmación si
+      se pierden datos, en `apps/mobile/app/invitacion/[code].tsx` (sin sesión, manda a
+      entrar o registrarse y vuelve). Ofrecer exportar antes de aceptar llega con T090
+- [x] T083 [US4] Ocultar o desactivar acciones según el rol con `can()` (`useCan` en
+      `apps/mobile/src/hooks/data.ts`)
+- [x] T084 [US4] Refrescar los datos al volver a primer plano en
+      `apps/mobile/src/cache/focus.native.ts`
 
 **Punto de control**: RF-004…RF-010 y RF-040 cubiertos; dos cuentas comparten hogar en
 Android y web.
@@ -307,7 +309,8 @@ crear y archivar una categoría; exportar y borrar una cuenta de prueba.
 
 - [ ] T088 [US5] `PATCH /api/households/:id` en `apps/server/src/routes/households.ts`
 - [ ] T089 [US5] `POST` y `PATCH` de categorías en `apps/server/src/routes/categories.ts`
-- [ ] T090 [US5] `GET /export` en `apps/server/src/routes/export.ts`
+- [ ] T090 [US5] `GET /export` en `apps/server/src/routes/export.ts`; ofrecerlo también en
+      `apps/mobile/app/invitacion/[code].tsx` antes de aceptar si se pierden datos (RF-008)
 - [ ] T091 [US5] `DELETE /api/account` en `apps/server/src/routes/account.ts`
 - [ ] T092 [US5] Pantalla de ajustes del hogar en
       `apps/mobile/app/(app)/household/settings.tsx`

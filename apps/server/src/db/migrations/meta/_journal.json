@@ -29,6 +29,13 @@
       "when": 1793120757209,
       "tag": "0003_member_reminders",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793121988321,
+      "tag": "0004_invitations",
+      "breakpoints": true
     }
   ]
 }

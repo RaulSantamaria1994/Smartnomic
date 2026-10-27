@@ -5,7 +5,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useState, type ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { persister } from '../src/cache/cache';
+import { watchAppFocus } from '../src/cache/focus';
 import { CACHE_MAX_AGE, createQueryClient } from '../src/cache/query-client';
+
+watchAppFocus();
 
 export default function RootLayout() {
   const [queryClient] = useState(createQueryClient);

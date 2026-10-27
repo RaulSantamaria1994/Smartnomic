@@ -1,5 +1,5 @@
 import { TIMEZONE_HEADER } from '@smartnomic/api';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Button } from '../../src/components/Button';
 import { Message } from '../../src/components/Message';
@@ -8,9 +8,11 @@ import { TextField } from '../../src/components/TextField';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { authErrorMessage } from '../../src/session/auth-errors';
+import { safeNext } from '../../src/session/next';
 import { MIN_PASSWORD_LENGTH } from '../../src/session/password';
 
 export default function SignUp() {
+  const next = safeNext(useLocalSearchParams<{ next?: string }>().next);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +36,7 @@ export default function SignUp() {
     });
     setLoading(false);
     if (error) return setError(authErrorMessage(error));
-    router.replace('/');
+    router.replace(next ?? '/');
   }
 
   return (
@@ -70,7 +72,7 @@ export default function SignUp() {
       <Button
         variant="link"
         label={es.auth.signUp.haveAccount}
-        onPress={() => router.replace('/entrar')}
+        onPress={() => router.replace(next ? { pathname: '/entrar', params: { next } } : '/entrar')}
       />
     </Screen>
   );

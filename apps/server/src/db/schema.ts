@@ -297,3 +297,33 @@ export const occurrences = pgTable(
     ),
   ],
 );
+
+// ---------------------------------------------------------------------------------------
+// Invitaciones (especificación 001, RF-004 y RF-005).
+// ---------------------------------------------------------------------------------------
+
+export const invitationStatus = pgEnum('invitation_status', ['pending', 'used', 'revoked']);
+
+export const invitations = pgTable(
+  'invitations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    role: memberRole('role').notNull(),
+    /** Código para escribirlo o abrir el enlace. Sirve una sola vez. */
+    code: text('code').notNull().unique(),
+    status: invitationStatus('status').notNull().default('pending'),
+    expiresAt: instant('expires_at').notNull(),
+    createdBy: uuid('created_by').references(() => members.id, { onDelete: 'set null' }),
+    usedBy: text('used_by').references(() => users.id, { onDelete: 'set null' }),
+    usedAt: instant('used_at'),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    // Se invita como editor o lector: la propiedad solo se transfiere.
+    check('invitations_role_check', sql`${table.role} <> 'owner'`),
+    index('invitations_household_idx').on(table.householdId),
+  ],
+);

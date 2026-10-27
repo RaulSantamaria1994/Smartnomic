@@ -34,7 +34,12 @@ export interface TestContext {
  * de otro (ver vitest.config.ts) porque comparten la base de datos.
  */
 export function useTestServer(
-  options: { authRateLimit?: AuthRateLimit; trustProxy?: boolean; now?: () => Date } = {},
+  options: {
+    authRateLimit?: AuthRateLimit;
+    invitationRateLimit?: AuthRateLimit;
+    trustProxy?: boolean;
+    now?: () => Date;
+  } = {},
 ) {
   const context = {} as TestContext;
   let close: () => Promise<void>;
@@ -58,6 +63,7 @@ export function useTestServer(
       api: context.api,
       authRateLimit: options.authRateLimit ?? { max: 1000, timeWindow: '1 minute' },
       now: options.now ?? (() => TEST_NOW),
+      invitationRateLimit: options.invitationRateLimit ?? { max: 1000, timeWindow: '1 minute' },
       ...(options.trustProxy !== undefined && { trustProxy: options.trustProxy }),
     });
   });

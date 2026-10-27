@@ -26,8 +26,10 @@ import {
 } from '../../src/format';
 import {
   currentPeriodStart,
+  useCan,
   useCategories,
   useMe,
+  useMembers,
   usePeriod,
   useRecurring,
   useUpcoming,
@@ -49,7 +51,9 @@ export default function Month() {
   const categories = useCategories(household?.id);
   const upcoming = useUpcoming(household?.id);
   const rules = useRecurring(household?.id);
-  const canWrite = me.data?.member.role !== 'viewer';
+  const can = useCan();
+  const canWrite = can('transactions.write');
+  const members = useMembers(household?.id);
 
   if (me.isPending) {
     return (
@@ -70,6 +74,15 @@ export default function Month() {
   const current = periodOf(periodStart, household.monthStartDay);
   const move = (n: number) => setStart(shiftPeriod(current, n, household.monthStartDay).start);
   const byId = new Map((categories.data?.categories ?? []).map((c) => [c.id, c]));
+  // Se dice quién apuntó cada movimiento (RF-009), salvo si el hogar es de una sola persona
+  // y lo apuntó ella.
+  const memberList = members.data?.members ?? [];
+  const names = new Map(memberList.map((m) => [m.id, m.name]));
+  const shared = memberList.length > 1;
+  const authorOf = (t: Transaction) =>
+    members.data && (shared || t.memberId !== me.data?.member.id)
+      ? (t.memberId && names.get(t.memberId)) || es.household.formerMember
+      : null;
   const offline = period.error instanceof ApiError && period.error.code === 'network';
   const data = period.data;
 
@@ -85,12 +98,21 @@ export default function Month() {
               void categories.refetch();
               void upcoming.refetch();
               void rules.refetch();
+              void members.refetch();
             }}
           />
         }
       >
         <View style={styles.topBar}>
           <Text style={styles.appName}>{es.appName}</Text>
+          <Pressable
+            onPress={() => router.push('/household/members')}
+            accessibilityRole="link"
+            accessibilityLabel={es.household.title}
+            style={[styles.sectionAction, styles.pushRight]}
+          >
+            <Text style={styles.link}>{es.household.open}</Text>
+          </Pressable>
           <Pressable
             onPress={() => router.push('/account')}
             accessibilityRole="link"
@@ -151,7 +173,7 @@ export default function Month() {
           today={upcoming.data?.today}
           rules={rules.data?.rules}
           categories={byId}
-          canResolve={canWrite}
+          canResolve={can('occurrences.resolve')}
         />
 
         {period.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
@@ -171,6 +193,7 @@ export default function Month() {
                 key={t.id}
                 transaction={t}
                 category={byId.get(t.categoryId)}
+                author={authorOf(t)}
                 onPress={canWrite ? () => router.push(`/transaction/${t.id}`) : undefined}
               />
             ))}
@@ -292,10 +315,12 @@ function Total({
 function Row({
   transaction,
   category,
+  author,
   onPress,
 }: {
   transaction: Transaction;
   category: Category | undefined;
+  author: string | null;
   onPress: (() => void) | undefined;
 }) {
   const amount = formatSignedMoney(transaction.amountCents, transaction.kind);
@@ -305,7 +330,7 @@ function Row({
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : 'text'}
-      accessibilityLabel={`${name}, ${amount}, ${formatDay(transaction.date)}${transaction.note ? `, ${transaction.note}` : ''}`}
+      accessibilityLabel={`${name}, ${amount}, ${formatDay(transaction.date)}${transaction.note ? `, ${transaction.note}` : ''}${author ? `, ${es.household.byMember(author)}` : ''}`}
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}
     >
       <Text style={styles.icon}>{category?.icon ?? '•'}</Text>
@@ -315,6 +340,7 @@ function Row({
           {formatDay(transaction.date)}
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>
+        {author && <Text style={styles.muted}>{es.household.byMember(author)}</Text>}
       </View>
       <Text
         style={[
@@ -348,6 +374,7 @@ const styles = StyleSheet.create({
   },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   appName: { fontSize: 15, fontWeight: '700', color: colors.muted },
+  pushRight: { marginLeft: 'auto' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   arrow: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   arrowText: { fontSize: 32, color: colors.primary },

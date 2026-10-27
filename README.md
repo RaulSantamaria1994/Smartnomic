@@ -42,6 +42,11 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 - `GET|PUT|DELETE /api/households/:id/recurring[/:ruleId]`: pagos y cobros recurrentes.
 - `GET /api/households/:id/upcoming?days=30`: vencimientos atrasados y próximos.
 - `PATCH /api/households/:id/members/me`: mis avisos (activados y hora).
+- `GET /api/households/:id/members`, `PATCH|DELETE …/members/:memberId`, `POST …/leave` y
+  `POST …/transfer-ownership`: miembros, roles, quitar, salir y pasar la propiedad.
+- `GET|POST /api/households/:id/invitations` y `DELETE …/invitations/:invId`: invitaciones
+  (caducan a los 7 días). `GET /api/invitations/:code` y `POST …/accept`: ver y aceptar una
+  invitación (limitado a 20 peticiones por minuto e IP).
 - `POST …/recurring/:ruleId/occurrences/:fecha/pay|skip`: pagar (crea el movimiento con
   el importe real) u omitir un vencimiento.
 - Si existe `apps/mobile/dist` (`pnpm --filter @smartnomic/mobile export:web`), sirve la
