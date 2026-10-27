@@ -25,13 +25,26 @@ pnpm test:watch        # tests en modo watch mientras desarrollas
 ## Servidor
 
 ```sh
-pnpm --filter @smartnomic/server dev   # http://localhost:3000, se recarga al guardar
+cp apps/server/.env.example apps/server/.env   # la primera vez; pon un BETTER_AUTH_SECRET
+pnpm --filter @smartnomic/server dev           # http://localhost:3000, se recarga al guardar
 ```
 
+Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
+
 - `GET /health` responde `{"ok":true}`.
-- Variables: `PORT` (3000), `HOST` (`0.0.0.0`) y `CORS_ORIGINS` (orígenes permitidos,
-  separados por comas; solo hace falta en desarrollo para la web de Expo, por ejemplo
-  `http://localhost:8081`).
+- `/api/auth/*`: registro, inicio y cierre de sesión (Better Auth).
+- Variables (ver `apps/server/.env.example`):
+
+  | Variable             | Para qué                                                      |
+  | -------------------- | ------------------------------------------------------------- |
+  | `DATABASE_URL`       | PostgreSQL. Sin ella, el servidor solo responde `/health`     |
+  | `BETTER_AUTH_SECRET` | Firma las sesiones. Obligatoria en producción                 |
+  | `BETTER_AUTH_URL`    | URL pública del servidor                                      |
+  | `CORS_ORIGINS`       | Orígenes de la web de Expo en desarrollo, separados por comas |
+  | `PORT`, `HOST`       | Puerto (3000) e interfaz (`0.0.0.0`)                          |
+
+Cambiar el esquema de la base de datos: edita `apps/server/src/db/schema.ts` y ejecuta
+`pnpm --filter @smartnomic/server db:generate`. Nunca se edita una migración ya fusionada.
 
 ## App (Android y web)
 
@@ -55,9 +68,12 @@ El repositorio trae un `Dockerfile` y un `railway.json` (comprobación de salud 
 
 1. En [railway.com](https://railway.com), **New Project → Deploy from GitHub repo** con
    este repositorio, en una región de la UE.
-2. **Variables**: `PORT` = `3000`.
-3. **Settings → Networking → Generate Domain** con el puerto `3000`.
-4. Comprueba `https://<tu-dominio>/health`.
+2. **New → Database → Add PostgreSQL**, en la misma región.
+3. En el servicio del servidor, **Variables**: `PORT` = `3000`, `DATABASE_URL` como
+   referencia a la de PostgreSQL, `BETTER_AUTH_SECRET` (`openssl rand -hex 32`) y
+   `BETTER_AUTH_URL` con el dominio público.
+4. **Settings → Networking → Generate Domain** con el puerto `3000`.
+5. Comprueba `https://<tu-dominio>/health`.
 
 ## APK de Android (EAS Build)
 
