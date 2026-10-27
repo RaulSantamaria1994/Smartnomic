@@ -217,27 +217,28 @@ con el móvil en modo avión, y al tocarlo se abre el vencimiento.
 
 ### Tests de la historia 3
 
-- [ ] T065 [P] [US3] Tests de `remindersToSchedule` (antelación 0/1/3/7, mismo día,
+- [x] T065 [P] [US3] Tests de `remindersToSchedule` (antelación 0/1/3/7, mismo día,
       resueltos excluidos, hora configurada, cambio de hora, tope de 50, avisos
       desactivados) en `packages/domain/src/reminders.test.ts`
-- [ ] T066 [P] [US3] Tests de `reminder_time` y de activar o desactivar avisos por
+- [x] T066 [P] [US3] Tests de `reminder_time` y de activar o desactivar avisos por
       miembro en `apps/server/test/reminders.test.ts`
 
 ### Implementación de la historia 3
 
-- [ ] T067 [P] [US3] Implementar `remindersToSchedule` en
+- [x] T067 [P] [US3] Implementar `remindersToSchedule` en
       `packages/domain/src/reminders.ts`
-- [ ] T068 [US3] Campo `reminder_time` en `households`, `reminders_enabled` en `members`
-      y `PATCH /members/me` en `apps/server/src/routes/members.ts`
-- [ ] T069 [US3] Programar avisos con `expo-notifications` (al abrir, al volver a primer
+- [x] T068 [US3] Campos `reminders_enabled` y `reminder_time` en `members` (cada miembro
+      elige su hora) y `PATCH /members/me` en `apps/server/src/routes/members.ts`
+- [x] T069 [US3] Programar avisos con `expo-notifications` (al abrir, al volver a primer
       plano y tras cada cambio; cancelar los anteriores) en
       `apps/mobile/src/reminders/reminders.native.ts`, y no-op en `reminders.web.ts`
-- [ ] T070 [US3] Pedir permisos de notificaciones y alarmas exactas, y mostrar aviso si
-      faltan, en `apps/mobile/src/reminders/permissions.native.ts`
-- [ ] T071 [US3] Abrir el vencimiento al tocar el aviso en `apps/mobile/app/_layout.tsx`
-- [ ] T072 [US3] Destacar vencimientos próximos y atrasados en la pantalla principal en
+- [x] T070 [US3] Pedir permisos de notificaciones (y declarar el de alarmas exactas), y
+      mostrar aviso si faltan, en `apps/mobile/src/reminders/reminders.native.ts`
+- [x] T071 [US3] Abrir el vencimiento al tocar el aviso en
+      `apps/mobile/src/hooks/useReminderSync.ts`
+- [x] T072 [US3] Destacar vencimientos próximos y atrasados en la pantalla principal en
       web en `apps/mobile/app/(app)/index.tsx`
-- [ ] T073 [US3] Antelación del aviso en el formulario del pago y hora de avisos en los
+- [x] T073 [US3] Antelación del aviso en el formulario del pago y hora de avisos en los
       ajustes en `apps/mobile/app/(app)/recurring/` y `apps/mobile/app/(app)/account.tsx`
 
 **Punto de control**: RF-029…RF-036 cubiertos; prueba manual en Android con y sin conexión.

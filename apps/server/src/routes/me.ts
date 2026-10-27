@@ -4,6 +4,7 @@ import type { Database } from '../db/client';
 import { ensureDefaultCategories, ensureHousehold } from '../households';
 import type { HouseholdAccess } from '../plugins/household-access';
 import { toHousehold } from './households';
+import { toMember } from './members';
 
 export function registerMeRoutes(
   app: FastifyInstance,
@@ -20,7 +21,7 @@ export function registerMeRoutes(
       return {
         user,
         household: toHousehold(household),
-        member: { id: member.id, role: member.role },
+        member: toMember(member),
       };
     },
   );

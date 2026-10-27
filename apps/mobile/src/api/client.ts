@@ -1,6 +1,7 @@
 import {
   categoriesResponseSchema,
   healthResponseSchema,
+  memberSchema,
   meResponseSchema,
   periodResponseSchema,
   recurringListSchema,
@@ -11,6 +12,7 @@ import {
   type PayOccurrenceInput,
   type RecurringInput,
   type TransactionInput,
+  type UpdateMyMemberInput,
 } from '@smartnomic/api';
 import { z } from 'zod';
 import { API_URL } from '../config';
@@ -66,6 +68,12 @@ export const api = {
       method: 'POST',
       schema: resolvedOccurrenceSchema,
     }),
+  updateMyMember: (householdId: string, input: UpdateMyMemberInput) =>
+    request(`${household(householdId)}/members/me`, {
+      method: 'PATCH',
+      body: input,
+      schema: memberSchema,
+    }),
   restoreTransaction: (householdId: string, id: string) =>
     request(`${household(householdId)}/transactions/${id}/restore`, {
       method: 'POST',
@@ -80,5 +88,8 @@ export const queryKeys = {
   periods: (householdId: string) => ['periods', householdId] as const,
   period: (householdId: string, start: string) => ['periods', householdId, start] as const,
   recurring: (householdId: string) => ['recurring', householdId] as const,
-  upcoming: (householdId: string) => ['upcoming', householdId] as const,
+  upcoming: (householdId: string, days?: number) =>
+    (days === undefined
+      ? ['upcoming', householdId]
+      : ['upcoming', householdId, days]) as readonly unknown[],
 };

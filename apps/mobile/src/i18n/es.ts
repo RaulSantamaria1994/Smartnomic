@@ -159,6 +159,36 @@ export const es = {
       endDate: 'La fecha de fin no es válida o es anterior a la de inicio.',
     },
   },
+  reminders: {
+    channel: 'Vencimientos',
+    pay: 'vence',
+    collect: 'cobras',
+    today: 'Hoy',
+    tomorrow: 'Mañana',
+    inDays: (days: number) => `En ${days} días`,
+    dueToday: 'vence hoy',
+    deniedTitle: 'Los avisos están desactivados',
+    deniedText:
+      'No recibirás recordatorios de tus pagos. Actívalos en los ajustes del móvil: Notificaciones → Smartnomic.',
+    openSettings: 'Abrir ajustes',
+    allow: 'Activar avisos',
+    soonTitle: (count: number) =>
+      count === 1 ? '1 pago vence pronto' : `${count} pagos vencen pronto`,
+    overdueTitle: (count: number) => (count === 1 ? '1 pago atrasado' : `${count} pagos atrasados`),
+  },
+  settings: {
+    title: 'Ajustes',
+    open: 'Ajustes',
+    reminders: 'Recordatorios',
+    enabled: 'Avisarme de los vencimientos',
+    time: 'Hora de los avisos (HH:MM)',
+    timeError: 'Escribe la hora como HH:MM, por ejemplo 09:00.',
+    save: 'Guardar',
+    saved: 'Guardado.',
+    webNote:
+      'Los avisos solo llegan en la app de Android. En el navegador, los pagos que vencen pronto aparecen destacados en la pantalla principal.',
+    back: 'Volver',
+  },
   home: {
     greeting: (name: string) => `Hola, ${name}`,
     household: 'Tu hogar',

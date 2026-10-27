@@ -41,6 +41,7 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 - `GET /api/households/:id/periods/:start`: resumen y movimientos de un periodo.
 - `GET|PUT|DELETE /api/households/:id/recurring[/:ruleId]`: pagos y cobros recurrentes.
 - `GET /api/households/:id/upcoming?days=30`: vencimientos atrasados y próximos.
+- `PATCH /api/households/:id/members/me`: mis avisos (activados y hora).
 - `POST …/recurring/:ruleId/occurrences/:fecha/pay|skip`: pagar (crea el movimiento con
   el importe real) u omitir un vencimiento.
 - Si existe `apps/mobile/dist` (`pnpm --filter @smartnomic/mobile export:web`), sirve la
@@ -93,7 +94,13 @@ dispositivo.
 
 Con sesión, la pantalla principal es el **mes**: ingresos, gastos y balance del periodo,
 los **próximos pagos** (con los atrasados), la lista de movimientos y el botón
-**Apuntar**. Desde «Próximos pagos → Gestionar» se dan de alta los pagos recurrentes. En Android los últimos datos se guardan
+**Apuntar**. Desde «Próximos pagos → Gestionar» se dan de alta los pagos recurrentes.
+
+**Recordatorios**: en Android, la app programa avisos locales (con la antelación de cada
+pago y el mismo día, a la hora elegida en **Ajustes**) que llegan aunque no haya conexión;
+al tocar uno se abre el vencimiento. En el navegador no hay avisos: la pantalla principal
+destaca los pagos atrasados y los que vencen en los próximos 3 días. Los avisos solo se
+pueden probar en un APK o en un build de desarrollo, no en Expo Go. En Android los últimos datos se guardan
 para verlos sin conexión.
 
 ## Publicar el servidor (Railway)

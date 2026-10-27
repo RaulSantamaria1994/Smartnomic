@@ -126,6 +126,10 @@ export const members = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     role: memberRole('role').notNull(),
+    /** Este miembro recibe avisos de los vencimientos (RF-031). */
+    remindersEnabled: boolean('reminders_enabled').notNull().default(true),
+    /** Hora local `HH:MM` de sus avisos (RF-030). */
+    reminderTime: text('reminder_time').notNull().default('09:00'),
     joinedAt: instant('joined_at').notNull().defaultNow(),
   },
   (table) => [
@@ -136,6 +140,10 @@ export const members = pgTable(
       .on(table.householdId)
       .where(sql`${table.role} = 'owner'`),
     index('members_household_id_idx').on(table.householdId),
+    check(
+      'members_reminder_time_check',
+      sql`${table.reminderTime} ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'`,
+    ),
   ],
 );
 
