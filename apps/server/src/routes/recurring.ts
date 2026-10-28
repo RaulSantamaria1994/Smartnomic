@@ -44,7 +44,7 @@ export function toRule(row: RuleRow): RecurringRule {
   };
 }
 
-function toResolved(row: OccurrenceRow): ResolvedOccurrence {
+export function toResolved(row: OccurrenceRow): ResolvedOccurrence {
   return {
     ruleId: row.recurringId,
     dueDate: row.dueDate,

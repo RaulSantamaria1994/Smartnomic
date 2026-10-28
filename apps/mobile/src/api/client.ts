@@ -1,5 +1,8 @@
 import {
   categoriesResponseSchema,
+  categorySchema,
+  householdExportSchema,
+  householdSchema,
   invitationPreviewSchema,
   invitationSchema,
   invitationsResponseSchema,
@@ -16,6 +19,9 @@ import {
   type PayOccurrenceInput,
   type RecurringInput,
   type TransactionInput,
+  type CreateCategoryInput,
+  type UpdateCategoryInput,
+  type UpdateHouseholdInput,
   type UpdateMyMemberInput,
 } from '@smartnomic/api';
 import { z } from 'zod';
@@ -78,6 +84,24 @@ export const api = {
       body: input,
       schema: memberSchema,
     }),
+  updateHousehold: (householdId: string, input: UpdateHouseholdInput) =>
+    request(household(householdId), { method: 'PATCH', body: input, schema: householdSchema }),
+  createCategory: (householdId: string, input: CreateCategoryInput) =>
+    request(`${household(householdId)}/categories`, {
+      method: 'POST',
+      body: input,
+      schema: categorySchema,
+    }),
+  updateCategory: (householdId: string, categoryId: string, input: UpdateCategoryInput) =>
+    request(`${household(householdId)}/categories/${categoryId}`, {
+      method: 'PATCH',
+      body: input,
+      schema: categorySchema,
+    }),
+  exportHousehold: (householdId: string) =>
+    request(`${household(householdId)}/export`, { schema: householdExportSchema }),
+  deleteAccount: (password: string) =>
+    request('/api/account', { method: 'DELETE', body: { password }, schema: z.null() }),
   members: (householdId: string) =>
     request(`${household(householdId)}/members`, { schema: membersResponseSchema }),
   changeRole: (householdId: string, memberId: string, role: 'editor' | 'viewer') =>

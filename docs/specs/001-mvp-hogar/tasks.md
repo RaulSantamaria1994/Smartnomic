@@ -297,26 +297,28 @@ crear y archivar una categoría; exportar y borrar una cuenta de prueba.
 
 ### Tests de la historia 5
 
-- [ ] T085 [P] [US5] Tests de ajustes del hogar (solo propietario, día 1–28) en
+- [x] T085 [P] [US5] Tests de ajustes del hogar (solo propietario, día 1–28) en
       `apps/server/test/households.test.ts`
-- [ ] T086 [P] [US5] Tests de categorías (crear, renombrar, archivar sin afectar a
+- [x] T086 [P] [US5] Tests de categorías (crear, renombrar, archivar sin afectar a
       movimientos, nombres duplicados) en `apps/server/test/categories.test.ts`
-- [ ] T087 [P] [US5] Tests de exportación (todo el hogar, nada de otros hogares) y de
+- [x] T087 [P] [US5] Tests de exportación (todo el hogar, nada de otros hogares) y de
       borrado de cuenta (único miembro borra el hogar; propietario con miembros recibe
       409; sesiones invalidadas) en `apps/server/test/account.test.ts`
 
 ### Implementación de la historia 5
 
-- [ ] T088 [US5] `PATCH /api/households/:id` en `apps/server/src/routes/households.ts`
-- [ ] T089 [US5] `POST` y `PATCH` de categorías en `apps/server/src/routes/categories.ts`
-- [ ] T090 [US5] `GET /export` en `apps/server/src/routes/export.ts`; ofrecerlo también en
+- [x] T088 [US5] `PATCH /api/households/:id` en `apps/server/src/routes/households.ts`
+- [x] T089 [US5] `POST` y `PATCH` de categorías en `apps/server/src/routes/categories.ts`
+      (nombre repetido del mismo tipo, sin distinguir mayúsculas: 409)
+- [x] T090 [US5] `GET /export` en `apps/server/src/routes/export.ts`; ofrecerlo también en
       `apps/mobile/app/invitacion/[code].tsx` antes de aceptar si se pierden datos (RF-008)
-- [ ] T091 [US5] `DELETE /api/account` en `apps/server/src/routes/account.ts`
-- [ ] T092 [US5] Pantalla de ajustes del hogar en
+- [x] T091 [US5] `DELETE /api/account` en `apps/server/src/routes/account.ts` (se confirma
+      con la contraseña)
+- [x] T092 [US5] Pantalla de ajustes del hogar en
       `apps/mobile/app/(app)/household/settings.tsx`
-- [ ] T093 [US5] Pantalla de categorías en
+- [x] T093 [US5] Pantalla de categorías en
       `apps/mobile/app/(app)/household/categories.tsx`
-- [ ] T094 [US5] Exportar y borrar la cuenta (con confirmación y paso de propiedad) en
+- [x] T094 [US5] Exportar y borrar la cuenta (con confirmación y paso de propiedad) en
       `apps/mobile/app/(app)/account.tsx`
 
 **Punto de control**: RF-003, RF-021, RF-038 y RF-039 cubiertos; las cinco historias

@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 a 6 terminadas (historias 1 a 4). La siguiente es la fase 7
-(historia 5: ajustar el hogar y las categorías), desde T085. No inventes comandos, rutas
+Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 a 7 terminadas (las cinco historias). La siguiente es la fase 8
+(cierre), desde T095. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 

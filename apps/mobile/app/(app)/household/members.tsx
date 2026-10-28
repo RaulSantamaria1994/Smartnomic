@@ -211,6 +211,16 @@ export default function Members() {
         />
       </View>
 
+      <Button
+        variant="link"
+        label={es.householdMenu.settings}
+        onPress={() => router.push('/household/settings')}
+      />
+      <Button
+        variant="link"
+        label={es.householdMenu.categories}
+        onPress={() => router.push('/household/categories')}
+      />
       <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
     </Screen>
   );

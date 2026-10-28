@@ -17,6 +17,45 @@ export type Category = z.infer<typeof categorySchema>;
 
 export const categoriesResponseSchema = z.object({ categories: z.array(categorySchema) });
 
+export const CATEGORY_NAME_MAX_LENGTH = 40;
+
+const categoryNameSchema = z
+  .string()
+  .trim()
+  .min(1, 'Escribe un nombre.')
+  .max(CATEGORY_NAME_MAX_LENGTH, `Como mucho ${CATEGORY_NAME_MAX_LENGTH} caracteres.`);
+
+/** Color `#RRGGBB`. */
+export const categoryColorSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/, { message: 'Color no válido: se espera #RRGGBB' });
+
+/** Un emoji o símbolo corto. */
+export const categoryIconSchema = z.string().trim().min(1).max(16);
+
+/** Cuerpo de `POST /api/households/:householdId/categories` (RF-021). */
+export const createCategorySchema = z.object({
+  kind: transactionKindSchema,
+  name: categoryNameSchema,
+  icon: categoryIconSchema,
+  color: categoryColorSchema,
+});
+
+export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
+
+/** Cuerpo de `PATCH …/categories/:categoryId`: renombrar, cambiar icono o color, archivar. */
+export const updateCategorySchema = z
+  .object({
+    name: categoryNameSchema,
+    icon: categoryIconSchema,
+    color: categoryColorSchema,
+    archived: z.boolean(),
+  })
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: 'No hay nada que cambiar.' });
+
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
+
 export const NOTE_MAX_LENGTH = 500;
 
 /** Cuerpo de `PUT /api/households/:householdId/transactions/:id` (crear o editar). */

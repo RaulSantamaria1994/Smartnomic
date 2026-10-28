@@ -151,3 +151,19 @@ export async function joinHousehold(
     .insert(members)
     .values({ householdId: ownerMember!.householdId, userId: guest.id, role });
 }
+
+/** Petición a la API con la sesión de `user`. */
+export function call(
+  app: FastifyInstance,
+  user: TestUser,
+  method: 'GET' | 'PATCH' | 'DELETE' | 'POST' | 'PUT',
+  url: string,
+  payload?: unknown,
+) {
+  return app.inject({
+    method,
+    url,
+    headers: { cookie: user.cookie, origin: TEST_ORIGIN },
+    ...(payload !== undefined && { payload: payload as Record<string, unknown> }),
+  });
+}
