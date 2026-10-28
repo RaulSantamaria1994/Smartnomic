@@ -7,7 +7,9 @@ import { api, queryKeys } from '../../src/api/client';
 import { Button } from '../../src/components/Button';
 import { Message } from '../../src/components/Message';
 import { Screen } from '../../src/components/Screen';
+import { exportHousehold } from '../../src/export/export-household';
 import { formatDay } from '../../src/format';
+import { useMe } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { colors, spacing } from '../../src/theme';
@@ -58,6 +60,9 @@ function Preview({ code }: { code: string }) {
   const [confirmLoseData, setConfirmLoseData] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exported, setExported] = useState(false);
+  const myHousehold = useMe().data?.household.id;
   const goHome = () => router.replace('/');
 
   if (preview.isPending) {
@@ -80,6 +85,21 @@ function Preview({ code }: { code: string }) {
   const p = preview.data;
   const blocker = blockerText(p);
   const needsConfirm = p.currentHousehold === 'delete' && p.currentHouseholdHasData;
+
+  // Antes de perder los datos se ofrece guardarlos (RF-008).
+  async function exportFirst() {
+    if (!myHousehold) return;
+    setError(null);
+    setExporting(true);
+    try {
+      await exportHousehold(myHousehold);
+      setExported(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : es.auth.errors.unknown);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   async function accept() {
     setError(null);
@@ -117,6 +137,13 @@ function Preview({ code }: { code: string }) {
           {needsConfirm && (
             <>
               <Message text={es.invitation.loseData} />
+              <Button
+                variant="link"
+                label={es.invitation.exportFirst}
+                onPress={() => void exportFirst()}
+                loading={exporting}
+              />
+              {exported && <Message text={es.invitation.exported} kind="success" />}
               <View style={styles.switchRow}>
                 <Text style={styles.label}>{es.invitation.confirmLoseData}</Text>
                 <Switch

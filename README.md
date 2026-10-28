@@ -35,7 +35,11 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 - `/api/auth/*`: registro, inicio y cierre de sesión y recuperar la contraseña (Better
   Auth). Las peticiones POST tienen un límite de 10 por minuto e IP.
 - `GET /api/me`: usuario, hogar y rol. `GET /api/households/:id`: datos del hogar.
-- `GET /api/households/:id/categories`: categorías del hogar.
+- `PATCH /api/households/:id`: nombre e inicio de mes (solo el propietario).
+- `GET|POST /api/households/:id/categories` y `PATCH …/categories/:catId`: categorías del
+  hogar; crear, renombrar, archivar y restaurar.
+- `GET /api/households/:id/export`: todos los datos del hogar en JSON.
+- `DELETE /api/account`: borrar la cuenta, confirmando con la contraseña.
 - `PUT|DELETE /api/households/:id/transactions/:txId` y `POST …/restore`: apuntar o
   editar (idempotente por el UUIDv7 que genera la app), borrar y deshacer.
 - `GET /api/households/:id/periods/:start`: resumen y movimientos de un periodo.

@@ -8,7 +8,9 @@ import { registerAuthRoutes, type Auth, type AuthRateLimit } from './auth';
 import type { Database } from './db/client';
 import { registerErrorHandler } from './plugins/errors';
 import { createHouseholdAccess } from './plugins/household-access';
+import { registerAccountRoutes } from './routes/account';
 import { registerCategoryRoutes } from './routes/categories';
+import { registerExportRoutes } from './routes/export';
 import { registerHouseholdRoutes } from './routes/households';
 import { registerInvitationRoutes } from './routes/invitations';
 import { registerMeRoutes } from './routes/me';
@@ -67,12 +69,19 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
       rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
     });
     registerMeRoutes(app, { db, access });
-    registerHouseholdRoutes(app, { access });
+    const now = options.now ?? (() => new Date());
+    registerHouseholdRoutes(app, { db, access });
     registerMemberRoutes(app, { db, access });
-    registerCategoryRoutes(app, { db, access });
+    registerCategoryRoutes(app, { db, access, now });
     registerTransactionRoutes(app, { db, access });
     registerPeriodRoutes(app, { db, access });
-    const now = options.now ?? (() => new Date());
+    registerExportRoutes(app, { db, access, now });
+    registerAccountRoutes(app, {
+      db,
+      auth,
+      access,
+      rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
+    });
     registerRecurringRoutes(app, { db, access, now });
     registerInvitationRoutes(app, {
       db,

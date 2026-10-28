@@ -11,6 +11,19 @@ export const householdSchema = z.object({
 
 export type Household = z.infer<typeof householdSchema>;
 
+export const HOUSEHOLD_NAME_MAX_LENGTH = 60;
+
+/** Cuerpo de `PATCH /api/households/:householdId` (solo el propietario, RF-003). */
+export const updateHouseholdSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Escribe un nombre.').max(HOUSEHOLD_NAME_MAX_LENGTH),
+    monthStartDay: monthStartDaySchema,
+  })
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: 'No hay nada que cambiar.' });
+
+export type UpdateHouseholdInput = z.infer<typeof updateHouseholdSchema>;
+
 export const memberSchema = z.object({
   id: z.uuid(),
   role: roleSchema,
