@@ -222,7 +222,7 @@ export const es = {
     newTitle: 'Nueva categoría',
     kind: 'Tipo',
     name: 'Nombre',
-    icon: 'Icono (un emoji)',
+    icon: 'Icono',
     color: 'Color',
     create: 'Crear categoría',
     created: 'Categoría creada.',

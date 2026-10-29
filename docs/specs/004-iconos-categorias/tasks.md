@@ -64,10 +64,10 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Elegir el icono de una categoría (P2)
 
-- [ ] I012 [US2] `IconPicker` en `apps/mobile/src/components/IconPicker.tsx`: cuadrícula
-      `radiogroup`, celdas de 48 px, nombre de `es.ts`, `checked`, 6 columnas en móvil y 8
-      en ancho
-- [ ] I013 [US2] `app/(app)/household/categories.tsx`: `IconPicker` al crear y al editar
+- [x] I012 [US2] `IconPicker` en `apps/mobile/src/components/IconPicker.tsx`: cuadrícula
+      `radiogroup`, nombre de `es.ts`, `checked`, celdas de al menos 48 px con tantas
+      columnas como quepan (`iconGrid.ts`, con tests)
+- [x] I013 [US2] `app/(app)/household/categories.tsx`: `IconPicker` al crear y al editar
       en lugar del campo de texto; `tag` por defecto; quitar el texto «Icono (un emoji)»
 
 **Punto de control**: RF-404 cubierto.
