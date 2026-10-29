@@ -1,7 +1,7 @@
 import { DEFAULT_CATEGORIES } from '@smartnomic/domain';
 import { describe, expect, it } from 'vitest';
-import { contrastRatio, mix, tint } from './color';
-import { color } from './tokens';
+import { categoryBackground, contrastRatio, iconTone, mix, tint } from './color';
+import { categoryPalette, color } from './tokens';
 
 describe('mix y tint', () => {
   it('mezcla dos colores en la proporción pedida', () => {
@@ -66,5 +66,37 @@ describe('contraste de los tokens «Calma» (WCAG 2.1 AA)', () => {
         category.name,
       ).toBeGreaterThanOrEqual(AA);
     }
+  });
+});
+
+describe('iconTone (especificación 004)', () => {
+  const NON_TEXT = 3;
+  const tones = [
+    ...categoryPalette.map((c) => c.value),
+    ...DEFAULT_CATEGORIES.map((c) => c.color),
+    // Colores claros que podrían venir de datos antiguos.
+    '#FFFF00',
+    '#FFFFFF',
+    '#C28A00',
+    '#7FDBFF',
+  ];
+
+  it('el icono contrasta 3:1 con el fondo suave de su categoría (WCAG 1.4.11)', () => {
+    for (const tone of tones) {
+      expect(contrastRatio(iconTone(tone), categoryBackground(tone)), tone).toBeGreaterThanOrEqual(
+        NON_TEXT,
+      );
+    }
+  });
+
+  it('un color que ya contrasta no cambia', () => {
+    expect(iconTone('#1F5FBF')).toBe('#1F5FBF');
+    expect(iconTone('#455A64')).toBe('#455A64');
+  });
+
+  it('un color claro se oscurece hacia la tinta, sin llegar a ella si no hace falta', () => {
+    const toned = iconTone('#C28A00');
+    expect(toned).not.toBe('#C28A00');
+    expect(toned).not.toBe(color.text.primary);
   });
 });

@@ -37,25 +37,25 @@ fallar antes de implementar.
 
 **Objetivo**: servidor y datos con identificadores; todas las pantallas con glifos.
 
-- [ ] I004 [US1] Tests del servidor en `apps/server/test/categories.test.ts`: crear y
+- [x] I004 [US1] Tests del servidor en `apps/server/test/categories.test.ts`: crear y
       editar con un identificador; 400 con un emoji o un texto fuera del catálogo; un
       hogar nuevo empieza con iconos del catálogo
-- [ ] I005 [US1] Test de la migración en `apps/server/test/migrations.test.ts`: filas con
+- [x] I005 [US1] Test de la migración en `apps/server/test/migrations.test.ts`: filas con
       emoji predefinidos, frecuentes, desconocidos y ya migrados quedan con su
       identificador; ejecutar la SQL dos veces no cambia nada; la tabla de la SQL coincide
       con `iconFromEmoji`
-- [ ] I006 [US1] Migración `apps/server/src/db/migrations/0005_category_icons.sql` con
+- [x] I006 [US1] Migración `apps/server/src/db/migrations/0005_category_icons.sql` con
       `drizzle-kit generate --custom`
-- [ ] I007 [P] [US1] Tests de `iconTone` en `apps/mobile/src/design/color.test.ts`: con
+- [x] I007 [P] [US1] Tests de `iconTone` en `apps/mobile/src/design/color.test.ts`: con
       cada color de `categoryPalette` y de las predefinidas, contraste ≥ 3:1 sobre
       `tint(color)`; colores ya oscuros no cambian
-- [ ] I008 [US1] `iconTone` en `apps/mobile/src/design/color.ts`
-- [ ] I009 [US1] `apps/mobile/src/design/categoryGlyphs.ts` (identificador → glifo),
+- [x] I008 [US1] `iconTone` en `apps/mobile/src/design/color.ts`
+- [x] I009 [US1] `apps/mobile/src/design/categoryGlyphs.ts` (identificador → glifo),
       nombres en `src/i18n/es.ts` (`categoryIcons`), tamaños de glifo en `size` y quitar
       `typography.emoji`/`emojiLarge` de `tokens.ts`
-- [ ] I010 [US1] `CategoryIcon` con `MaterialCommunityIcons`, color `iconTone` y `tag`
+- [x] I010 [US1] `CategoryIcon` con `MaterialCommunityIcons`, color `iconTone` y `tag`
       para valores desconocidos; carga de la fuente de iconos en `src/design/fonts.ts`
-- [ ] I011 [US1] Detalle de vencimiento `app/(app)/occurrence/[ruleId]/[dueDate].tsx`:
+- [x] I011 [US1] Detalle de vencimiento `app/(app)/occurrence/[ruleId]/[dueDate].tsx`:
       título solo con el nombre e icono junto a él
 
 **Punto de control**: RF-403 y RF-405 en pantalla; ninguna pantalla enseña emoji.

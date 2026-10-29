@@ -4,6 +4,7 @@ import {
   errorResponseSchema,
   periodResponseSchema,
 } from '@smartnomic/api';
+import { DEFAULT_CATEGORIES, isCategoryIcon } from '@smartnomic/domain';
 import { describe, expect, it } from 'vitest';
 import { call, joinHousehold, me, newId, signUp, useTestServer, type TestUser } from './helpers';
 
@@ -72,11 +73,35 @@ describe('crear categorías', () => {
       { ...PET, name: '' },
       { ...PET, name: 'x'.repeat(41) },
       { ...PET, icon: '' },
+      { ...PET, icon: '\u{1F436}' },
+      { ...PET, icon: 'paw' },
+      { ...PET, icon: 'Pet' },
       { ...PET, color: 'rojo' },
       { ...PET, kind: 'otro' },
     ]) {
       expect((await create(owner, householdId, body)).statusCode, JSON.stringify(body)).toBe(400);
     }
+  });
+});
+
+describe('iconos (especificación 004)', () => {
+  it('un hogar nuevo empieza con iconos del catálogo', async () => {
+    const { owner, householdId } = await setup();
+    const categories = await list(owner, householdId);
+    expect(categories.map((c) => c.icon)).toEqual(DEFAULT_CATEGORIES.map((c) => c.icon));
+    for (const c of categories) expect(isCategoryIcon(c.icon)).toBe(true);
+  });
+
+  it('al editar solo acepta iconos del catálogo', async () => {
+    const { owner, householdId } = await setup();
+    const { id } = categorySchema.parse((await create(owner, householdId)).json());
+    for (const icon of ['\u{1F415}', 'dog', '']) {
+      const response = await call(ctx.app, owner, 'PATCH', url(householdId, id), { icon });
+      expect(response.statusCode, icon).toBe(400);
+      expect(errorResponseSchema.parse(response.json()).error.code).toBe('validation_failed');
+    }
+    const unchanged = (await list(owner, householdId)).find((c) => c.id === id);
+    expect(unchanged?.icon).toBe('pet');
   });
 });
 

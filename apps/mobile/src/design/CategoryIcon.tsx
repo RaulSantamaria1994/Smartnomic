@@ -1,8 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { tint } from './color';
-import { color, radius, typography } from './tokens';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { DEFAULT_CATEGORY_ICON, isCategoryIcon } from '@smartnomic/domain';
+import { StyleSheet, View } from 'react-native';
+import { CATEGORY_GLYPHS } from './categoryGlyphs';
+import { categoryBackground, iconTone } from './color';
+import { color, radius, size as sizes } from './tokens';
 
-/** Emoji de la categoría sobre un fondo suave de su color (RF-205). Decorativo. */
+/**
+ * Icono de la categoría con su color sobre un fondo suave del mismo (RF-205, especificación
+ * 004). Un icono que no está en el catálogo se ve como el genérico. Decorativo.
+ */
 export function CategoryIcon({
   icon,
   tone,
@@ -15,10 +21,14 @@ export function CategoryIcon({
 }) {
   const box = size === 'lg' ? 48 : 40;
   let background: string = color.bg.sunken;
+  let foreground: string = color.text.muted;
   try {
-    if (tone) background = tint(tone, 0.16);
+    if (tone) {
+      background = categoryBackground(tone);
+      foreground = iconTone(tone);
+    }
   } catch {
-    // Un color mal guardado no rompe la fila: se usa el fondo neutro.
+    // Un color mal guardado no rompe la fila: se usan los colores neutros.
   }
   return (
     <View
@@ -27,7 +37,11 @@ export function CategoryIcon({
       aria-hidden
       style={[styles.box, { width: box, height: box, backgroundColor: background }]}
     >
-      <Text style={size === 'lg' ? typography.emojiLarge : typography.emoji}>{icon ?? '•'}</Text>
+      <MaterialCommunityIcons
+        name={CATEGORY_GLYPHS[isCategoryIcon(icon) ? icon : DEFAULT_CATEGORY_ICON]}
+        size={size === 'lg' ? sizes.categoryGlyphLarge : sizes.categoryGlyph}
+        color={foreground}
+      />
     </View>
   );
 }

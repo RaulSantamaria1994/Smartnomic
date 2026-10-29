@@ -99,7 +99,7 @@ apps/mobile/src/noEmoji.test.ts # CE-401: sin emoji en app/, src/ y packages/
 | `home`          | `home-outline`            | Vivienda            | `baby`       | `baby-carriage`         | Bebé               |
 | `utilities`     | `lightbulb-outline`       | Suministros         | `kids`       | `account-child-outline` | Hijos              |
 | `groceries`     | `cart-outline`            | Supermercado        | `sport`      | `dumbbell`              | Deporte            |
-| `car`           | `car-outline`             | Transporte          | `pharmacy`   | `pill`                  | Farmacia           |
+| `car`           | `car-outline`             | Coche               | `pharmacy`   | `pill`                  | Farmacia           |
 | `health`        | `stethoscope`             | Salud               | `water`      | `water-outline`         | Agua               |
 | `education`     | `school-outline`          | Educación           | `gas`        | `fire`                  | Gas                |
 | `leisure`       | `party-popper`            | Ocio                | `internet`   | `wifi`                  | Internet           |
