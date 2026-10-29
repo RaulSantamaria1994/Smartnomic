@@ -2,7 +2,8 @@
 
 **Rama de la funcionalidad**: `004-iconos-categorias`
 **Creada**: 2026-10-29
-**Estado**: Borrador
+**Estado**: Aprobada
+**Plan**: [`plan.md`](plan.md)
 **Entrada**: "Sustituye los emojis de la app por logos o símbolos de librería."
 
 > Esta especificación describe **qué** debe conseguir el cambio y **por qué**. El **cómo**
