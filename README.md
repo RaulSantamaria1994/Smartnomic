@@ -137,11 +137,37 @@ El repositorio trae un `Dockerfile` (exporta la web y la sirve junto con la API)
 4. **Settings → Networking → Generate Domain** con el puerto `3000`.
 5. Comprueba `https://<tu-dominio>/health`.
 
-## APK de Android (EAS Build)
+## APK de Android
+
+### Con GitHub Actions
+
+El flujo `.github/workflows/android.yml` compila el APK en las máquinas de GitHub (sin
+cuenta de Expo) en cada fusión a `main` y cuando se lanza a mano: **Actions → APK de
+Android → Run workflow**. Tarda unos 20 minutos; el APK se descarga en la ejecución, en
+**Artifacts** (`smartnomic-<número>`, un zip con `app-release.apk`). Cada ejecución sube el
+número de versión, así que se instala encima del anterior.
+
+La dirección del servidor va en el propio flujo (`EXPO_PUBLIC_API_URL`), igual que en
+`apps/mobile/eas.json`; si cambias de dominio, cámbiala en los dos.
+
+**Firma.** Sin más, el APK se firma con la clave de depuración de la plantilla de Expo:
+vale para probar, no para publicar en Google Play. Para usar una clave propia, créala una
+vez y guárdala en **Settings → Secrets and variables → Actions** (nunca en el repositorio):
+
+```sh
+keytool -genkeypair -v -keystore smartnomic.jks -alias smartnomic \
+  -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 smartnomic.jks   # valor de ANDROID_KEYSTORE_BASE64
+```
+
+Secretos: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`
+(`smartnomic`) y `ANDROID_KEY_PASSWORD`. Guarda la clave en un sitio seguro: sin ella no se
+pueden publicar actualizaciones. Al cambiar de clave hay que desinstalar la app una vez.
+
+### Con EAS Build
 
 El APK se compila en los servidores de Expo, que no ven las variables de tu terminal: la
 dirección del servidor va en `apps/mobile/eas.json` (`build.preview.env.EXPO_PUBLIC_API_URL`).
-Si cambias de dominio, cámbiala ahí.
 
 ```sh
 npm install -g eas-cli
@@ -168,8 +194,8 @@ alguno). La migración `0005` no se toca: ya está aplicada.
 
 ## Icono y pantalla de carga
 
-Se generan a partir de un dibujo vectorial con los colores de la marca (necesita
-Playwright con Chromium):
+Se generan a partir de la imagen original del icono, `apps/mobile/assets/source/icon.jpg`:
+el script quita el fondo crema y compone cada tamaño (necesita Playwright con Chromium):
 
 ```sh
 node apps/mobile/scripts/make-icons.cjs   # crea apps/mobile/assets/*.png
