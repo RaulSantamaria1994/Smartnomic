@@ -1,17 +1,13 @@
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import icon from '../../assets/icon.png';
 import { AppText } from './Text';
-import { color, radius, spacing } from './tokens';
+import { radius, spacing } from './tokens';
 
 /** Marca de Smartnomic para las pantallas sin sesión: símbolo, nombre y lema. */
 export function Brand({ tagline }: { tagline: string }) {
   return (
     <View style={styles.row} accessibilityRole="header">
-      <View style={styles.mark} aria-hidden accessible={false}>
-        <AppText variant="title" tone="onAccent">
-          S
-        </AppText>
-        <View style={styles.dot} />
-      </View>
+      <Image source={icon} style={styles.mark} accessible={false} aria-hidden />
       <View style={styles.text}>
         <AppText variant="heading">Smartnomic</AppText>
         <AppText variant="caption" tone="muted">
@@ -24,22 +20,6 @@ export function Brand({ tagline }: { tagline: string }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms, marginBottom: spacing.md },
-  mark: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.lg,
-    backgroundColor: color.bg.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dot: {
-    position: 'absolute',
-    right: 9,
-    top: 9,
-    width: 8,
-    height: 8,
-    borderRadius: radius.pill,
-    backgroundColor: color.progress.fill,
-  },
+  mark: { width: 48, height: 48, borderRadius: radius.lg },
   text: { flex: 1 },
 });

@@ -151,6 +151,15 @@ eas build --platform android --profile preview
 
 Al terminar, EAS da un enlace y un QR para descargar el APK en el móvil.
 
+## Icono y pantalla de carga
+
+Se generan a partir de un dibujo vectorial con los colores de la marca (necesita
+Playwright con Chromium):
+
+```sh
+node apps/mobile/scripts/make-icons.cjs   # crea apps/mobile/assets/*.png
+```
+
 ## Estructura
 
 | Carpeta           | Qué contiene                                                    |

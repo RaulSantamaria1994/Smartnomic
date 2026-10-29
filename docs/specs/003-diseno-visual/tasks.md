@@ -90,11 +90,16 @@ excepciones.
 
 ## Fase 5: Historia 4 — Icono y pantalla de inicio (P4)
 
-- [ ] D018 [US4] Script `apps/mobile/scripts/make-icons.cjs` que dibuja el icono en SVG y
+- [x] D018 [US4] Script `apps/mobile/scripts/make-icons.cjs` que dibuja el icono en SVG y
       genera con Chromium `assets/icon.png`, `adaptive-icon.png`, `splash.png` y
       `favicon.png`
-- [ ] D019 [US4] Configurar icono, icono adaptativo, splash, favicon y color de
+- [x] D019 [US4] Configurar icono, icono adaptativo, splash, favicon y color de
       notificación en `apps/mobile/app.json`
+
+- [x] D019b [US4] (Encontrado al probar la web de producción) El servidor no servía los
+      archivos de `assets/__node_modules/.pnpm/…` (fuentes e iconos) porque la carpeta empieza
+      por punto, y respondía con la página: `serveDotFiles` y 404 para archivos que faltan, en
+      `apps/server/src/server.ts`, con tests en `test/web.test.ts`
 
 **Punto de control**: RF-207 cubierto.
 
