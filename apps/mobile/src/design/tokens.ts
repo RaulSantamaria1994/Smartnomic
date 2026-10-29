@@ -123,8 +123,6 @@ export const typography = {
   amountLarge: type(28, 34, 'extrabold', -0.5),
   amount: type(16, 22, 'bold'),
   /** Emoji de las categorías: sin familia propia, con la del sistema. */
-  emoji: { fontSize: 22, lineHeight: 28 },
-  emojiLarge: { fontSize: 26, lineHeight: 32 },
 } as const satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;
@@ -134,7 +132,15 @@ export const spacing = { xxs: 2, xs: 4, sm: 8, ms: 12, md: 16, ml: 20, lg: 24, x
 export const radius = { sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, pill: 999 } as const;
 
 /** Tamaños mínimos: objetivos táctiles de 44 px (WCAG) y 48 px en botones. */
-export const size = { touch: 44, button: 52, icon: 22, iconSmall: 18, avatar: 40 } as const;
+export const size = {
+  touch: 44,
+  button: 52,
+  icon: 22,
+  iconSmall: 18,
+  avatar: 40,
+  categoryGlyph: 22,
+  categoryGlyphLarge: 26,
+} as const;
 
 export const shadow = {
   card: {

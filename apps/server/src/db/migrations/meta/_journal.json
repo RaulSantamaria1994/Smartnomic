@@ -36,6 +36,13 @@
       "when": 1793121988321,
       "tag": "0004_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793272364419,
+      "tag": "0005_category_icons",
+      "breakpoints": true
     }
   ]
 }

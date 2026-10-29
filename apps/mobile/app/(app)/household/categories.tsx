@@ -1,5 +1,10 @@
 import type { Category } from '@smartnomic/api';
-import type { TransactionKind } from '@smartnomic/domain';
+import {
+  DEFAULT_CATEGORY_ICON,
+  isCategoryIcon,
+  type CategoryIconId,
+  type TransactionKind,
+} from '@smartnomic/domain';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -7,6 +12,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { api, queryKeys } from '../../../src/api/client';
 import { Button } from '../../../src/components/Button';
 import { Chip } from '../../../src/components/Chip';
+import { IconPicker } from '../../../src/components/IconPicker';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
@@ -30,9 +36,14 @@ export default function Categories() {
   const canWrite = useCan()('categories.write');
   const [kind, setKind] = useState<TransactionKind>('expense');
   const [name, setName] = useState('');
-  const [icon, setIcon] = useState('🏷️');
+  const [icon, setIcon] = useState<CategoryIconId>(DEFAULT_CATEGORY_ICON);
   const [color, setColor] = useState<string>(PALETTE[0].value);
-  const [editing, setEditing] = useState<{ id: string; name: string; icon: string } | null>(null);
+  const [editing, setEditing] = useState<{
+    id: string;
+    name: string;
+    icon: CategoryIconId;
+    color: string;
+  } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
 
@@ -68,12 +79,15 @@ export default function Categories() {
         api.createCategory(householdId!, {
           kind,
           name: name.trim(),
-          icon: icon.trim() || '🏷️',
+          icon,
           color,
         }),
       es.categories.created,
     );
-    if (ok) setName('');
+    if (ok) {
+      setName('');
+      setIcon(DEFAULT_CATEGORY_ICON);
+    }
   }
 
   async function saveEdit() {
@@ -82,7 +96,7 @@ export default function Categories() {
     const ok = await run(`edit-${editing.id}`, () =>
       api.updateCategory(householdId!, editing.id, {
         name: editing.name.trim(),
-        icon: editing.icon.trim() || '🏷️',
+        icon: editing.icon,
       }),
     );
     if (ok) setEditing(null);
@@ -101,11 +115,12 @@ export default function Categories() {
           onChangeText={(value) => setEditing({ ...editing, name: value })}
           maxLength={40}
         />
-        <TextField
-          label={es.categories.icon}
+        <Text style={styles.label}>{es.categories.icon}</Text>
+        <IconPicker
           value={editing.icon}
-          onChangeText={(value) => setEditing({ ...editing, icon: value })}
-          maxLength={16}
+          onChange={(value) => setEditing({ ...editing, icon: value })}
+          tone={editing.color}
+          accessibilityLabel={`${es.categories.icon} ${editing.name}`}
         />
         <View style={styles.actions}>
           <Button
@@ -129,7 +144,14 @@ export default function Categories() {
                   variant="link"
                   label={es.categories.edit}
                   accessibilityLabel={`${es.categories.edit} ${c.name}`}
-                  onPress={() => setEditing({ id: c.id, name: c.name, icon: c.icon })}
+                  onPress={() =>
+                    setEditing({
+                      id: c.id,
+                      name: c.name,
+                      icon: isCategoryIcon(c.icon) ? c.icon : DEFAULT_CATEGORY_ICON,
+                      color: c.color,
+                    })
+                  }
                 />
               )}
               <Button
@@ -181,12 +203,6 @@ export default function Categories() {
             onChangeText={setName}
             maxLength={40}
           />
-          <TextField
-            label={es.categories.icon}
-            value={icon}
-            onChangeText={setIcon}
-            maxLength={16}
-          />
           <Text style={styles.label}>{es.categories.color}</Text>
           <View
             style={styles.chips}
@@ -209,6 +225,13 @@ export default function Categories() {
               />
             ))}
           </View>
+          <Text style={styles.label}>{es.categories.icon}</Text>
+          <IconPicker
+            value={icon}
+            onChange={setIcon}
+            tone={color}
+            accessibilityLabel={es.categories.icon}
+          />
           <Button
             label={es.categories.create}
             onPress={() => void create()}
@@ -261,7 +284,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   rowMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44 },
-  icon: { ...typography.title, width: 32, textAlign: 'center' },
   swatch: { width: 12, height: 12, borderRadius: 6 },
   name: { ...typography.body, color: colors.text, flex: 1 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md },

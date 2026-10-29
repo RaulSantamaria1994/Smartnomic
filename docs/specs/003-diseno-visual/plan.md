@@ -68,7 +68,7 @@ apps/mobile/
 │   ├── Card.tsx             # superficie con borde y esquinas
 │   ├── ListRow.tsx          # fila con icono, título, detalle e importe
 │   ├── StatusPill.tsx       # atrasado · vence pronto · pagado · omitido · cobrado
-│   ├── CategoryIcon.tsx     # emoji de la categoría sobre un fondo suave de su color
+│   ├── CategoryIcon.tsx     # icono de la categoría sobre un fondo suave de su color (004)
 │   ├── Amount.tsx           # importe con signo, color y cifras tabulares
 │   ├── SummaryCard.tsx      # tarjeta «Te quedan este mes» con barra de gasto
 │   ├── EmptyState.tsx       # icono, texto y acción
@@ -98,7 +98,7 @@ valiendo.
 | Escala tipográfica       | display 40/800 · title 22/700 · heading 17/700 · body 16/500 · label 14/600 · caption 13/500; importes con `fontVariant: ['tabular-nums']`                               | —                                                                      |
 | Carga de la fuente       | `useFonts` en el layout raíz con `expo-splash-screen` hasta que carga; en web, `font-display: swap`                                                                      | —                                                                      |
 | Iconos de interfaz       | Feather de `@expo/vector-icons` (incluido en Expo, trazo fino como el lienzo)                                                                                            | SVG a mano (`react-native-svg`, otra dependencia nativa)               |
-| Iconos de categoría      | Se mantienen los emoji guardados en cada categoría, sobre un fondo `tint(color)`                                                                                         | Cambiar a iconos de trazo (migración de datos y elegir icono al crear) |
+| Iconos de categoría      | Sustituido por [`004-iconos-categorias`](../004-iconos-categorias/plan.md): iconos de Material Community con identificadores propios. Antes: emoji sobre `tint(color)`   | Cambiar a iconos de trazo (migración de datos y elegir icono al crear) |
 | Fondo de categoría       | `tint(hex, 0.14)` mezclado con blanco; un test comprueba que el texto tinta sobre él cumple 4,5:1                                                                        | —                                                                      |
 | Navegación               | `Tabs` de Expo Router en `(app)/(tabs)`. El «+» es un botón propio en la barra que abre `/new` (no es una pestaña); se oculta a los lectores                             | Barra hecha a mano (perdería la gestión de estado de pestañas)         |
 | Pantallas secundarias    | Siguen en el `Stack` de `(app)` encima de las pestañas, con cabecera propia y «Volver»                                                                                   | —                                                                      |

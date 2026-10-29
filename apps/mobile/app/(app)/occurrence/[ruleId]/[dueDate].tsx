@@ -22,6 +22,8 @@ import { useRefreshRecurring } from '../../../../src/hooks/useRuleMutations';
 import { es } from '../../../../src/i18n/es';
 import { newTransactionId } from '../../../../src/ids';
 import { colors, spacing } from '../../../../src/theme';
+import { CategoryIcon } from '../../../../src/design/CategoryIcon';
+import { AppText } from '../../../../src/design/Text';
 import { typography } from '../../../../src/design/tokens';
 
 /** Pagar (con el importe real) u omitir un vencimiento (T064, RF-024 y RF-025). */
@@ -106,8 +108,14 @@ export default function Occurrence() {
   }
 
   return (
-    <Screen title={`${category?.icon ?? ''} ${rule.name}`.trim()}>
+    <Screen title={rule.name}>
       <View style={styles.info}>
+        {category && (
+          <View style={styles.category}>
+            <CategoryIcon icon={category.icon} tone={category.color} />
+            <AppText variant="bodyStrong">{category.name}</AppText>
+          </View>
+        )}
         <Text style={[styles.due, overdue && { color: colors.error }]}>
           {es.recurring.dueOn(formatDueDate(dueDate, today))}
           {overdue ? ` · ${es.recurring.overdue}` : ''}
@@ -161,6 +169,12 @@ export default function Occurrence() {
 }
 
 const styles = StyleSheet.create({
+  category: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
   info: { gap: spacing.xs },
   due: { ...typography.heading, color: colors.text },
   muted: { ...typography.body, color: colors.muted },

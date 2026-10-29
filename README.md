@@ -8,8 +8,9 @@ dinero y reciba recordatorios antes de cada pago. Funciona en Android y en el na
 - Forma de trabajar (personas y agentes): [`AGENTS.md`](AGENTS.md)
 
 **Estado:** el MVP (`docs/specs/001-mvp-hogar`) está completo y desplegado en Railway, y el
-calendario de pagos programados (`docs/specs/002-calendario`) y el diseño visual «Calma»
-(`docs/specs/003-diseno-visual`) también están terminados.
+calendario de pagos programados (`docs/specs/002-calendario`), el diseño visual «Calma»
+(`docs/specs/003-diseno-visual`) y los iconos de categoría (`docs/specs/004-iconos-categorias`)
+también están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 
@@ -158,6 +159,12 @@ El aspecto de la app («Calma»: verde pino, fondo arena, Plus Jakarta Sans) sal
 y componentes de `apps/mobile/src/design/`. Las pantallas no usan colores ni tamaños de letra
 sueltos: ESLint lo impide fuera de esa carpeta. Los tests de `color.test.ts` comprueban el
 contraste WCAG de los tokens.
+
+La app no usa emoji (`noEmoji.test.ts` lo comprueba). Las categorías guardan un identificador
+del catálogo de `packages/domain/src/categoryIcons.ts`, y la app lo dibuja con Material
+Community Icons (`src/design/categoryGlyphs.ts`) y lo nombra en `src/i18n/es.ts`. Para
+añadir un icono: identificador en el catálogo, glifo y nombre (el compilador avisa si falta
+alguno). La migración `0005` no se toca: ya está aplicada.
 
 ## Icono y pantalla de carga
 
