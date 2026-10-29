@@ -1,5 +1,5 @@
 import type { Category } from '@smartnomic/api';
-import type { TransactionKind } from '@smartnomic/domain';
+import { iconFromEmoji, type TransactionKind } from '@smartnomic/domain';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -68,7 +68,7 @@ export default function Categories() {
         api.createCategory(householdId!, {
           kind,
           name: name.trim(),
-          icon: icon.trim() || '🏷️',
+          icon: iconFromEmoji(icon),
           color,
         }),
       es.categories.created,
@@ -82,7 +82,7 @@ export default function Categories() {
     const ok = await run(`edit-${editing.id}`, () =>
       api.updateCategory(householdId!, editing.id, {
         name: editing.name.trim(),
-        icon: editing.icon.trim() || '🏷️',
+        icon: iconFromEmoji(editing.icon),
       }),
     );
     if (ok) setEditing(null);

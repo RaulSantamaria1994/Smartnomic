@@ -20,13 +20,13 @@ fallar antes de implementar.
 
 **Objetivo**: el catálogo existe en el dominio y la API solo acepta sus identificadores.
 
-- [ ] I001 Tests del catálogo en `packages/domain/src/categoryIcons.test.ts`: 44
+- [x] I001 Tests del catálogo en `packages/domain/src/categoryIcons.test.ts`: 44
       identificadores únicos, `tag` incluido, `isCategoryIcon`, `iconFromEmoji` (las 13
       predefinidas, 🏷️, los frecuentes, con y sin selector de variante `️`, y desconocido →
       `tag`), y que cada categoría predefinida usa un identificador del catálogo
-- [ ] I002 Implementar `packages/domain/src/categoryIcons.ts` y pasar
+- [x] I002 Implementar `packages/domain/src/categoryIcons.ts` y pasar
       `DEFAULT_CATEGORIES` (`categories.ts`) a identificadores; exportarlo en `index.ts`
-- [ ] I003 `categoryIconSchema = z.enum(CATEGORY_ICONS)` en
+- [x] I003 `categoryIconSchema = z.enum(CATEGORY_ICONS)` en
       `packages/api/src/schemas/transactions.ts` (la respuesta sigue con `z.string()`)
 
 **Punto de control**: dominio y contrato compilan; RF-401, RF-402 y RF-406 (contrato).

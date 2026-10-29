@@ -3,6 +3,7 @@
 // (docs/CONSTITUTION.md, art. II).
 export * from './calendar';
 export * from './categories';
+export * from './categoryIcons';
 export * from './dates';
 export * from './ids';
 export * from './money';

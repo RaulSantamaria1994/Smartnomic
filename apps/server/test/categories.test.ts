@@ -9,7 +9,7 @@ import { call, joinHousehold, me, newId, signUp, useTestServer, type TestUser } 
 
 const ctx = useTestServer();
 
-const PET = { kind: 'expense', name: 'Mascotas', icon: '🐶', color: '#AA5500' };
+const PET = { kind: 'expense', name: 'Mascotas', icon: 'pet', color: '#AA5500' };
 
 async function setup() {
   const owner = await signUp(ctx.app);
@@ -87,11 +87,11 @@ describe('renombrar y archivar', () => {
 
     const response = await call(ctx.app, owner, 'PATCH', url(householdId, id), {
       name: 'Perro',
-      icon: '🐕',
+      icon: 'kids',
     });
 
     expect(response.statusCode).toBe(200);
-    expect(categorySchema.parse(response.json())).toMatchObject({ name: 'Perro', icon: '🐕' });
+    expect(categorySchema.parse(response.json())).toMatchObject({ name: 'Perro', icon: 'kids' });
   });
 
   it('renombrar a un nombre en uso da 409', async () => {

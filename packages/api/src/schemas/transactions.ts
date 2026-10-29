@@ -1,4 +1,4 @@
-import { TRANSACTION_KINDS } from '@smartnomic/domain';
+import { CATEGORY_ICONS, TRANSACTION_KINDS } from '@smartnomic/domain';
 import { z } from 'zod';
 import { centsSchema, dateSchema, uuidV7Schema } from './common';
 
@@ -30,8 +30,8 @@ export const categoryColorSchema = z
   .string()
   .regex(/^#[0-9A-Fa-f]{6}$/, { message: 'Color no válido: se espera #RRGGBB' });
 
-/** Un emoji o símbolo corto. */
-export const categoryIconSchema = z.string().trim().min(1).max(16);
+/** Identificador del catálogo de iconos (especificación 004, RF-406). */
+export const categoryIconSchema = z.enum(CATEGORY_ICONS, { message: 'Icono no válido.' });
 
 /** Cuerpo de `POST /api/households/:householdId/categories` (RF-021). */
 export const createCategorySchema = z.object({
