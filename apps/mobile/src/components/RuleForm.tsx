@@ -7,7 +7,7 @@ import {
   type TransactionKind,
 } from '@smartnomic/domain';
 import { useState } from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
 import { ApiError } from '../api/http';
 import {
   amountErrorMessage,
@@ -18,9 +18,12 @@ import {
   WEEKDAYS,
 } from '../format';
 import { es } from '../i18n/es';
-import { colors, spacing } from '../theme';
+import { AppText } from '../design/Text';
+import { spacing } from '../design/tokens';
 import { Button } from './Button';
+import { CategoryPicker } from './CategoryPicker';
 import { Chip } from './Chip';
+import { SegmentedControl } from './SegmentedControl';
 import { Message } from './Message';
 import { TextField } from './TextField';
 
@@ -122,19 +125,15 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
 
   return (
     <View style={styles.form}>
-      <View style={styles.row} accessibilityRole="radiogroup">
-        <Chip
-          label={es.transaction.expense}
-          selected={kind === 'expense'}
-          onPress={() => changeKind('expense')}
-        />
-        <Chip
-          label={es.transaction.income}
-          selected={kind === 'income'}
-          onPress={() => changeKind('income')}
-          color={colors.success}
-        />
-      </View>
+      <SegmentedControl
+        accessibilityLabel={es.transaction.kind}
+        value={kind}
+        onChange={changeKind}
+        options={[
+          { value: 'expense', label: es.transaction.expense },
+          { value: 'income', label: es.transaction.income },
+        ]}
+      />
       <TextField label={es.recurring.name} value={name} onChangeText={setName} maxLength={60} />
       <TextField
         label={es.recurring.expectedAmount}
@@ -144,20 +143,15 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
         placeholder="0,00"
       />
 
-      <Text style={styles.label}>{es.transaction.category}</Text>
-      <View style={styles.wrap} accessibilityRole="radiogroup">
-        {options.map((c) => (
-          <Chip
-            key={c.id}
-            label={`${c.icon} ${c.name}`}
-            selected={c.id === categoryId}
-            onPress={() => setCategoryId(c.id)}
-            color={c.color}
-          />
-        ))}
-      </View>
+      <AppText variant="label">{es.transaction.category}</AppText>
+      <CategoryPicker
+        accessibilityLabel={es.transaction.category}
+        categories={options}
+        value={categoryId}
+        onChange={setCategoryId}
+      />
 
-      <Text style={styles.label}>{es.recurring.frequency}</Text>
+      <AppText variant="label">{es.recurring.frequency}</AppText>
       <View style={styles.wrap} accessibilityRole="radiogroup">
         {(['monthly', 'weekly', 'yearly'] as const).map((f) => (
           <Chip
@@ -177,7 +171,7 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
 
       {frequency === 'weekly' ? (
         <>
-          <Text style={styles.label}>{es.recurring.weekday}</Text>
+          <AppText variant="label">{es.recurring.weekday}</AppText>
           <View style={styles.wrap} accessibilityRole="radiogroup">
             {WEEKDAY_ORDER.map((d) => (
               <Chip
@@ -200,7 +194,7 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
       )}
       {frequency === 'yearly' && (
         <>
-          <Text style={styles.label}>{es.recurring.month}</Text>
+          <AppText variant="label">{es.recurring.month}</AppText>
           <View style={styles.wrap} accessibilityRole="radiogroup">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <Chip
@@ -227,7 +221,7 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
         keyboardType="numbers-and-punctuation"
       />
 
-      <Text style={styles.label}>{es.recurring.remind}</Text>
+      <AppText variant="label">{es.recurring.remind}</AppText>
       <View style={styles.wrap} accessibilityRole="radiogroup">
         {REMIND_DAYS_OPTIONS.map((d) => (
           <Chip
@@ -241,7 +235,7 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
 
       {initial && (
         <View style={styles.switchRow}>
-          <Text style={styles.label}>{es.recurring.active}</Text>
+          <AppText variant="label">{es.recurring.active}</AppText>
           <Switch
             value={active}
             onValueChange={setActive}
@@ -261,6 +255,5 @@ const styles = StyleSheet.create({
   form: { gap: spacing.md },
   row: { flexDirection: 'row', gap: spacing.sm },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  label: { fontSize: 16, fontWeight: '600', color: colors.text },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 });

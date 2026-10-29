@@ -76,4 +76,30 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Especificación 003, CE-202: el aspecto sale de los tokens de `src/design/`.
+    files: ['apps/mobile/**/*.{ts,tsx}'],
+    ignores: ['apps/mobile/src/design/**', 'apps/mobile/scripts/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]',
+          message: 'Usa un color de los tokens (src/design/tokens.ts), no un color suelto.',
+        },
+        {
+          selector: 'Literal[value=/^rgba?\\(/]',
+          message: 'Usa un color de los tokens (src/design/tokens.ts), no un color suelto.',
+        },
+        {
+          selector: "Property[key.name='fontSize'][value.type='Literal']",
+          message: 'Usa una variante de `typography` (src/design/tokens.ts), no un tamaño suelto.',
+        },
+        {
+          selector: "Property[key.name='fontWeight']",
+          message: 'Usa una variante de `typography`: con la fuente propia, el peso es la familia.',
+        },
+      ],
+    },
+  },
 );

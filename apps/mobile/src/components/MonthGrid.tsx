@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatDay } from '../format';
 import { es } from '../i18n/es';
 import { colors, spacing } from '../theme';
+import { color, typography } from '../design/tokens';
 
 interface Props {
   month: string;
@@ -86,10 +87,10 @@ function Day({
   const markColor = !summary
     ? undefined
     : summary.overdue > 0
-      ? colors.error
+      ? color.mark.overdue
       : summary.pending > 0
-        ? colors.primary
-        : colors.muted;
+        ? color.mark.pending
+        : color.mark.resolved;
   const label =
     es.calendar.dayLabel(formatDay(date), count, summary?.overdue ?? 0) +
     (isToday ? es.calendar.todaySuffix : '');
@@ -111,7 +112,7 @@ function Day({
       <View style={styles.markRow}>
         {markColor && (
           <View
-            style={[styles.mark, { backgroundColor: isSelected ? colors.onPrimary : markColor }]}
+            style={[styles.mark, { backgroundColor: isSelected ? color.text.onAccent : markColor }]}
           />
         )}
         {count > 1 && (
@@ -133,10 +134,9 @@ const styles = StyleSheet.create({
   },
   week: { flexDirection: 'row', gap: 2 },
   weekday: {
+    ...typography.label,
     flex: 1,
     textAlign: 'center',
-    fontSize: 14,
-    fontWeight: '600',
     color: colors.muted,
     paddingVertical: spacing.xs,
   },
@@ -149,12 +149,12 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
     paddingVertical: 2,
   },
-  today: { borderColor: colors.primary },
-  selected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  today: { borderColor: color.border.focus },
+  selected: { backgroundColor: color.bg.accent, borderColor: color.bg.accent },
   pressed: { opacity: 0.7 },
-  number: { fontSize: 16, color: colors.text, fontWeight: '500' },
+  number: { ...typography.body, color: colors.text },
   selectedText: { color: colors.onPrimary },
   markRow: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 18 },
   mark: { width: 8, height: 8, borderRadius: 4 },
-  count: { fontSize: 14, color: colors.muted, fontWeight: '600' },
+  count: { ...typography.label, color: colors.muted },
 });

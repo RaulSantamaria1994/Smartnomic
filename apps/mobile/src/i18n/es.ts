@@ -1,6 +1,7 @@
 // Textos de la interfaz (constitución, art. VIII.5).
 export const es = {
   appName: 'Smartnomic',
+  brand: { tagline: 'La economía de tu hogar, en calma.' },
   common: {
     loading: 'Cargando…',
     retry: 'Reintentar',
@@ -78,11 +79,18 @@ export const es = {
     deleted: 'Movimiento borrado.',
     undo: 'Deshacer',
   },
+  summary: {
+    leftThisMonth: 'Te quedan este mes',
+    balance: 'Balance del periodo',
+    spentShare: (percent: number) => `Has gastado el ${percent} % de lo que ha entrado`,
+    noIncome: 'Aún no hay ingresos en este periodo.',
+  },
   transaction: {
     newTitle: 'Apuntar',
     editTitle: 'Editar movimiento',
     expense: 'Gasto',
     income: 'Ingreso',
+    kind: 'Tipo de movimiento',
     amount: 'Importe',
     category: 'Categoría',
     date: 'Fecha',
@@ -143,6 +151,8 @@ export const es = {
     today: 'Hoy',
     tomorrow: 'Mañana',
     yesterday: 'Ayer',
+    inDays: (n: number) => `En ${n} días`,
+    daysAgo: (n: number) => `Hace ${n} días`,
     pay: 'Marcar como pagado',
     collect: 'Marcar como cobrado',
     skip: 'Omitir este mes',
@@ -223,6 +233,7 @@ export const es = {
     readOnly: 'Solo los editores y el propietario pueden cambiar las categorías.',
   },
   account: {
+    title: 'Tu cuenta',
     exportTitle: 'Tus datos',
     exportHint:
       'Descarga en un archivo todos los movimientos, pagos recurrentes y categorías del hogar.',
@@ -342,7 +353,16 @@ export const es = {
     accept: 'Unirme',
     goHome: 'Ir al inicio',
   },
+  tabs: {
+    month: 'Mes',
+    calendar: 'Calendario',
+    recurring: 'Pagos',
+    household: 'Hogar',
+    add: 'Apuntar un movimiento',
+    navigation: 'Navegación principal',
+  },
   home: {
+    transactions: 'Movimientos',
     greeting: (name: string) => `Hola, ${name}`,
     household: 'Tu hogar',
     roles: { owner: 'Propietario', editor: 'Editor', viewer: 'Lector' },

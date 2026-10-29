@@ -5,7 +5,7 @@
     "scheme": "smartnomic",
     "version": "0.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "android": {
       "package": "com.raulsantamaria.smartnomic",
       "versionCode": 1,
@@ -13,20 +13,38 @@
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.RECEIVE_BOOT_COMPLETED"
-      ]
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E5A4C"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "themeColor": "#0E5A4C",
+      "backgroundColor": "#F6F4EF"
     },
     "plugins": [
       "expo-router",
       [
         "expo-notifications",
         {
-          "color": "#1F5FBF"
+          "color": "#0E5A4C",
+          "icon": "./assets/notification-icon.png"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0E5A4C"
         }
       ]
-    ]
+    ],
+    "icon": "./assets/icon.png"
   }
 }

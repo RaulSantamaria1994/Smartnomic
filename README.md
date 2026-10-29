@@ -8,7 +8,8 @@ dinero y reciba recordatorios antes de cada pago. Funciona en Android y en el na
 - Forma de trabajar (personas y agentes): [`AGENTS.md`](AGENTS.md)
 
 **Estado:** el MVP (`docs/specs/001-mvp-hogar`) está completo y desplegado en Railway, y el
-calendario de pagos programados (`docs/specs/002-calendario`) también está terminado.
+calendario de pagos programados (`docs/specs/002-calendario`) y el diseño visual «Calma»
+(`docs/specs/003-diseno-visual`) también están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 
@@ -150,6 +151,22 @@ eas build --platform android --profile preview
 ```
 
 Al terminar, EAS da un enlace y un QR para descargar el APK en el móvil.
+
+## Diseño
+
+El aspecto de la app («Calma»: verde pino, fondo arena, Plus Jakarta Sans) sale de los tokens
+y componentes de `apps/mobile/src/design/`. Las pantallas no usan colores ni tamaños de letra
+sueltos: ESLint lo impide fuera de esa carpeta. Los tests de `color.test.ts` comprueban el
+contraste WCAG de los tokens.
+
+## Icono y pantalla de carga
+
+Se generan a partir de un dibujo vectorial con los colores de la marca (necesita
+Playwright con Chromium):
+
+```sh
+node apps/mobile/scripts/make-icons.cjs   # crea apps/mobile/assets/*.png
+```
 
 ## Estructura
 

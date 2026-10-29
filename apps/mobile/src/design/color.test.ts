@@ -1,0 +1,70 @@
+import { DEFAULT_CATEGORIES } from '@smartnomic/domain';
+import { describe, expect, it } from 'vitest';
+import { contrastRatio, mix, tint } from './color';
+import { color } from './tokens';
+
+describe('mix y tint', () => {
+  it('mezcla dos colores en la proporción pedida', () => {
+    expect(mix('#000000', '#FFFFFF', 0)).toBe('#000000');
+    expect(mix('#000000', '#FFFFFF', 1)).toBe('#FFFFFF');
+    expect(mix('#000000', '#FFFFFF', 0.5)).toBe('#808080');
+  });
+
+  it('tint aclara un color hacia el blanco', () => {
+    expect(tint('#000000', 0.14)).toBe('#DBDBDB');
+    expect(tint('#0E5A4C', 1)).toBe('#0E5A4C');
+    expect(tint('#0e5a4c', 0)).toBe('#FFFFFF');
+  });
+
+  it('rechaza colores mal escritos', () => {
+    expect(() => tint('rojo')).toThrow();
+    expect(() => tint('#FFF')).toThrow();
+  });
+});
+
+describe('contrastRatio', () => {
+  it('ratios WCAG conocidos', () => {
+    expect(contrastRatio('#000000', '#FFFFFF')).toBeCloseTo(21, 1);
+    expect(contrastRatio('#FFFFFF', '#FFFFFF')).toBeCloseTo(1, 5);
+    expect(contrastRatio('#767676', '#FFFFFF')).toBeCloseTo(4.54, 2);
+    expect(contrastRatio('#FFFFFF', '#767676')).toBeCloseTo(4.54, 2);
+  });
+});
+
+describe('contraste de los tokens «Calma» (WCAG 2.1 AA)', () => {
+  const AA = 4.5;
+  const pairs: [string, string, string][] = [
+    ['texto sobre el fondo', color.text.primary, color.bg.canvas],
+    ['texto secundario sobre el fondo', color.text.muted, color.bg.canvas],
+    ['texto secundario sobre tarjeta', color.text.muted, color.bg.surface],
+    ['enlace sobre el fondo', color.text.link, color.bg.canvas],
+    ['texto sobre el botón principal', color.text.onAccent, color.bg.accent],
+    ['texto claro sobre la tarjeta de resumen', color.text.onAccentMuted, color.bg.accent],
+    ['ingresos sobre tarjeta', color.amount.income, color.bg.surface],
+    ['error sobre tarjeta', color.text.danger, color.bg.surface],
+  ];
+  for (const [name, fg, bg] of pairs) {
+    it(name, () => expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(AA));
+  }
+
+  for (const [status, { fg, bg }] of Object.entries(color.status)) {
+    it(`etiqueta de estado «${status}»`, () =>
+      expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(AA));
+  }
+
+  it('bordes de campos y foco: 3:1 sobre tarjeta y fondo (WCAG 1.4.11)', () => {
+    for (const bg of [color.bg.surface, color.bg.canvas]) {
+      expect(contrastRatio(color.border.strong, bg)).toBeGreaterThanOrEqual(3);
+      expect(contrastRatio(color.border.focus, bg)).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('la tinta se lee sobre el fondo suave de cada categoría predefinida', () => {
+    for (const category of DEFAULT_CATEGORIES) {
+      expect(
+        contrastRatio(color.text.primary, tint(category.color)),
+        category.name,
+      ).toBeGreaterThanOrEqual(AA);
+    }
+  });
+});

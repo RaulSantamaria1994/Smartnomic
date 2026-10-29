@@ -1,14 +1,16 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors, spacing } from '../theme';
+import { Pressable, StyleSheet } from 'react-native';
+import { AppText } from '../design/Text';
+import { color as tokens, radius, size, spacing } from '../design/tokens';
 
 interface Props {
   label: string;
   selected: boolean;
   onPress: () => void;
+  /** Color de relleno cuando está elegido (por defecto, el verde pino). */
   color?: string;
 }
 
-export function Chip({ label, selected, onPress, color = colors.primary }: Props) {
+export function Chip({ label, selected, onPress, color = tokens.bg.accent }: Props) {
   return (
     <Pressable
       onPress={onPress}
@@ -23,7 +25,9 @@ export function Chip({ label, selected, onPress, color = colors.primary }: Props
         pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.text, selected && styles.selectedText]}>{label}</Text>
+      <AppText variant="label" tone={selected ? 'onAccent' : 'primary'}>
+        {label}
+      </AppText>
     </Pressable>
   );
 }
@@ -31,15 +35,12 @@ export function Chip({ label, selected, onPress, color = colors.primary }: Props
 const styles = StyleSheet.create({
   chip: {
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    borderRadius: 999,
+    borderColor: tokens.border.strong,
+    backgroundColor: tokens.bg.surface,
+    borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    minHeight: 44,
+    minHeight: size.touch,
     justifyContent: 'center',
   },
-  text: { fontSize: 15, color: colors.text },
-  selectedText: { color: colors.onPrimary, fontWeight: '600' },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: 0.8 },
 });

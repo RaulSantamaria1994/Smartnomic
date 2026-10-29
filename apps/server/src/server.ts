@@ -100,13 +100,17 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
 
   const webRoot = options.webRoot && existsSync(options.webRoot) ? options.webRoot : undefined;
   if (webRoot) {
-    await app.register(fastifyStatic, { root: webRoot, wildcard: false });
+    // `serveDotFiles`: Expo exporta las fuentes e iconos de los paquetes bajo
+    // `assets/__node_modules/.pnpm/…`; la carpeta solo contiene la web compilada.
+    await app.register(fastifyStatic, { root: webRoot, wildcard: false, serveDotFiles: true });
   }
 
   app.setNotFoundHandler((request, reply) => {
     const path = request.url.split('?')[0] ?? '';
-    // La web es una sola página: cualquier ruta que no sea de la API la resuelve la app.
-    if (webRoot && request.method === 'GET' && !path.startsWith('/api/')) {
+    // La web es una sola página: cualquier ruta que no sea de la API ni un archivo
+    // (`/assets/x.ttf`) la resuelve la app. Un archivo que falta da 404, no la página.
+    const isFile = /\.[a-z0-9]+$/i.test(path);
+    if (webRoot && request.method === 'GET' && !path.startsWith('/api/') && !isFile) {
       return reply.sendFile('index.html');
     }
     return reply.status(404).send(errorResponse('not_found', 'No existe esta ruta.'));

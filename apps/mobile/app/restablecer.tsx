@@ -39,7 +39,7 @@ export default function ResetPassword() {
 
   if (done) {
     return (
-      <Screen title={es.auth.reset.title}>
+      <Screen brand title={es.auth.reset.title}>
         <Message kind="success" text={es.auth.reset.done} />
         <Button label={es.auth.reset.goToSignIn} onPress={() => router.replace('/entrar')} />
       </Screen>
@@ -48,7 +48,7 @@ export default function ResetPassword() {
 
   if (linkError) {
     return (
-      <Screen title={es.auth.reset.title}>
+      <Screen brand title={es.auth.reset.title}>
         <Message text={linkError} />
         <Button label={es.auth.reset.requestNew} onPress={() => router.replace('/recuperar')} />
       </Screen>
@@ -56,7 +56,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <Screen title={es.auth.reset.title}>
+    <Screen brand title={es.auth.reset.title}>
       <TextField
         label={es.auth.newPassword}
         hint={es.auth.passwordHint}

@@ -1,13 +1,25 @@
+import { color, spacing as designSpacing } from './design/tokens';
+
+/**
+ * Nombres antiguos de color y espaciado, ahora sobre los tokens de `src/design/tokens.ts`
+ * (especificación 003). Se quitan cuando todas las pantallas usen los tokens.
+ */
 export const colors = {
-  background: '#F7F7F5',
-  surface: '#FFFFFF',
-  text: '#1B1B1F',
-  muted: '#5B5B66',
-  border: '#C9C9CF',
-  primary: '#1F5FBF',
-  onPrimary: '#FFFFFF',
-  error: '#B3261E',
-  success: '#1E7A3C',
+  background: color.bg.canvas,
+  surface: color.bg.surface,
+  text: color.text.primary,
+  muted: color.text.muted,
+  border: color.border.strong,
+  primary: color.text.link,
+  onPrimary: color.text.onAccent,
+  error: color.text.danger,
+  success: color.text.success,
 } as const;
 
-export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;
+export const spacing = {
+  xs: designSpacing.xs,
+  sm: designSpacing.sm,
+  md: designSpacing.md,
+  lg: designSpacing.lg,
+  xl: designSpacing.xl,
+} as const;

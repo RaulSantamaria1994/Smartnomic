@@ -1,5 +1,5 @@
 import type { AmountError, Cents, DateString, Period } from '@smartnomic/domain';
-import { parseDate } from '@smartnomic/domain';
+import { daysBetween, parseDate } from '@smartnomic/domain';
 import { es } from './i18n/es';
 
 const LOCALE = 'es-ES';
@@ -162,4 +162,23 @@ export function formatMonthTitle(month: string): string {
   const [year, value] = month.split('-').map(Number) as [number, number];
   const name = monthName(value);
   return `${name.charAt(0).toUpperCase()}${name.slice(1)} de ${year}`;
+}
+
+/**
+ * Para las tarjetas de próximos pagos: «Hoy», «Mañana», «En 3 días» (hasta una semana) o
+ * la fecha; si ya pasó, «Ayer» o «Hace N días».
+ */
+export function formatRelativeDue(dueDate: DateString, today: DateString): string {
+  const days = daysBetween(today, dueDate);
+  if (days === 0) return es.recurring.today;
+  if (days === 1) return es.recurring.tomorrow;
+  if (days === -1) return es.recurring.yesterday;
+  if (days < 0) return es.recurring.daysAgo(-days);
+  if (days <= 7) return es.recurring.inDays(days);
+  return formatDayMonth(dueDate);
+}
+
+/** «OCT»: el mes abreviado, para la fecha destacada de una tarjeta. */
+export function formatMonthShort(date: DateString): string {
+  return monthName(parseDate(date).month).slice(0, 3).toUpperCase();
 }
