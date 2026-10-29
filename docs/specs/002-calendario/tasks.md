@@ -44,31 +44,31 @@ aparece en su día y con su estado; al tocar un día se ven sus pagos.
 
 ### Tests de la historia 1
 
-- [ ] C004 [P] [US1] Tests de `calendarMonth` y `calendarTotals` en
+- [x] C004 [P] [US1] Tests de `calendarMonth` y `calendarTotals` en
       `packages/domain/src/calendar.test.ts`: estados `pending`/`overdue`/`paid`/`skipped`
       según hoy; pagos el día 31 en meses cortos; semanales, cada N meses y anuales; fecha
       de fin; reglas desactivadas (solo sus resueltos); resueltos cuya fecha ya no encaja
       con la regla; importe real de los pagados; totales; y que coincide con `upcoming`
       en los vencimientos pendientes (CE-102)
-- [ ] C005 [P] [US1] Tests de la ruta en `apps/server/test/calendar.test.ts`: respuesta
+- [x] C005 [P] [US1] Tests de la ruta en `apps/server/test/calendar.test.ts`: respuesta
       con estados, importe real y `resolvedBy`; movimiento del pago borrado (importe
       previsto); límites (`bounds`, 400 fuera de ellos y con un mes mal escrito); hogar
       sin pagos; lector puede verlo; hogar ajeno 403; sin sesión 401
 
 ### Implementación de la historia 1
 
-- [ ] C006 [US1] `calendarMonth` y `calendarTotals` en `packages/domain/src/calendar.ts`
-- [ ] C007 [US1] `GET /api/households/:householdId/calendar/:month` en
+- [x] C006 [US1] `calendarMonth` y `calendarTotals` en `packages/domain/src/calendar.ts`
+- [x] C007 [US1] `GET /api/households/:householdId/calendar/:month` en
       `apps/server/src/routes/calendar.ts`, registrada en `src/server.ts`
-- [ ] C008 [P] [US1] `api.calendar`, `queryKeys.calendar` en `apps/mobile/src/api/client.ts`
+- [x] C008 [P] [US1] `api.calendar`, `queryKeys.calendar` en `apps/mobile/src/api/client.ts`
       y `useCalendar` en `apps/mobile/src/hooks/data.ts`
-- [ ] C009 [P] [US1] Textos del calendario en `apps/mobile/src/i18n/es.ts`
-- [ ] C010 [US1] Componente `MonthGrid` accesible (marcas por estado, hoy, seleccionado,
+- [x] C009 [P] [US1] Textos del calendario en `apps/mobile/src/i18n/es.ts`
+- [x] C010 [US1] Componente `MonthGrid` accesible (marcas por estado, hoy, seleccionado,
       etiquetas para lector de pantalla, 44×44 mínimo) en
       `apps/mobile/src/components/MonthGrid.tsx`
-- [ ] C011 [US1] Pantalla `apps/mobile/app/(app)/calendar.tsx`: mes, flechas con límites,
+- [x] C011 [US1] Pantalla `apps/mobile/app/(app)/calendar.tsx`: mes, flechas con límites,
       «Hoy», totales, cuadrícula, lista del día y mensaje si no hay vencimientos
-- [ ] C012 [US1] Enlace «Calendario» en la sección «Próximos pagos» de
+- [x] C012 [US1] Enlace «Calendario» en la sección «Próximos pagos» de
       `apps/mobile/app/(app)/index.tsx`
 
 **Punto de control**: RF-101…RF-106, RF-108 y RF-109 cubiertos; el calendario se ve en

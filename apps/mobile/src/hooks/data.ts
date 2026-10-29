@@ -1,5 +1,5 @@
 import { can, civilDateIn, periodOf, type Action, type DateString } from '@smartnomic/domain';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { api, queryKeys } from '../api/client';
 
 export function useMe() {
@@ -68,4 +68,15 @@ export function useInvitations(householdId: string | undefined, enabled: boolean
 export function useCan(): (action: Action) => boolean {
   const role = useMe().data?.member.role;
   return (action) => (role ? can(role, action) : false);
+}
+
+/** Vencimientos de un mes natural para el calendario (especificación 002). */
+export function useCalendar(householdId: string | undefined, month: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.calendar(householdId ?? '', month ?? ''),
+    queryFn: () => api.calendar(householdId!, month!),
+    enabled: Boolean(householdId && month),
+    // Al cambiar de mes se sigue viendo el anterior hasta que llega el nuevo.
+    placeholderData: keepPreviousData,
+  });
 }

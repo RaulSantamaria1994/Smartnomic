@@ -10,6 +10,7 @@ import { loggerOptions } from './logging';
 import { registerErrorHandler } from './plugins/errors';
 import { createHouseholdAccess } from './plugins/household-access';
 import { registerAccountRoutes } from './routes/account';
+import { registerCalendarRoutes } from './routes/calendar';
 import { registerCategoryRoutes } from './routes/categories';
 import { registerExportRoutes } from './routes/export';
 import { registerHouseholdRoutes } from './routes/households';
@@ -88,6 +89,7 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
       rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
     });
     registerRecurringRoutes(app, { db, access, now });
+    registerCalendarRoutes(app, { db, access, now });
     registerInvitationRoutes(app, {
       db,
       access,

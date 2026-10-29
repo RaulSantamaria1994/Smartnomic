@@ -5,6 +5,7 @@ import {
   formatDay,
   formatDueDate,
   formatMoney,
+  formatMonthTitle,
   formatPeriod,
   formatShortDate,
   formatSignedMoney,
@@ -13,6 +14,13 @@ import {
 
 // El importe y el símbolo van separados por un espacio duro.
 const nbsp = (text: string) => text.replace(/\u00a0/g, ' ');
+
+describe('formatMonthTitle', () => {
+  it('nombre del mes con mayúscula y el año', () => {
+    expect(formatMonthTitle('2026-11')).toBe('Noviembre de 2026');
+    expect(formatMonthTitle('2027-01')).toBe('Enero de 2027');
+  });
+});
 
 describe('formatMoney', () => {
   it('formatea céntimos en euros con el formato español', () => {

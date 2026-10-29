@@ -156,3 +156,10 @@ export function formatDayMonth(date: DateString): string {
   const { day, month } = parseDate(date);
   return `${day} de ${monthName(month)}`;
 }
+
+/** «Noviembre de 2026» para un mes `YYYY-MM`. */
+export function formatMonthTitle(month: string): string {
+  const [year, value] = month.split('-').map(Number) as [number, number];
+  const name = monthName(value);
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)} de ${year}`;
+}
