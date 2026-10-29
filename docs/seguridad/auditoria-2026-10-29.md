@@ -62,6 +62,11 @@ La sesión ya iba en `expo-secure-store`.
 **H5 — Permisos del token de GitHub (bajo).** Los flujos de CI y del APK ahora piden solo
 `contents: read`.
 
+**H6 — Importes en la pantalla de bloqueo (bajo).** Los avisos de pago mostraban el
+importe («Mañana vence Alquiler · 750,00 €») a cualquiera que viera el móvil. Ahora dicen
+«Mañana vence Alquiler · 1 de noviembre · Toca para ver el importe»
+(`reminders/plan.ts`; test en `plan.test.ts`; especificación 001 actualizada).
+
 ## Riesgos aceptados y recomendaciones
 
 - **R1 — Registrarse revela si un email ya tiene cuenta** (Better Auth responde
@@ -70,9 +75,6 @@ La sesión ya iba en `expo-secure-store`.
 - **R2 — Avisos de `pnpm audit`** (`node-forge`, `zod` 3, `esbuild`, `deepmerge`): están en
   la CLI de Expo y en `drizzle-kit`, herramientas de desarrollo que no van ni en el servidor
   ni en la app. El `zod` del servidor (4.6.7) ya está corregido.
-- **Notificaciones en la pantalla de bloqueo**: muestran el importe del pago. Si se quiere
-  ocultar con el móvil bloqueado, el canal de avisos debe crearse con visibilidad privada
-  (cambia cómo se ven los avisos: decisión de producto).
 - **Clave de firma del APK**: se usa la de depuración de la plantilla de Expo. Para
   publicar, crear una clave propia (README, «APK de Android»).
 - **Repetir la prueba de H2 en producción** tras desplegar, y revisar la configuración de

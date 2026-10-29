@@ -18,8 +18,6 @@ const rule = {
   active: true,
 };
 
-const nbsp = (t: string) => t.replace(/\u00a0/g, ' ');
-
 describe('localNow y reminderInstant', () => {
   it('usan la hora local del dispositivo', () => {
     const now = new Date(2026, 9, 27, 8, 5);
@@ -56,7 +54,7 @@ describe('reminderText', () => {
       rule,
     );
     expect(before.title).toBe('Mañana vence Alquiler');
-    expect(nbsp(before.body)).toBe('750,00 € · 1 de noviembre');
+    expect(before.body).toBe('1 de noviembre · Toca para ver el importe');
 
     const due = reminderText(
       {
@@ -70,7 +68,7 @@ describe('reminderText', () => {
       rule,
     );
     expect(due.title).toBe('Hoy vence Alquiler');
-    expect(nbsp(due.body)).toBe('750,00 € · vence hoy');
+    expect(due.body).toBe('Toca para ver el importe');
   });
 
   it('con varios días de antelación y para cobros', () => {
@@ -87,6 +85,23 @@ describe('reminderText', () => {
         { ...rule, kind: 'income', name: 'Nómina' },
       ).title,
     ).toBe('En 3 días cobras Nómina');
+  });
+
+  it('nunca muestra el importe: se ve en la pantalla de bloqueo', () => {
+    for (const daysBefore of [0, 1, 3]) {
+      const { title, body } = reminderText(
+        {
+          id: 'd',
+          ruleId: rule.id,
+          dueDate: '2026-11-04',
+          date: '2026-11-01',
+          time: '09:00',
+          daysBefore,
+        },
+        rule,
+      );
+      expect(`${title} ${body}`).not.toMatch(/750|€/);
+    }
   });
 });
 

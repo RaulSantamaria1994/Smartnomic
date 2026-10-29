@@ -1,6 +1,6 @@
 import type { Member, RecurringRule, UpcomingOccurrenceDto } from '@smartnomic/api';
 import { formatDate, remindersToSchedule, type Reminder } from '@smartnomic/domain';
-import { formatDayMonth, formatMoney } from '../format';
+import { formatDayMonth } from '../format';
 import { es } from '../i18n/es';
 
 /** Fecha y hora locales del dispositivo (`YYYY-MM-DD`, `HH:MM`). */
@@ -50,10 +50,13 @@ export function planReminders(
   });
 }
 
-/** «Mañana vence Alquiler» · «750,00 € · 1 de noviembre». */
+/**
+ * «Mañana vence Alquiler» · «1 de noviembre · Toca para ver el importe». Sin el importe:
+ * el aviso se ve en la pantalla de bloqueo, y quien coja el móvil no debe leerlo.
+ */
 export function reminderText(
   reminder: Reminder,
-  rule: Pick<RecurringRule, 'name' | 'amountCents' | 'kind'>,
+  rule: Pick<RecurringRule, 'name' | 'kind'>,
 ): { title: string; body: string } {
   const verb = rule.kind === 'income' ? es.reminders.collect : es.reminders.pay;
   const when =
@@ -62,9 +65,11 @@ export function reminderText(
       : reminder.daysBefore === 1
         ? es.reminders.tomorrow
         : es.reminders.inDays(reminder.daysBefore);
-  const due = reminder.daysBefore === 0 ? es.reminders.dueToday : formatDayMonth(reminder.dueDate);
   return {
     title: `${when} ${verb} ${rule.name}`,
-    body: `${formatMoney(rule.amountCents)} · ${due}`,
+    body:
+      reminder.daysBefore === 0
+        ? es.reminders.seeAmount
+        : `${formatDayMonth(reminder.dueDate)} · ${es.reminders.seeAmount}`,
   };
 }

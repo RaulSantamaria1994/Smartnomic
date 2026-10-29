@@ -179,7 +179,7 @@ export const es = {
     today: 'Hoy',
     tomorrow: 'Mañana',
     inDays: (days: number) => `En ${days} días`,
-    dueToday: 'vence hoy',
+    seeAmount: 'Toca para ver el importe',
     deniedTitle: 'Los avisos están desactivados',
     deniedText:
       'No recibirás recordatorios de tus pagos. Actívalos en los ajustes del móvil: Notificaciones → Smartnomic.',

@@ -161,7 +161,8 @@ base64 -w0 smartnomic.jks   # valor de ANDROID_KEYSTORE_BASE64
 ```
 
 Secretos: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`
-(`smartnomic`) y `ANDROID_KEY_PASSWORD`. Guarda la clave en un sitio seguro: sin ella no se
+(`smartnomic`) y `ANDROID_KEY_PASSWORD` (la misma contraseña que la del almacén: `keytool`
+crea almacenes PKCS12, que usan una sola). Guarda la clave en un sitio seguro: sin ella no se
 pueden publicar actualizaciones. Al cambiar de clave hay que desinstalar la app una vez.
 
 ### Con EAS Build
