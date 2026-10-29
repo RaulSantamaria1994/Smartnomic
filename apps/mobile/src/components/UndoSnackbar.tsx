@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api, queryKeys } from '../api/client';
 import { es } from '../i18n/es';
 import { useUndo } from '../state/undo';
+import { TAB_BAR_HEIGHT } from './TabBar';
 import { color, layout, radius, shadow, spacing, typography } from '../design/tokens';
 
 const UNDO_WINDOW_MS = 6000;
@@ -41,7 +42,7 @@ export function UndoSnackbar() {
 
   return (
     <View
-      style={[styles.bar, { bottom: insets.bottom + spacing.md }]}
+      style={[styles.bar, { bottom: insets.bottom + TAB_BAR_HEIGHT + spacing.sm }]}
       accessibilityLiveRegion="polite"
     >
       <Text style={styles.text}>{es.month.deleted}</Text>

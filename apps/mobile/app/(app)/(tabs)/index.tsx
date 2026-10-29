@@ -8,7 +8,6 @@ import {
   shiftPeriod,
   type DateString,
 } from '@smartnomic/domain';
-import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -20,10 +19,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ApiError } from '../../src/api/http';
-import { Button } from '../../src/components/Button';
-import { Message } from '../../src/components/Message';
-import { ReminderBanners } from '../../src/components/ReminderBanners';
+import { ApiError } from '../../../src/api/http';
+import { Button } from '../../../src/components/Button';
+import { Message } from '../../../src/components/Message';
+import { ReminderBanners } from '../../../src/components/ReminderBanners';
 import {
   Amount,
   AppText,
@@ -36,15 +35,15 @@ import {
   SummaryCard,
   type IconName,
   type PillKind,
-} from '../../src/design';
-import { color, layout, radius, shadow, size, spacing } from '../../src/design/tokens';
+} from '../../../src/design';
+import { color, layout, radius, size, spacing } from '../../../src/design/tokens';
 import {
   formatDay,
   formatMoney,
   formatMonthShort,
   formatPeriod,
   formatRelativeDue,
-} from '../../src/format';
+} from '../../../src/format';
 import {
   currentPeriodStart,
   todayIn,
@@ -55,9 +54,8 @@ import {
   usePeriod,
   useRecurring,
   useUpcoming,
-} from '../../src/hooks/data';
-import { es } from '../../src/i18n/es';
-import { signOut } from '../../src/session/sign-out';
+} from '../../../src/hooks/data';
+import { es } from '../../../src/i18n/es';
 
 /**
  * Movimientos que se pintan de una vez. Con cientos en un periodo, pintarlos todos retrasa
@@ -70,7 +68,6 @@ const SOON_DAYS = 3;
 
 /** Pantalla «Mes»: resumen del periodo, próximos pagos y movimientos (especificación 003). */
 export default function Month() {
-  const queryClient = useQueryClient();
   const me = useMe();
   const household = me.data?.household;
   const [start, setStart] = useState<DateString | null>(null);
@@ -154,16 +151,6 @@ export default function Month() {
               {es.home.greeting(userName.split(' ')[0] ?? userName)}
             </AppText>
           </View>
-          <IconLink
-            icon="household"
-            label={es.household.title}
-            onPress={() => router.push('/household/members')}
-          />
-          <IconLink
-            icon="settings"
-            label={es.settings.title}
-            onPress={() => router.push('/account')}
-          />
         </View>
 
         <View style={styles.periodBar}>
@@ -238,23 +225,7 @@ export default function Month() {
             />
           )}
         </View>
-
-        <Button variant="link" label={es.auth.signOut} onPress={() => void signOut(queryClient)} />
       </ScrollView>
-
-      {canWrite && (
-        <Pressable
-          onPress={() => router.push('/new')}
-          accessibilityRole="button"
-          accessibilityLabel={`+ ${es.month.add}`}
-          style={({ pressed }) => [styles.fab, pressed && styles.pressed]}
-        >
-          <Icon name="plus" tint={color.text.onAccent} />
-          <AppText variant="bodyStrong" tone="onAccent">
-            {es.month.add}
-          </AppText>
-        </Pressable>
-      )}
     </SafeAreaView>
   );
 }
@@ -262,27 +233,6 @@ export default function Month() {
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '·';
-}
-
-function IconLink({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: IconName;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="link"
-      accessibilityLabel={label}
-      style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
-    >
-      <Icon name={icon} />
-    </Pressable>
-  );
 }
 
 function RoundButton({
@@ -328,20 +278,6 @@ function Upcoming({
         <AppText variant="heading" accessibilityRole="header">
           {es.recurring.upcomingTitle}
         </AppText>
-        <View style={styles.sectionActions}>
-          <Button
-            variant="link"
-            label={es.calendar.open}
-            accessibilityLabel={es.calendar.title}
-            onPress={() => router.push('/calendar')}
-          />
-          <Button
-            variant="link"
-            label={es.recurring.manage}
-            accessibilityLabel={es.recurring.title}
-            onPress={() => router.push('/recurring')}
-          />
-        </View>
       </View>
       {rules.length === 0 && (
         <Card>
@@ -485,7 +421,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.ml,
-    paddingBottom: 120,
+    paddingBottom: spacing.xl,
     gap: spacing.ml,
     width: '100%',
     maxWidth: layout.maxWidth,
@@ -514,7 +450,6 @@ const styles = StyleSheet.create({
   periodBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   section: { gap: spacing.ms },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sectionActions: { flexDirection: 'row' },
   cards: { gap: spacing.ms, paddingRight: spacing.md },
   upcomingCard: {
     width: 168,
@@ -531,19 +466,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: radius.md,
     alignItems: 'center',
-  },
-  fab: {
-    position: 'absolute',
-    right: spacing.ml,
-    bottom: spacing.lg,
-    minHeight: 56,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.pill,
-    backgroundColor: color.bg.accent,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    ...shadow.raised,
   },
   pressed: { opacity: 0.8 },
 });

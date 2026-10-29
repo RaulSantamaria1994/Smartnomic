@@ -233,6 +233,7 @@ export const es = {
     readOnly: 'Solo los editores y el propietario pueden cambiar las categorías.',
   },
   account: {
+    title: 'Tu cuenta',
     exportTitle: 'Tus datos',
     exportHint:
       'Descarga en un archivo todos los movimientos, pagos recurrentes y categorías del hogar.',
@@ -351,6 +352,13 @@ export const es = {
     exported: 'Datos exportados.',
     accept: 'Unirme',
     goHome: 'Ir al inicio',
+  },
+  tabs: {
+    month: 'Mes',
+    calendar: 'Calendario',
+    recurring: 'Pagos',
+    household: 'Hogar',
+    add: 'Apuntar un movimiento',
   },
   home: {
     transactions: 'Movimientos',

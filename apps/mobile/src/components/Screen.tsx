@@ -9,11 +9,14 @@ import { color, layout, spacing } from '../design/tokens';
 export function Screen({
   title,
   brand,
+  align = 'center',
   children,
 }: {
   title?: string;
   /** Muestra la marca encima del título (pantallas sin sesión). */
   brand?: boolean;
+  /** Las pestañas empiezan arriba; los formularios cortos, centrados. */
+  align?: 'center' | 'top';
   children: ReactNode;
 }) {
   return (
@@ -22,7 +25,10 @@ export function Screen({
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={[styles.content, align === 'top' && styles.top]}
+          keyboardShouldPersistTaps="handled"
+        >
           {brand && <Brand tagline={es.brand.tagline} />}
           {title && (
             <AppText variant="headline" accessibilityRole="header">
@@ -37,6 +43,7 @@ export function Screen({
 }
 
 const styles = StyleSheet.create({
+  top: { justifyContent: 'flex-start', maxWidth: layout.maxWidth },
   safe: { flex: 1, backgroundColor: color.bg.canvas },
   flex: { flex: 1 },
   content: {

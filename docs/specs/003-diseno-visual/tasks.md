@@ -77,11 +77,11 @@ excepciones.
 
 ## Fase 4: Historia 3 — Barra de navegación inferior (P3)
 
-- [ ] D015 [US3] Mover `index.tsx`, `calendar.tsx`, `recurring/index.tsx` (como
+- [x] D015 [US3] Mover `index.tsx`, `calendar.tsx`, `recurring/index.tsx` (como
       `recurring.tsx`) y `account.tsx` a `app/(app)/(tabs)/` sin cambiar sus URL
-- [ ] D016 [US3] `app/(app)/(tabs)/_layout.tsx` con `Tabs`: Mes, Calendario, «+»
+- [x] D016 [US3] `app/(app)/(tabs)/_layout.tsx` con `Tabs`: Mes, Calendario, «+»
       (abre `/new`, oculto a lectores), Pagos y Hogar; accesible (`tab`, `selected`)
-- [ ] D017 [US3] Quitar los enlaces que sobran con la barra (Ajustes, Calendario,
+- [x] D017 [US3] Quitar los enlaces que sobran con la barra (Ajustes, Calendario,
       Gestionar, Cerrar sesión duplicado) y dar a «Hogar» el contenido de ajustes y hogar
 
 **Punto de control**: RF-208 cubierto; todas las URL y enlaces de avisos siguen valiendo.

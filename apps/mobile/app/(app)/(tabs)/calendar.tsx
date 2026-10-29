@@ -12,10 +12,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ApiError } from '../../src/api/http';
-import { Button } from '../../src/components/Button';
-import { Message } from '../../src/components/Message';
-import { MonthGrid } from '../../src/components/MonthGrid';
+import { ApiError } from '../../../src/api/http';
+import { Button } from '../../../src/components/Button';
+import { Message } from '../../../src/components/Message';
+import { MonthGrid } from '../../../src/components/MonthGrid';
 import {
   Amount,
   CategoryIcon,
@@ -24,8 +24,8 @@ import {
   ListRow,
   StatusPill,
   type PillKind,
-} from '../../src/design';
-import { formatDay, formatMoney, formatMonthTitle } from '../../src/format';
+} from '../../../src/design';
+import { formatDay, formatMoney, formatMonthTitle } from '../../../src/format';
 import {
   todayIn,
   useCalendar,
@@ -34,10 +34,10 @@ import {
   useMe,
   useMembers,
   useRecurring,
-} from '../../src/hooks/data';
-import { es } from '../../src/i18n/es';
-import { colors, spacing } from '../../src/theme';
-import { color, radius, typography } from '../../src/design/tokens';
+} from '../../../src/hooks/data';
+import { es } from '../../../src/i18n/es';
+import { colors, spacing } from '../../../src/theme';
+import { color, radius, typography } from '../../../src/design/tokens';
 
 /** Calendario de pagos programados (especificación 002, historias 1 y 2). */
 export default function Calendar() {
@@ -92,7 +92,6 @@ export default function Calendar() {
         }
       >
         <View style={styles.topBar}>
-          <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
           {visible !== current && current && (
             <Button variant="link" label={es.calendar.today} onPress={() => go(current)} />
           )}
@@ -286,7 +285,7 @@ const styles = StyleSheet.create({
     maxWidth: 640,
     alignSelf: 'center',
   },
-  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  topBar: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   arrow: {
     width: 48,

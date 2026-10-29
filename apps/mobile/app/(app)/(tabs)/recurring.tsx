@@ -18,7 +18,7 @@ export default function RecurringList() {
   const byId = new Map((categories.data?.categories ?? []).map((c) => [c.id, c]));
 
   return (
-    <Screen title={es.recurring.title}>
+    <Screen title={es.recurring.title} align="top">
       {rules.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
       {rules.error && <Message text={rules.error.message} />}
       {rules.data && rules.data.rules.length === 0 && (
@@ -54,7 +54,6 @@ export default function RecurringList() {
       {canWrite && (
         <Button label={es.recurring.add} onPress={() => router.push('/recurring/new')} />
       )}
-      <Button variant="link" label={es.transaction.cancel} onPress={() => router.back()} />
     </Screen>
   );
 }
