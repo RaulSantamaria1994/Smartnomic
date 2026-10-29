@@ -276,6 +276,16 @@ export function registerRecurringRoutes(
               note: input.note || rule.name,
             })
             .onConflictDoNothing({ target: transactions.id });
+          // El id lo elige la app: si ya existía, tiene que ser un movimiento de este hogar.
+          // Si no, el vencimiento quedaría enlazado a un movimiento ajeno y su importe se
+          // vería en el calendario.
+          const [linked] = await tx
+            .select({ householdId: transactions.householdId })
+            .from(transactions)
+            .where(eq(transactions.id, input.transactionId));
+          if (linked?.householdId !== household.id) {
+            throw new ApiError('conflict', 'Ese movimiento no es de este hogar.');
+          }
           const [row] = await tx
             .insert(occurrences)
             .values({

@@ -312,6 +312,51 @@ describe('pagar y omitir', () => {
     expect(await ctx.db.select().from(transactions)).toHaveLength(1);
   });
 
+  it('no se puede pagar con el id de un movimiento de otro hogar (ni ver su importe)', async () => {
+    const rule = await createRule(rent());
+    const intruso = await signUp(ctx.app);
+    const otherHousehold = (await me(ctx.app, intruso)).household.id;
+    const otherCategory = categoriesResponseSchema
+      .parse(
+        (
+          await ctx.app.inject({
+            method: 'GET',
+            url: `/api/households/${otherHousehold}/categories`,
+            headers: { cookie: intruso.cookie },
+          })
+        ).json(),
+      )
+      .categories.find((c) => c.name === 'Vivienda')!;
+    const foreignId = newId();
+    const put = await ctx.app.inject({
+      method: 'PUT',
+      url: `/api/households/${otherHousehold}/transactions/${foreignId}`,
+      headers: { cookie: intruso.cookie },
+      payload: {
+        kind: 'expense',
+        amountCents: 99999,
+        date: '2026-10-20',
+        categoryId: otherCategory.id,
+      },
+    });
+    expect(put.statusCode).toBe(200);
+
+    const response = await pay(owner, rule.id, '2026-11-01', {
+      transactionId: foreignId,
+      amountCents: 75000,
+      date: '2026-11-01',
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(await ctx.db.select().from(occurrences)).toHaveLength(0);
+    const calendar = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/households/${householdId}/calendar/2026-11`,
+      headers: { cookie: owner.cookie },
+    });
+    expect(calendar.body).not.toContain('99999');
+  });
+
   it('dos miembros que pagan a la vez crean un solo gasto', async () => {
     const rule = await createRule(rent());
     const editor = await signUp(ctx.app);
