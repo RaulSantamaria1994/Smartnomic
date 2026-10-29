@@ -2,8 +2,8 @@
 
 **Rama de la funcionalidad**: `003-diseno-visual`
 **Creada**: 2026-10-29
-**Estado**: Aclarada, pendiente de aprobación
-**Plan**: pendiente (`plan.md`, cuando se apruebe esta especificación)
+**Estado**: Aprobada
+**Plan**: [`plan.md`](plan.md)
 **Propuesta visual**: [lienzo «Smartnomic · Propuesta visual»](https://claude.ai/artifact/KrLAujuEQFQMcMccqHHPk5)
 (privado del propietario)
 **Entrada**: "Quiero dar a la app un aspecto atractivo para el usuario. Es una app de gestión
