@@ -2,8 +2,8 @@
 
 **Rama de la funcionalidad**: `002-calendario`
 **Creada**: 2026-10-29
-**Estado**: Aclarada, pendiente de aprobación
-**Plan**: pendiente (`plan.md`, cuando se apruebe esta especificación)
+**Estado**: Aprobada
+**Plan**: [`plan.md`](plan.md)
 **Entrada**: "Vamos a implementar la opción de ver los pagos programados en un calendario."
 
 > Esta especificación describe **qué** debe hacer la funcionalidad y **por qué**, desde el
