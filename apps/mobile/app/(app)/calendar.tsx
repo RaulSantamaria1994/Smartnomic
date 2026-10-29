@@ -16,6 +16,15 @@ import { ApiError } from '../../src/api/http';
 import { Button } from '../../src/components/Button';
 import { Message } from '../../src/components/Message';
 import { MonthGrid } from '../../src/components/MonthGrid';
+import {
+  Amount,
+  CategoryIcon,
+  EmptyState,
+  Icon,
+  ListRow,
+  StatusPill,
+  type PillKind,
+} from '../../src/design';
 import { formatDay, formatMoney, formatMonthTitle } from '../../src/format';
 import {
   todayIn,
@@ -28,6 +37,7 @@ import {
 } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
 import { colors, spacing } from '../../src/theme';
+import { color, radius, typography } from '../../src/design/tokens';
 
 /** Calendario de pagos programados (especificación 002, historias 1 y 2). */
 export default function Calendar() {
@@ -131,10 +141,7 @@ export default function Calendar() {
         )}
 
         {shown && shown.items.length === 0 && (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>{es.calendar.empty}</Text>
-            <Text style={styles.muted}>{es.calendar.emptyHint}</Text>
-          </View>
+          <EmptyState icon="calendar" title={es.calendar.empty} hint={es.calendar.emptyHint} />
         )}
 
         {shown && day && shown.items.length > 0 && (
@@ -197,7 +204,7 @@ function Arrow({
       accessibilityState={{ disabled }}
       style={({ pressed }) => [styles.arrow, (pressed || disabled) && { opacity: 0.3 }]}
     >
-      <Text style={styles.arrowText}>{symbol}</Text>
+      <Icon name={symbol === '‹' ? 'back' : 'forward'} tint={color.text.link} />
     </Pressable>
   );
 }
@@ -221,6 +228,13 @@ function Total({
   );
 }
 
+const PILL: Record<CalendarItem['status'], PillKind> = {
+  overdue: 'overdue',
+  pending: 'pending',
+  paid: 'paid',
+  skipped: 'skipped',
+};
+
 function ItemRow({
   item,
   rule,
@@ -241,39 +255,23 @@ function ItemRow({
       ? es.calendar.collected
       : es.calendar.status[item.status];
   const detail = resolvedBy ? `${status} ${es.calendar.resolvedBy(resolvedBy)}` : status;
-  const statusColor =
-    item.status === 'overdue'
-      ? colors.error
-      : item.status === 'paid'
-        ? colors.success
-        : colors.muted;
   return (
-    <Pressable
+    <ListRow
+      title={rule?.name ?? '—'}
+      detail={<StatusPill kind={PILL[item.status]} label={detail} />}
+      leading={<CategoryIcon icon={category?.icon} tone={category?.color} />}
+      trailing={
+        <Amount
+          cents={item.amountCents}
+          muted={item.status === 'skipped'}
+          strike={item.status === 'skipped'}
+        />
+      }
+      strike={item.status === 'skipped'}
       onPress={onPress}
-      disabled={!onPress}
-      accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={`${rule?.name ?? '—'}, ${formatMoney(item.amountCents)}, ${detail}`}
       accessibilityHint={onPress ? es.calendar.resolveHint : undefined}
-      style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}
-    >
-      <Text style={styles.icon}>{category?.icon ?? '•'}</Text>
-      <View style={styles.rowText}>
-        <Text style={[styles.rowTitle, item.status === 'skipped' && styles.skipped]}>
-          {rule?.name ?? '—'}
-        </Text>
-        <Text style={[styles.muted, { color: statusColor }]}>{detail}</Text>
-      </View>
-      <Text
-        style={[
-          styles.rowAmount,
-          { color: item.kind === 'income' ? colors.success : colors.text },
-          item.status === 'skipped' && styles.skipped,
-        ]}
-      >
-        {formatMoney(item.amountCents)}
-      </Text>
-      {onPress && <Text style={styles.chevron}>›</Text>}
-    </Pressable>
+    />
   );
 }
 
@@ -290,9 +288,17 @@ const styles = StyleSheet.create({
   },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  arrow: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
-  arrowText: { fontSize: 32, color: colors.primary },
-  title: { fontSize: 22, fontWeight: '700', color: colors.text },
+  arrow: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: color.border.default,
+    backgroundColor: color.bg.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: { ...typography.title, color: colors.text },
   totals: { flexDirection: 'row', gap: spacing.sm },
   total: {
     flex: 1,
@@ -303,10 +309,8 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     gap: spacing.xs,
   },
-  totalValue: { fontSize: 16, fontWeight: '600' },
-  muted: { fontSize: 14, color: colors.muted },
-  empty: { alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.md },
-  emptyText: { fontSize: 16, color: colors.text, textAlign: 'center' },
+  totalValue: { ...typography.bodyStrong },
+  muted: { ...typography.caption, color: colors.muted },
   list: {
     backgroundColor: colors.surface,
     borderRadius: 12,
@@ -315,26 +319,10 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
   },
   listTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    ...typography.heading,
     color: colors.text,
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xs,
   },
   listNote: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    minHeight: 56,
-  },
-  icon: { fontSize: 24, width: 32, textAlign: 'center' },
-  rowText: { flex: 1, gap: 2 },
-  rowTitle: { fontSize: 16, color: colors.text, fontWeight: '500' },
-  rowAmount: { fontSize: 16, fontWeight: '600' },
-  skipped: { textDecorationLine: 'line-through', color: colors.muted },
-  chevron: { fontSize: 24, color: colors.primary },
 });

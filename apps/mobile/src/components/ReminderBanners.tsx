@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { es } from '../i18n/es';
 import { openNotificationSettings, remindersSupported } from '../reminders/reminders';
 import { useNotificationPermission } from '../state/permission';
-import { colors, spacing } from '../theme';
+import { color, radius, spacing, typography } from '../design/tokens';
 import { Button } from './Button';
 
 /** Días en que un vencimiento cuenta como «pronto» para destacarlo. */
@@ -59,10 +59,10 @@ export function ReminderBanners({
 }
 
 const styles = StyleSheet.create({
-  banner: { borderRadius: 12, padding: spacing.md, gap: spacing.xs, borderWidth: 1 },
-  warning: { backgroundColor: '#FFF4E5', borderColor: '#F0B45B' },
-  danger: { backgroundColor: '#FDECEA', borderColor: '#E8A39C' },
-  info: { backgroundColor: '#E8F0FD', borderColor: '#9DB8E8' },
-  title: { fontSize: 16, fontWeight: '700', color: colors.text },
-  text: { fontSize: 15, color: colors.text },
+  banner: { borderRadius: radius.lg, padding: spacing.md, gap: spacing.xs },
+  warning: { backgroundColor: color.status.soon.bg },
+  danger: { backgroundColor: color.status.overdue.bg },
+  info: { backgroundColor: color.status.soon.bg },
+  title: { ...typography.bodyStrong, color: color.text.primary },
+  text: { ...typography.caption, color: color.text.primary },
 });

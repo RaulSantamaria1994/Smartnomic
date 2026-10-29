@@ -15,6 +15,7 @@ import { es } from '../../../src/i18n/es';
 import { invitationLink } from '../../../src/invite-link';
 import { shareText } from '../../../src/share';
 import { colors, spacing } from '../../../src/theme';
+import { fontFamily, typography } from '../../../src/design/tokens';
 
 type Invitable = 'editor' | 'viewer';
 type Feedback = { text: string; kind: 'error' | 'success' } | null;
@@ -301,10 +302,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   section: { gap: spacing.sm },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
-  label: { fontSize: 16, color: colors.text, fontWeight: '500' },
-  code: { fontWeight: '700', letterSpacing: 1 },
-  muted: { fontSize: 14, color: colors.muted },
+  sectionTitle: { ...typography.heading, color: colors.text },
+  label: { ...typography.body, color: colors.text },
+  code: { fontFamily: fontFamily.bold, letterSpacing: 1 },
+  muted: { ...typography.caption, color: colors.muted },
   chips: { flexDirection: 'row', gap: spacing.sm },
   actions: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md },
   invitation: {

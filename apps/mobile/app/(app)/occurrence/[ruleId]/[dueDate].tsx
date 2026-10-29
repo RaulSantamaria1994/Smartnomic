@@ -22,6 +22,7 @@ import { useRefreshRecurring } from '../../../../src/hooks/useRuleMutations';
 import { es } from '../../../../src/i18n/es';
 import { newTransactionId } from '../../../../src/ids';
 import { colors, spacing } from '../../../../src/theme';
+import { typography } from '../../../../src/design/tokens';
 
 /** Pagar (con el importe real) u omitir un vencimiento (T064, RF-024 y RF-025). */
 export default function Occurrence() {
@@ -161,8 +162,8 @@ export default function Occurrence() {
 
 const styles = StyleSheet.create({
   info: { gap: spacing.xs },
-  due: { fontSize: 17, fontWeight: '600', color: colors.text },
-  muted: { fontSize: 15, color: colors.muted },
-  label: { fontSize: 16, fontWeight: '600', color: colors.text },
+  due: { ...typography.heading, color: colors.text },
+  muted: { ...typography.body, color: colors.muted },
+  label: { ...typography.bodyStrong, color: colors.text },
   row: { flexDirection: 'row', gap: spacing.sm },
 });

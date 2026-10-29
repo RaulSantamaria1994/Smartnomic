@@ -30,7 +30,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <Screen title={es.auth.forgot.title}>
+    <Screen brand title={es.auth.forgot.title}>
       {sent ? (
         <Message kind="success" text={es.auth.forgot.sent} />
       ) : (

@@ -27,7 +27,7 @@ export default function SignIn() {
   }
 
   return (
-    <Screen title={es.auth.signIn.title}>
+    <Screen brand title={es.auth.signIn.title}>
       <TextField
         label={es.auth.email}
         value={email}

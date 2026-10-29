@@ -43,7 +43,7 @@ actualizan primero los documentos.
 ## Estado actual
 
 Funcionalidades terminadas: **`001-mvp-hogar`** (falta probarla en Android con el APK, T098
-y T099) y **`002-calendario`**. En curso: **`003-diseno-visual`**, documentos aprobados y fase 1 (base del sistema de diseño) terminada; la siguiente es la fase 2, desde D007. No inventes comandos, rutas
+y T099) y **`002-calendario`**. En curso: **`003-diseno-visual`**, documentos aprobados y fases 1 y 2 terminadas; la siguiente es la fase 3 (pantalla principal), desde D013. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 

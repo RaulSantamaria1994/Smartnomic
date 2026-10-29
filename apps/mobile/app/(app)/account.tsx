@@ -16,6 +16,7 @@ import { es } from '../../src/i18n/es';
 import { remindersSupported } from '../../src/reminders/reminders';
 import { signOut } from '../../src/session/sign-out';
 import { colors, spacing } from '../../src/theme';
+import { typography } from '../../src/design/tokens';
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -193,8 +194,8 @@ export default function Account() {
 }
 
 const styles = StyleSheet.create({
-  section: { fontSize: 18, fontWeight: '700', color: colors.text },
-  label: { fontSize: 16, color: colors.text, flex: 1 },
-  muted: { fontSize: 15, color: colors.muted },
+  section: { ...typography.heading, color: colors.text },
+  label: { ...typography.body, color: colors.text, flex: 1 },
+  muted: { ...typography.body, color: colors.muted },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
 });

@@ -44,18 +44,18 @@ punta y axe-core.
 
 **Objetivo**: componentes comunes con los tokens y todas las pantallas usándolos.
 
-- [ ] D007 [US1] Componentes nuevos en `apps/mobile/src/design/`: `Card`, `ListRow`,
+- [x] D007 [US1] Componentes nuevos en `apps/mobile/src/design/`: `Card`, `ListRow`,
       `StatusPill`, `CategoryIcon`, `Amount`, `EmptyState`
-- [ ] D008 [US1] Rehacer con tokens `Button` (primary, secondary, link, danger), `Chip`,
+- [x] D008 [US1] Rehacer con tokens `Button` (primary, secondary, link, danger), `Chip`,
       `TextField`, `Message`, `Screen`, `UndoSnackbar` y `ReminderBanners` en
       `apps/mobile/src/components/`
-- [ ] D009 [US1] Formularios `TransactionForm` y `RuleForm` con el estilo del lienzo
+- [x] D009 [US1] Formularios `TransactionForm` y `RuleForm` con el estilo del lienzo
       (importe grande, categorías en cuadrícula con `CategoryIcon`, fechas en chips)
-- [ ] D010 [US1] Pantallas de entrada (`entrar`, `registro`, `recuperar`, `restablecer`) e
+- [x] D010 [US1] Pantallas de entrada (`entrar`, `registro`, `recuperar`, `restablecer`) e
       `invitacion/[code]`
-- [ ] D011 [US1] Pantallas de pagos (`recurring/*`, `occurrence/*`), calendario
+- [x] D011 [US1] Pantallas de pagos (`recurring/*`, `occurrence/*`), calendario
       (`calendar.tsx`, `MonthGrid`) y hogar (`household/*`, `account.tsx`)
-- [ ] D012 [US1] Regla de ESLint en `eslint.config.js`: en `apps/mobile`, fuera de
+- [x] D012 [US1] Regla de ESLint en `eslint.config.js`: en `apps/mobile`, fuera de
       `src/design/`, prohibidos los literales de color hex y los `fontSize` numéricos
 
 **Punto de control**: RF-201, RF-202, RF-204–RF-206 cubiertos; la regla no tiene

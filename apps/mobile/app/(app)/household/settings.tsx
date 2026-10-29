@@ -10,6 +10,7 @@ import { TextField } from '../../../src/components/TextField';
 import { useCan, useMe } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { colors } from '../../../src/theme';
+import { typography } from '../../../src/design/tokens';
 
 /** Nombre del hogar y día de inicio del mes (T092, RF-003). Solo el propietario. */
 export default function HouseholdSettings() {
@@ -79,5 +80,5 @@ export default function HouseholdSettings() {
 }
 
 const styles = StyleSheet.create({
-  muted: { fontSize: 15, color: colors.muted },
+  muted: { ...typography.body, color: colors.muted },
 });

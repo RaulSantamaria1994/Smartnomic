@@ -13,6 +13,7 @@ import { useMe } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { colors, spacing } from '../../src/theme';
+import { typography } from '../../src/design/tokens';
 
 /**
  * Unirse a un hogar con un enlace o un código (T082, RF-005, RF-008). Sin sesión, manda a
@@ -32,7 +33,7 @@ export default function AcceptInvitation() {
   }
   if (!session) {
     return (
-      <Screen title={es.invitation.title}>
+      <Screen brand title={es.invitation.title}>
         <Text style={styles.text}>{es.invitation.signInFirst}</Text>
         <Button
           label={es.invitation.signIn}
@@ -67,7 +68,7 @@ function Preview({ code }: { code: string }) {
 
   if (preview.isPending) {
     return (
-      <Screen title={es.invitation.title}>
+      <Screen brand title={es.invitation.title}>
         <Text style={styles.text}>{es.invitation.loading}</Text>
         <ActivityIndicator />
       </Screen>
@@ -75,7 +76,7 @@ function Preview({ code }: { code: string }) {
   }
   if (!preview.data) {
     return (
-      <Screen title={es.invitation.title}>
+      <Screen brand title={es.invitation.title}>
         <Message text={preview.error?.message ?? es.auth.errors.unknown} />
         <Button label={es.invitation.goHome} onPress={goHome} />
       </Screen>
@@ -176,8 +177,8 @@ function blockerText(p: InvitationPreview): string | null {
 }
 
 const styles = StyleSheet.create({
-  text: { fontSize: 16, color: colors.text },
-  muted: { fontSize: 14, color: colors.muted },
-  label: { fontSize: 16, color: colors.text, flex: 1 },
+  text: { ...typography.body, color: colors.text },
+  muted: { ...typography.caption, color: colors.muted },
+  label: { ...typography.body, color: colors.text, flex: 1 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
 });

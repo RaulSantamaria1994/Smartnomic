@@ -77,6 +77,21 @@ export const color = {
   overlay: { onAccent: 'rgba(255,255,255,0.10)' },
 } as const;
 
+/**
+ * Colores que se pueden elegir para una categoría propia. Se guardan con la categoría;
+ * por eso son datos y no tokens semánticos.
+ */
+export const categoryPalette = [
+  { value: '#1F5FBF', name: 'Azul' },
+  { value: '#2F7D32', name: 'Verde' },
+  { value: '#C62828', name: 'Rojo' },
+  { value: '#8E5A2B', name: 'Marrón' },
+  { value: '#5E35B1', name: 'Morado' },
+  { value: '#D81B60', name: 'Rosa' },
+  { value: '#00838F', name: 'Turquesa' },
+  { value: '#455A64', name: 'Gris' },
+] as const;
+
 /** Familias de Plus Jakarta Sans: en Android cada peso es una familia distinta. */
 export const fontFamily = {
   regular: 'PlusJakartaSans_400Regular',
@@ -97,6 +112,7 @@ function type(
 
 export const typography = {
   display: type(40, 48, 'extrabold', -1),
+  headline: type(28, 34, 'bold', -0.5),
   title: type(22, 28, 'bold', -0.3),
   heading: type(17, 24, 'bold'),
   bodyStrong: type(16, 22, 'semibold'),
@@ -106,6 +122,9 @@ export const typography = {
   small: type(13, 18, 'semibold'),
   amountLarge: type(28, 34, 'extrabold', -0.5),
   amount: type(16, 22, 'bold'),
+  /** Emoji de las categorías: sin familia propia, con la del sistema. */
+  emoji: { fontSize: 22, lineHeight: 28 },
+  emojiLarge: { fontSize: 26, lineHeight: 32 },
 } as const satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;

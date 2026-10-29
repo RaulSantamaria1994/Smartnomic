@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api, queryKeys } from '../api/client';
 import { es } from '../i18n/es';
 import { useUndo } from '../state/undo';
-import { colors, spacing } from '../theme';
+import { color, layout, radius, shadow, spacing, typography } from '../design/tokens';
 
 const UNDO_WINDOW_MS = 6000;
 
@@ -57,16 +57,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
-    maxWidth: 480,
+    maxWidth: layout.maxFormWidth,
     alignSelf: 'center',
-    backgroundColor: colors.text,
-    borderRadius: 8,
+    backgroundColor: color.text.primary,
+    borderRadius: radius.lg,
     paddingLeft: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    ...shadow.raised,
   },
-  text: { color: colors.onPrimary, fontSize: 15 },
+  text: { ...typography.body, color: color.text.onAccent },
   action: { padding: spacing.md, minHeight: 48, justifyContent: 'center' },
-  actionText: { color: '#9EC1FF', fontSize: 15, fontWeight: '700' },
+  actionText: { ...typography.bodyStrong, color: color.progress.fill },
 });

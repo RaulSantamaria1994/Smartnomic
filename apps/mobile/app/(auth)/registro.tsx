@@ -40,7 +40,7 @@ export default function SignUp() {
   }
 
   return (
-    <Screen title={es.auth.signUp.title}>
+    <Screen brand title={es.auth.signUp.title}>
       <TextField
         label={es.auth.name}
         value={name}

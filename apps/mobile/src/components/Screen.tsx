@@ -1,9 +1,21 @@
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../theme';
+import { Brand } from '../design/Brand';
+import { AppText } from '../design/Text';
+import { es } from '../i18n/es';
+import { color, layout, spacing } from '../design/tokens';
 
-export function Screen({ title, children }: { title?: string; children: ReactNode }) {
+export function Screen({
+  title,
+  brand,
+  children,
+}: {
+  title?: string;
+  /** Muestra la marca encima del título (pantallas sin sesión). */
+  brand?: boolean;
+  children: ReactNode;
+}) {
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
@@ -11,10 +23,11 @@ export function Screen({ title, children }: { title?: string; children: ReactNod
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          {brand && <Brand tagline={es.brand.tagline} />}
           {title && (
-            <Text style={styles.title} accessibilityRole="header">
+            <AppText variant="headline" accessibilityRole="header">
               {title}
-            </Text>
+            </AppText>
           )}
           {children}
         </ScrollView>
@@ -24,7 +37,7 @@ export function Screen({ title, children }: { title?: string; children: ReactNod
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: color.bg.canvas },
   flex: { flex: 1 },
   content: {
     flexGrow: 1,
@@ -32,8 +45,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     width: '100%',
-    maxWidth: 480,
+    maxWidth: layout.maxFormWidth,
     alignSelf: 'center',
   },
-  title: { fontSize: 28, fontWeight: '700', color: colors.text },
 });

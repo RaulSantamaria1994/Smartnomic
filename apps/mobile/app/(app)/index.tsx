@@ -37,6 +37,7 @@ import {
 import { es } from '../../src/i18n/es';
 import { signOut } from '../../src/session/sign-out';
 import { colors, spacing } from '../../src/theme';
+import { color, fontFamily, typography } from '../../src/design/tokens';
 
 /**
  * Movimientos que se pintan de una vez. Con cientos en un periodo, pintarlos todos retrasa
@@ -298,7 +299,10 @@ function Upcoming({
             <View style={styles.rowText}>
               <Text style={styles.rowTitle}>{rule.name}</Text>
               <Text
-                style={[styles.muted, item.overdue && { color: colors.error, fontWeight: '600' }]}
+                style={[
+                  styles.muted,
+                  item.overdue && { color: colors.error, fontFamily: fontFamily.semibold },
+                ]}
               >
                 {item.overdue ? `${es.recurring.overdue} · ${when}` : when}
               </Text>
@@ -400,12 +404,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  appName: { fontSize: 15, fontWeight: '700', color: colors.muted },
+  appName: { ...typography.bodyStrong, color: colors.muted },
   pushRight: { marginLeft: 'auto' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   arrow: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
-  arrowText: { fontSize: 32, color: colors.primary },
-  period: { fontSize: 22, fontWeight: '700', color: colors.text },
+  arrowText: { ...typography.headline, color: colors.primary },
+  period: { ...typography.title, color: colors.text },
   summary: { flexDirection: 'row', gap: spacing.sm },
   total: {
     flex: 1,
@@ -416,11 +420,11 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     gap: spacing.xs,
   },
-  totalValue: { fontSize: 17, fontWeight: '600' },
-  strong: { fontWeight: '800' },
+  totalValue: { ...typography.heading },
+  strong: { fontFamily: fontFamily.extrabold },
   empty: { alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.xl },
-  emptyText: { fontSize: 16, color: colors.text },
-  muted: { fontSize: 14, color: colors.muted },
+  emptyText: { ...typography.body, color: colors.text },
+  muted: { ...typography.caption, color: colors.muted },
   list: {
     backgroundColor: colors.surface,
     borderRadius: 12,
@@ -436,10 +440,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     minHeight: 56,
   },
-  icon: { fontSize: 24, width: 32, textAlign: 'center' },
+  icon: { ...typography.emoji, width: 32, textAlign: 'center' },
   rowText: { flex: 1, gap: 2 },
-  rowTitle: { fontSize: 16, color: colors.text, fontWeight: '500' },
-  rowAmount: { fontSize: 16, fontWeight: '600' },
+  rowTitle: { ...typography.body, color: colors.text },
+  rowAmount: { ...typography.bodyStrong },
   upcoming: {
     backgroundColor: colors.surface,
     borderRadius: 12,
@@ -455,15 +459,14 @@ const styles = StyleSheet.create({
   },
   sectionActions: { flexDirection: 'row' },
   sectionAction: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
-  link: { color: colors.primary, fontSize: 15, fontWeight: '500' },
+  link: { ...typography.body, color: colors.primary },
   sectionNote: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
   sectionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    ...typography.heading,
     color: colors.text,
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xs,
   },
-  overdueRow: { backgroundColor: '#FDECEA' },
+  overdueRow: { backgroundColor: color.status.overdue.bg },
   fab: { position: 'absolute', right: spacing.md, bottom: spacing.lg, minWidth: 160 },
 });

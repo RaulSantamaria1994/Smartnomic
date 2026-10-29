@@ -1,14 +1,17 @@
 import type { Category, TransactionInput } from '@smartnomic/api';
 import { addDays, parseAmount, type DateString, type TransactionKind } from '@smartnomic/domain';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, TextInput, View, type TextStyle } from 'react-native';
 import { ApiError } from '../api/http';
 import { amountErrorMessage, formatAmountInput, formatShortDate, parseShortDate } from '../format';
 import { es } from '../i18n/es';
-import { colors, spacing } from '../theme';
+import { AppText } from '../design/Text';
+import { color, spacing, typography } from '../design/tokens';
 import { Button } from './Button';
+import { CategoryPicker } from './CategoryPicker';
 import { Chip } from './Chip';
 import { Message } from './Message';
+import { SegmentedControl } from './SegmentedControl';
 import { TextField } from './TextField';
 
 const FOCUS_DELAY_MS = 400;
@@ -104,48 +107,43 @@ export function TransactionForm({ initial, categories, today, onSubmit, extraAct
 
   return (
     <View style={styles.form}>
-      <View style={styles.row} accessibilityRole="radiogroup">
-        <Chip
-          label={es.transaction.expense}
-          selected={kind === 'expense'}
-          onPress={() => changeKind('expense')}
-        />
-        <Chip
-          label={es.transaction.income}
-          selected={kind === 'income'}
-          onPress={() => changeKind('income')}
-          color={colors.success}
-        />
-      </View>
+      <SegmentedControl
+        accessibilityLabel={es.transaction.kind}
+        value={kind}
+        onChange={changeKind}
+        options={[
+          { value: 'expense', label: es.transaction.expense },
+          { value: 'income', label: es.transaction.income },
+        ]}
+      />
 
-      <View style={styles.amountBox}>
-        <TextInput
-          value={amount}
-          onChangeText={setAmount}
-          placeholder="0,00"
-          placeholderTextColor={colors.muted}
-          keyboardType="decimal-pad"
-          ref={amountRef}
-          accessibilityLabel={es.transaction.amount}
-          style={styles.amount}
-        />
-        <Text style={styles.currency}>€</Text>
-      </View>
-
-      <Text style={styles.label}>{es.transaction.category}</Text>
-      <View style={styles.wrap} accessibilityRole="radiogroup">
-        {options.map((c) => (
-          <Chip
-            key={c.id}
-            label={`${c.icon} ${c.name}`}
-            selected={c.id === categoryId}
-            onPress={() => setCategoryId(c.id)}
-            color={c.color}
+      <View style={styles.amountBlock}>
+        <View style={styles.amountBox}>
+          <TextInput
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="0,00"
+            placeholderTextColor={color.text.muted}
+            keyboardType="decimal-pad"
+            ref={amountRef}
+            accessibilityLabel={es.transaction.amount}
+            style={styles.amount}
           />
-        ))}
+          <AppText variant="headline" tone="muted">
+            €
+          </AppText>
+        </View>
       </View>
 
-      <Text style={styles.label}>{es.transaction.date}</Text>
+      <AppText variant="label">{es.transaction.category}</AppText>
+      <CategoryPicker
+        accessibilityLabel={es.transaction.category}
+        categories={options}
+        value={categoryId}
+        onChange={setCategoryId}
+      />
+
+      <AppText variant="label">{es.transaction.date}</AppText>
       <View style={styles.row}>
         <Chip
           label={es.transaction.today}
@@ -177,25 +175,31 @@ export function TransactionForm({ initial, categories, today, onSubmit, extraAct
   );
 }
 
+// `outlineStyle: 'none'` existe en la web pero no en los tipos de React Native.
+const webWithoutOutline: TextStyle =
+  Platform.OS === 'web' ? ({ outlineStyle: 'none' } as unknown as TextStyle) : {};
+
 const styles = StyleSheet.create({
   form: { gap: spacing.md },
   row: { flexDirection: 'row', gap: spacing.sm },
-  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  label: { fontSize: 16, fontWeight: '600', color: colors.text },
+  amountBlock: { alignItems: 'center', paddingVertical: spacing.sm },
   amountBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderColor: colors.primary,
+    gap: spacing.xs,
+    borderBottomWidth: 3,
+    borderColor: color.border.focus,
+    alignSelf: 'stretch',
   },
   amount: {
+    ...typography.display,
     flex: 1,
     // En la web un <input> no se encoge por debajo de su ancho propio sin esto.
     minWidth: 0,
-    fontSize: 40,
-    fontWeight: '700',
-    color: colors.text,
+    color: color.text.primary,
+    textAlign: 'center',
     paddingVertical: spacing.sm,
+    // El subrayado verde ya indica el foco; sin esto el navegador añade su recuadro.
+    ...webWithoutOutline,
   },
-  currency: { fontSize: 32, color: colors.muted },
 });

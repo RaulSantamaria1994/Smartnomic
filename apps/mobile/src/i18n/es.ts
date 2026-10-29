@@ -1,6 +1,7 @@
 // Textos de la interfaz (constitución, art. VIII.5).
 export const es = {
   appName: 'Smartnomic',
+  brand: { tagline: 'La economía de tu hogar, en calma.' },
   common: {
     loading: 'Cargando…',
     retry: 'Reintentar',
@@ -83,6 +84,7 @@ export const es = {
     editTitle: 'Editar movimiento',
     expense: 'Gasto',
     income: 'Ingreso',
+    kind: 'Tipo de movimiento',
     amount: 'Importe',
     category: 'Categoría',
     date: 'Fecha',

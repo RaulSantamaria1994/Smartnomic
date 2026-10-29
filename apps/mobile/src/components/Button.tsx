@@ -1,15 +1,25 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
-import { colors, spacing } from '../theme';
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { AppText } from '../design/Text';
+import { color, radius, size, spacing } from '../design/tokens';
+
+type Variant = 'primary' | 'secondary' | 'link' | 'danger';
 
 interface Props {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'link';
+  variant?: Variant;
   loading?: boolean;
   disabled?: boolean;
   /** Lo que oye un lector de pantalla, si `label` no basta (por ejemplo, «Archivar Ropa»). */
   accessibilityLabel?: string;
 }
+
+const TEXT_TONE = {
+  primary: 'onAccent',
+  secondary: 'primary',
+  link: 'link',
+  danger: 'danger',
+} as const;
 
 export function Button({
   label,
@@ -28,35 +38,43 @@ export function Button({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: inactive, busy: Boolean(loading) }}
       style={({ pressed }) => [
-        variant === 'primary' ? styles.primary : styles.link,
-        (pressed || inactive) && styles.dimmed,
+        styles.base,
+        styles[variant],
+        pressed && styles.pressed,
+        inactive && styles.inactive,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.onPrimary : colors.primary} />
+        <ActivityIndicator color={variant === 'primary' ? color.text.onAccent : color.text.link} />
       ) : (
-        <Text style={variant === 'primary' ? styles.primaryText : styles.linkText}>{label}</Text>
+        <AppText variant={variant === 'link' ? 'label' : 'bodyStrong'} tone={TEXT_TONE[variant]}>
+          {label}
+        </AppText>
       )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  primary: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
+  base: {
     alignItems: 'center',
-    minHeight: 48,
     justifyContent: 'center',
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.lg,
+    minHeight: size.button,
   },
-  primaryText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
-  link: {
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-    minHeight: 44,
-    justifyContent: 'center',
+  primary: { backgroundColor: color.bg.accent },
+  secondary: {
+    backgroundColor: color.bg.surface,
+    borderWidth: 1,
+    borderColor: color.border.strong,
   },
-  linkText: { color: colors.primary, fontSize: 16, fontWeight: '500' },
-  dimmed: { opacity: 0.6 },
+  danger: {
+    backgroundColor: color.bg.surface,
+    borderWidth: 1,
+    borderColor: color.text.danger,
+  },
+  link: { minHeight: size.touch, paddingHorizontal: spacing.sm, borderRadius: radius.sm },
+  pressed: { opacity: 0.8 },
+  inactive: { opacity: 0.5 },
 });

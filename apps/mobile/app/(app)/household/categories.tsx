@@ -13,18 +13,11 @@ import { TextField } from '../../../src/components/TextField';
 import { useCan, useCategories, useMe } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { colors, spacing } from '../../../src/theme';
+import { CategoryIcon } from '../../../src/design/CategoryIcon';
+import { categoryPalette, typography } from '../../../src/design/tokens';
 
 /** Colores para elegir: con contraste suficiente sobre blanco (constitución, art. VIII). */
-const PALETTE = [
-  { value: '#1F5FBF', name: 'Azul' },
-  { value: '#2F7D32', name: 'Verde' },
-  { value: '#C62828', name: 'Rojo' },
-  { value: '#8E5A2B', name: 'Marrón' },
-  { value: '#5E35B1', name: 'Morado' },
-  { value: '#D81B60', name: 'Rosa' },
-  { value: '#00838F', name: 'Turquesa' },
-  { value: '#455A64', name: 'Gris' },
-];
+const PALETTE = categoryPalette;
 
 type Feedback = { text: string; kind: 'error' | 'success' } | null;
 
@@ -38,7 +31,7 @@ export default function Categories() {
   const [kind, setKind] = useState<TransactionKind>('expense');
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('🏷️');
-  const [color, setColor] = useState(PALETTE[0]!.value);
+  const [color, setColor] = useState<string>(PALETTE[0].value);
   const [editing, setEditing] = useState<{ id: string; name: string; icon: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
@@ -127,8 +120,7 @@ export default function Categories() {
     ) : (
       <View key={c.id} style={styles.row}>
         <View style={styles.rowMain}>
-          <Text style={styles.icon}>{c.icon}</Text>
-          <View style={[styles.swatch, { backgroundColor: c.color }]} />
+          <CategoryIcon icon={c.icon} tone={c.color} />
           <Text style={styles.name}>{c.name}</Text>
           {canWrite && (
             <View style={styles.actions}>
@@ -251,9 +243,9 @@ export default function Categories() {
 
 const styles = StyleSheet.create({
   section: { gap: spacing.sm },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
-  label: { fontSize: 16, color: colors.text, fontWeight: '500' },
-  muted: { fontSize: 15, color: colors.muted },
+  sectionTitle: { ...typography.heading, color: colors.text },
+  label: { ...typography.body, color: colors.text },
+  muted: { ...typography.body, color: colors.muted },
   card: {
     gap: spacing.sm,
     padding: spacing.md,
@@ -269,9 +261,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   rowMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44 },
-  icon: { fontSize: 22, width: 32, textAlign: 'center' },
+  icon: { ...typography.title, width: 32, textAlign: 'center' },
   swatch: { width: 12, height: 12, borderRadius: 6 },
-  name: { fontSize: 16, color: colors.text, flex: 1 },
+  name: { ...typography.body, color: colors.text, flex: 1 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   colorDot: { width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: 'transparent' },
