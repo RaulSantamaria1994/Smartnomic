@@ -84,10 +84,10 @@ actualiza.
 **Prueba independiente**: se paga un vencimiento y se omite otro desde el calendario, y
 cambian de estado en el calendario, en «Próximos pagos» y en el mes.
 
-- [ ] C013 [US2] En la lista del día, los pendientes y atrasados enlazan a
+- [x] C013 [US2] En la lista del día, los pendientes y atrasados enlazan a
       `/occurrence/[ruleId]/[dueDate]` solo si `can('occurrences.resolve')`; los resueltos
       muestran quién los resolvió, en `apps/mobile/app/(app)/calendar.tsx`
-- [ ] C014 [US2] Invalidar `queryKeys.calendar` al pagar u omitir
+- [x] C014 [US2] Invalidar `queryKeys.calendar` al pagar u omitir
       (`apps/mobile/app/(app)/occurrence/[ruleId]/[dueDate].tsx`) y al cambiar un pago
       recurrente (`apps/mobile/src/hooks/useRuleMutations.ts`)
 

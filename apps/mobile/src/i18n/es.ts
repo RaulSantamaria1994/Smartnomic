@@ -276,6 +276,7 @@ export const es = {
             overdue > 0 ? `, ${overdue} ${overdue === 1 ? 'atrasado' : 'atrasados'}` : ''
           }`,
     todaySuffix: ', hoy',
+    resolveHint: 'Abre la pantalla para pagarlo u omitirlo.',
   },
   household: {
     title: 'Miembros del hogar',
