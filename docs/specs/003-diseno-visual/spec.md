@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `003-diseno-visual`
 **Creada**: 2026-10-29
-**Estado**: Borrador
+**Estado**: Aclarada, pendiente de aprobación
 **Plan**: pendiente (`plan.md`, cuando se apruebe esta especificación)
 **Propuesta visual**: [lienzo «Smartnomic · Propuesta visual»](https://claude.ai/artifact/KrLAujuEQFQMcMccqHHPk5)
 (privado del propietario)
@@ -18,13 +18,13 @@ económica del hogar."
 
 ### Sesión 2026-10-29
 
-- P: ¿Qué dirección visual? → [NECESITA ACLARACIÓN: propuesta «Calma» del lienzo: verde
-  pino de confianza, fondo arena cálido, cifras grandes, ámbar para lo que vence pronto y
-  rojo solo para lo atrasado.]
-- P: ¿Se cambia la navegación a una barra inferior con pestañas (Mes, Calendario, +,
-  Pagos, Hogar)? → [NECESITA ACLARACIÓN: propuesta: sí; hoy se navega con enlaces sueltos.]
-- P: ¿Modo oscuro? → [NECESITA ACLARACIÓN: propuesta: no en esta funcionalidad; los
-  colores se definen como tokens para poder añadirlo después.]
+- P: ¿Qué dirección visual? → R: «Calma», la del lienzo: verde pino de confianza, fondo
+  arena cálido, cifras grandes, ámbar para lo que vence pronto y rojo solo para lo
+  atrasado.
+- P: ¿Se cambia la navegación a una barra inferior con pestañas? → R: Sí: Mes,
+  Calendario, «+» (apuntar), Pagos y Hogar.
+- P: ¿Modo oscuro? → R: No en esta funcionalidad. Los colores se definen como tokens para
+  poder añadirlo después.
 
 ## Escenarios de usuario y pruebas _(obligatorio)_
 
@@ -84,8 +84,7 @@ toque desde cualquier pantalla principal, y apunta un gasto con el botón centra
 **Escenarios de aceptación**:
 
 1. **Dado** una pantalla principal, **cuando** Lucía mira abajo, **entonces** ve la barra
-   de navegación con la pestaña actual marcada y el botón «+» destacado (si se aprueba la
-   aclaración 2).
+   de navegación con la pestaña actual marcada y el botón «+» destacado.
 2. **Dado** un miembro con rol de lector, **cuando** usa la app, **entonces** el botón «+»
    no aparece, porque no puede apuntar.
 3. **Dado** la pantalla de apuntar, **cuando** se abre, **entonces** el importe es grande y
@@ -108,6 +107,8 @@ Android y en el navegador (favicon).
 - Categorías creadas por el usuario con colores poco contrastados: el icono y el texto
   siguen siendo legibles.
 - Sin conexión: los avisos de estado mantienen el mismo estilo.
+- El sistema en modo oscuro: la app se sigue viendo en claro, legible (sin modo oscuro
+  en esta funcionalidad).
 
 ## Requisitos _(obligatorio)_
 
@@ -125,8 +126,8 @@ Android y en el navegador (favicon).
 - **RF-206**: La app DEBE cumplir WCAG 2.1 AA: contraste 4,5:1 en texto, objetivos táctiles
   de 44 px, etiquetas para lector de pantalla y texto escalable.
 - **RF-207**: La app DEBE tener icono, pantalla de carga y favicon propios.
-- **RF-208**: [NECESITA ACLARACIÓN: depende de la aclaración 2] La navegación principal
-  DEBE hacerse con una barra inferior de pestañas.
+- **RF-208**: La navegación principal DEBE hacerse con una barra inferior de pestañas (Mes,
+  Calendario, «+», Pagos y Hogar).
 - **RF-209**: El rediseño NO DEBE cambiar lo que hace la app ni romper sus pruebas.
 
 ## Criterios de éxito _(obligatorio)_
