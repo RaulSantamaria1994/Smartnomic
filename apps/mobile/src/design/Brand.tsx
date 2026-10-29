@@ -1,7 +1,7 @@
 import { Image, StyleSheet, View } from 'react-native';
 import icon from '../../assets/icon.png';
 import { AppText } from './Text';
-import { radius, spacing } from './tokens';
+import { color, radius, spacing } from './tokens';
 
 /** Marca de Smartnomic para las pantallas sin sesión: símbolo, nombre y lema. */
 export function Brand({ tagline }: { tagline: string }) {
@@ -20,6 +20,13 @@ export function Brand({ tagline }: { tagline: string }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms, marginBottom: spacing.md },
-  mark: { width: 48, height: 48, borderRadius: radius.lg },
+  // El icono es crema: el borde lo separa del fondo arena.
+  mark: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: color.border.default,
+  },
   text: { flex: 1 },
 });

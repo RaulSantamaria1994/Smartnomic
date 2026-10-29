@@ -1,0 +1,66 @@
+name: APK de Android
+
+# Compila el APK en las máquinas de GitHub, sin EAS: a mano (pestaña Actions, «Run
+# workflow») y en cada fusión a main. El APK se descarga desde la ejecución (Artifacts).
+# En los PR solo se compila si cambian este flujo o su script, para probarlos antes.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - .github/workflows/android.yml
+      - apps/mobile/scripts/prepare-android-ci.cjs
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # Igual que build.preview.env de apps/mobile/eas.json: se incrusta al compilar.
+      EXPO_PUBLIC_API_URL: https://smartnomicserver-production.up.railway.app
+      # Cada APK con un número de versión mayor que el anterior, para instalarlo encima.
+      ANDROID_VERSION_CODE: ${{ github.run_number }}
+      # Clave de firma (opcional, ver README «APK de Android»). Sin ella se usa la clave de
+      # depuración de la plantilla de Expo.
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Generar el proyecto Android
+        working-directory: apps/mobile
+        run: pnpm exec expo prebuild --platform android --no-install
+      - name: Preparar la clave de firma
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/smartnomic.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/smartnomic.jks" >> "$GITHUB_ENV"
+      - name: Ajustar versión y firma
+        run: node apps/mobile/scripts/prepare-android-ci.cjs
+      - name: Compilar el APK
+        working-directory: apps/mobile/android
+        # Solo arquitecturas de móviles reales: compila antes y el APK pesa menos.
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smartnomic-${{ github.run_number }}
+          path: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
