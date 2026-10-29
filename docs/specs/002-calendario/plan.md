@@ -190,3 +190,18 @@ reglas desactivadas, resueltos y totales.
 | Discrepancias entre calendario, "Próximos pagos" y avisos   | Misma función del dominio (`occurrencesBetween`) y un test que compara ambos  |
 | Cuadrícula ilegible en móviles estrechos o con texto grande | Columnas flexibles, marcas en lugar de textos dentro del día, prueba a 360 px |
 | Muchos pagos semanales en 12 meses hacen lento el cálculo   | Se calcula solo el mes pedido; 50 reglas semanales son ~250 vencimientos      |
+
+## Resultado de los criterios de éxito (C015–C016, 2026-10-29)
+
+Medido en local con la web compilada para producción (servidor y PostgreSQL en la misma
+máquina, Chromium sin interfaz).
+
+| Criterio                                         | Resultado | Cómo se ha medido                                                                                                                                                                        |
+| ------------------------------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CE-101 (mes < 1 s con 50 pagos)                  | ✅        | 50 pagos (25 semanales, 25 mensuales; 132 vencimientos en noviembre). API: 12 ms de mediana (peor 20 ms). Web recargando la página entera: 874 ms (peor 878 ms); pasar de mes: 68–89 ms. |
+| CE-102 (mismo día que «Próximos pagos» y avisos) | ✅        | Los tres usan `occurrencesBetween`; un test del dominio compara el calendario con `upcoming`.                                                                                            |
+| CE-103 (pagar en ≤ 3 toques)                     | ✅        | Hoy viene seleccionado: tocar el pago y «Marcar como pagado» son 2 toques (3 si es otro día).                                                                                            |
+| CE-104 (WCAG 2.1 AA automático)                  | ✅        | axe-core sin problemas en la pantalla; a 360 px sin scroll horizontal.                                                                                                                   |
+
+Guía de validación recorrida en web con la versión de producción (pasos 1–5). El paso 6
+en Android (TalkBack y texto grande) queda pendiente del APK, como en el MVP.

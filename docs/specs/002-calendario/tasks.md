@@ -97,12 +97,12 @@ cambian de estado en el calendario, en «Próximos pagos» y en el mes.
 
 ## Fase 4: Cierre
 
-- [ ] C015 Prueba de punta a punta en web (guía de validación del plan) y medir CE-101 y
+- [x] C015 Prueba de punta a punta en web (guía de validación del plan) y medir CE-101 y
       CE-103
-- [ ] C016 [P] axe-core sin problemas en la pantalla del calendario (CE-104) y prueba a
+- [x] C016 [P] axe-core sin problemas en la pantalla del calendario (CE-104) y prueba a
       360 px de ancho
-- [ ] C017 [P] Comprobar que la app compila para Android (`expo export --platform android`)
-- [ ] C018 Actualizar `README.md` (endpoint nuevo), `AGENTS.md` (estado) y marcar las
+- [x] C017 [P] Comprobar que la app compila para Android (`expo export --platform android`)
+- [x] C018 Actualizar `README.md` (endpoint nuevo), `AGENTS.md` (estado) y marcar las
       tareas
 
 ---
