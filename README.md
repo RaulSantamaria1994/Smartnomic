@@ -201,6 +201,14 @@ el script quita el fondo crema y compone cada tamaño (necesita Playwright con C
 node apps/mobile/scripts/make-icons.cjs   # crea apps/mobile/assets/*.png
 ```
 
+## Seguridad
+
+El servidor envía cabeceras de seguridad (CSP, anti-iframe, HSTS en producción) y las
+respuestas de la API no se guardan en caché (`apps/server/src/plugins/security-headers.ts`).
+En producción, los límites de peticiones cuentan por la IP que escribe Railway en
+`X-Real-IP`. La última auditoría y sus resultados están en
+[`docs/seguridad/`](docs/seguridad/).
+
 ## Estructura
 
 | Carpeta           | Qué contiene                                                    |
