@@ -251,14 +251,24 @@ function Upcoming({
         <Text style={styles.sectionTitle} accessibilityRole="header">
           {es.recurring.upcomingTitle}
         </Text>
-        <Pressable
-          onPress={() => router.push('/recurring')}
-          accessibilityRole="link"
-          accessibilityLabel={es.recurring.title}
-          style={styles.sectionAction}
-        >
-          <Text style={styles.link}>{es.recurring.manage}</Text>
-        </Pressable>
+        <View style={styles.sectionActions}>
+          <Pressable
+            onPress={() => router.push('/calendar')}
+            accessibilityRole="link"
+            accessibilityLabel={es.calendar.title}
+            style={styles.sectionAction}
+          >
+            <Text style={styles.link}>{es.calendar.open}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/recurring')}
+            accessibilityRole="link"
+            accessibilityLabel={es.recurring.title}
+            style={styles.sectionAction}
+          >
+            <Text style={styles.link}>{es.recurring.manage}</Text>
+          </Pressable>
+        </View>
       </View>
       {rules.length === 0 && (
         <Text style={[styles.muted, styles.sectionNote]}>{es.recurring.empty}</Text>
@@ -443,6 +453,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingRight: spacing.sm,
   },
+  sectionActions: { flexDirection: 'row' },
   sectionAction: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
   link: { color: colors.primary, fontSize: 15, fontWeight: '500' },
   sectionNote: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },

@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 a 8 terminadas salvo lo que necesita un móvil o
-cuentas externas: recorrer la guía en Android (T098) y generar el APK con EAS (T099). No inventes comandos, rutas
+Funcionalidad terminada: **`001-mvp-hogar`** (falta probarla en Android con el APK, T098
+y T099). Funcionalidad en curso: **`002-calendario`**, documentos aprobados y fases 1 y 2 terminadas; la siguiente es la fase 3 (historia 2: pagar u omitir desde el calendario), desde C013. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 

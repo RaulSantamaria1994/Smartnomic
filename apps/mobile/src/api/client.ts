@@ -1,4 +1,5 @@
 import {
+  calendarResponseSchema,
   categoriesResponseSchema,
   categorySchema,
   householdExportSchema,
@@ -65,6 +66,8 @@ export const api = {
     }),
   deleteRule: (householdId: string, id: string) =>
     request(`${household(householdId)}/recurring/${id}`, { method: 'DELETE', schema: z.null() }),
+  calendar: (householdId: string, month: string) =>
+    request(`${household(householdId)}/calendar/${month}`, { schema: calendarResponseSchema }),
   upcoming: (householdId: string, days = 30) =>
     request(`${household(householdId)}/upcoming?days=${days}`, { schema: upcomingResponseSchema }),
   pay: (householdId: string, ruleId: string, dueDate: string, input: PayOccurrenceInput) =>
@@ -156,6 +159,9 @@ export const queryKeys = {
   me: ['me'] as const,
   categories: (householdId: string) => ['categories', householdId] as const,
   periods: (householdId: string) => ['periods', householdId] as const,
+  /** Todos los meses del calendario, para invalidarlos juntos. */
+  calendars: (householdId: string) => ['calendar', householdId] as const,
+  calendar: (householdId: string, month: string) => ['calendar', householdId, month] as const,
   period: (householdId: string, start: string) => ['periods', householdId, start] as const,
   recurring: (householdId: string) => ['recurring', householdId] as const,
   members: (householdId: string) => ['members', householdId] as const,

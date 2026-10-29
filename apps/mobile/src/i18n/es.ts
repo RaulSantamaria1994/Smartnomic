@@ -247,6 +247,36 @@ export const es = {
     settings: 'Ajustes del hogar',
     categories: 'Categorías',
   },
+  calendar: {
+    title: 'Calendario',
+    open: 'Calendario',
+    previous: 'Mes anterior',
+    next: 'Mes siguiente',
+    today: 'Hoy',
+    weekdays: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
+    weekdayNames: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'],
+    expenses: 'Pagos previstos',
+    income: 'Cobros previstos',
+    pending: 'Pendiente de pagar',
+    empty: 'Este mes no hay pagos programados.',
+    emptyHint: 'Da de alta el alquiler, la luz o la nómina en «Pagos recurrentes».',
+    noneThatDay: 'Este día no hay pagos.',
+    status: {
+      pending: 'Pendiente',
+      overdue: 'Atrasado',
+      paid: 'Pagado',
+      skipped: 'Omitido',
+    },
+    collected: 'Cobrado',
+    resolvedBy: (name: string) => `por ${name}`,
+    dayLabel: (date: string, count: number, overdue: number) =>
+      count === 0
+        ? date
+        : `${date}, ${count} ${count === 1 ? 'vencimiento' : 'vencimientos'}${
+            overdue > 0 ? `, ${overdue} ${overdue === 1 ? 'atrasado' : 'atrasados'}` : ''
+          }`,
+    todaySuffix: ', hoy',
+  },
   household: {
     title: 'Miembros del hogar',
     open: 'Hogar',
