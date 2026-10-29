@@ -115,7 +115,9 @@ abre el pago; y que en el navegador aparece destacado al entrar.
 
 1. **Dado** un vencimiento pendiente para mañana con recordatorio de 1 día antes,
    **cuando** llega la hora de aviso de hoy, **entonces** el usuario recibe en Android una
-   notificación con el nombre del pago, el importe previsto y la fecha.
+   notificación con el nombre del pago y la fecha. El importe se ve al abrir la app, no en
+   la notificación, que aparece en la pantalla de bloqueo (cambio de la auditoría de
+   seguridad del 29 de octubre de 2026, `docs/seguridad/`).
 2. **Dado** un vencimiento pendiente para hoy, **cuando** llega la hora de aviso,
    **entonces** el usuario recibe en Android una notificación de que vence hoy.
 3. **Dado** un vencimiento ya marcado como pagado u omitido, **cuando** llega la hora de

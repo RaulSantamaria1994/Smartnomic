@@ -21,6 +21,8 @@ export interface AuthOptions {
   trustedOrigins?: string[];
   /** En producción las cookies solo viajan por HTTPS. */
   production: boolean;
+  /** Cabecera con la IP real del cliente para el límite propio de Better Auth (ver server.ts). */
+  clientIpHeader?: string;
   /** Sin él, recuperar la contraseña no está disponible. */
   sendResetPassword?: SendResetPassword;
   /** Se llama si falla un envío. Nunca recibe la dirección del destinatario. */
@@ -77,6 +79,9 @@ export function createAuth(options: AuthOptions) {
     },
     advanced: {
       useSecureCookies: options.production,
+      ...(options.clientIpHeader && {
+        ipAddress: { ipAddressHeaders: [options.clientIpHeader] },
+      }),
       // Constitución, art. IX.3.3: cookie HttpOnly, Secure y SameSite en la web.
       defaultCookieAttributes: {
         httpOnly: true,

@@ -14,6 +14,8 @@ const CORS_ORIGINS = (process.env.CORS_ORIGINS ?? '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+// Railway escribe la IP del cliente en X-Real-IP y sustituye la que mande el cliente.
+const CLIENT_IP_HEADER = 'x-real-ip';
 // Web exportada de Expo (`pnpm --filter @smartnomic/mobile export:web`).
 const WEB_ROOT =
   process.env.WEB_ROOT ?? fileURLToPath(new URL('../../mobile/dist', import.meta.url));
@@ -35,6 +37,7 @@ async function main() {
       secret: requiredSecret(),
       trustedOrigins: CORS_ORIGINS,
       production: PRODUCTION,
+      ...(PRODUCTION && { clientIpHeader: CLIENT_IP_HEADER }),
       ...(sendEmail && { sendEmail, onEmailError: (error) => logEmailError(error) }),
     });
   }
@@ -44,6 +47,7 @@ async function main() {
     corsOrigins: CORS_ORIGINS,
     // En producción (Railway) el servidor está detrás de un proxy.
     trustProxy: PRODUCTION,
+    ...(PRODUCTION && { clientIpHeader: CLIENT_IP_HEADER, hsts: true }),
     webRoot: WEB_ROOT,
     ...(api && { api }),
   });

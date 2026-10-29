@@ -38,6 +38,7 @@ export function useTestServer(
     authRateLimit?: AuthRateLimit;
     invitationRateLimit?: AuthRateLimit;
     trustProxy?: boolean;
+    clientIpHeader?: string;
     now?: () => Date;
   } = {},
 ) {
@@ -65,6 +66,7 @@ export function useTestServer(
       now: options.now ?? (() => TEST_NOW),
       invitationRateLimit: options.invitationRateLimit ?? { max: 1000, timeWindow: '1 minute' },
       ...(options.trustProxy !== undefined && { trustProxy: options.trustProxy }),
+      ...(options.clientIpHeader && { clientIpHeader: options.clientIpHeader }),
     });
   });
 

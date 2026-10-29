@@ -12,6 +12,10 @@ on:
       - .github/workflows/android.yml
       - apps/mobile/scripts/prepare-android-ci.cjs
 
+# El token de GitHub solo puede leer el repositorio (mínimo privilegio).
+permissions:
+  contents: read
+
 concurrency:
   group: apk-${{ github.ref }}
   cancel-in-progress: true

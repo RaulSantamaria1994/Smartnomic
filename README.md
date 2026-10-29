@@ -161,7 +161,8 @@ base64 -w0 smartnomic.jks   # valor de ANDROID_KEYSTORE_BASE64
 ```
 
 Secretos: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`
-(`smartnomic`) y `ANDROID_KEY_PASSWORD`. Guarda la clave en un sitio seguro: sin ella no se
+(`smartnomic`) y `ANDROID_KEY_PASSWORD` (la misma contraseña que la del almacén: `keytool`
+crea almacenes PKCS12, que usan una sola). Guarda la clave en un sitio seguro: sin ella no se
 pueden publicar actualizaciones. Al cambiar de clave hay que desinstalar la app una vez.
 
 ### Con EAS Build
@@ -200,6 +201,14 @@ el script quita el fondo crema y compone cada tamaño (necesita Playwright con C
 ```sh
 node apps/mobile/scripts/make-icons.cjs   # crea apps/mobile/assets/*.png
 ```
+
+## Seguridad
+
+El servidor envía cabeceras de seguridad (CSP, anti-iframe, HSTS en producción) y las
+respuestas de la API no se guardan en caché (`apps/server/src/plugins/security-headers.ts`).
+En producción, los límites de peticiones cuentan por la IP que escribe Railway en
+`X-Real-IP`. La última auditoría y sus resultados están en
+[`docs/seguridad/`](docs/seguridad/).
 
 ## Estructura
 

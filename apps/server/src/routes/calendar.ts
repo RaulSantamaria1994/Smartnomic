@@ -53,7 +53,11 @@ export function registerCalendarRoutes(
         .from(occurrences)
         .leftJoin(
           transactions,
-          and(eq(transactions.id, occurrences.transactionId), isNull(transactions.deletedAt)),
+          and(
+            eq(transactions.id, occurrences.transactionId),
+            eq(transactions.householdId, household.id),
+            isNull(transactions.deletedAt),
+          ),
         )
         .where(
           and(eq(occurrences.householdId, household.id), between(occurrences.dueDate, start, end)),
