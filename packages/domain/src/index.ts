@@ -1,6 +1,7 @@
 // Lógica de negocio pura de Smartnomic: dinero, periodos, recurrencias, resúmenes,
 // presupuestos y avisos. Sin interfaz, red, base de datos, reloj ni azar
 // (docs/CONSTITUTION.md, art. II).
+export * from './calendar';
 export * from './categories';
 export * from './dates';
 export * from './ids';

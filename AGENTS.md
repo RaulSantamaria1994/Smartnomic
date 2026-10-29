@@ -43,7 +43,7 @@ actualizan primero los documentos.
 ## Estado actual
 
 Funcionalidad terminada: **`001-mvp-hogar`** (falta probarla en Android con el APK, T098
-y T099). Funcionalidad en curso: **`002-calendario`**, con `spec.md` y `plan.md` aprobados y `tasks.md` en revisión. No inventes comandos, rutas
+y T099). Funcionalidad en curso: **`002-calendario`**, documentos aprobados y fase 1 (base común) terminada; la siguiente es la fase 2 (historia 1), desde C004. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 

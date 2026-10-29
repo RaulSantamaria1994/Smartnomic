@@ -22,12 +22,12 @@ Los ids siguen desde los del MVP con el prefijo `C` para no confundirlos.
 
 **Objetivo**: dominio y contrato del calendario, que usan las dos historias.
 
-- [ ] C001 [P] Tests del dominio del calendario en `packages/domain/src/calendar.test.ts`:
+- [x] C001 [P] Tests del dominio del calendario en `packages/domain/src/calendar.test.ts`:
       `monthRange`, `monthOf` y `shiftMonth` (cambio de año); `monthGrid` con semanas de
       lunes a domingo (mes de 4, 5 y 6 filas, febrero bisiesto y no bisiesto)
-- [ ] C002 Implementar `monthRange`, `monthOf`, `shiftMonth` y `monthGrid` en
+- [x] C002 Implementar `monthRange`, `monthOf`, `shiftMonth` y `monthGrid` en
       `packages/domain/src/calendar.ts` y exportarlos en `src/index.ts`
-- [ ] C003 [P] Esquemas zod `monthSchema` (`YYYY-MM`), `calendarItemSchema` y
+- [x] C003 [P] Esquemas zod `monthSchema` (`YYYY-MM`), `calendarItemSchema` y
       `calendarResponseSchema` en `packages/api/src/schemas/calendar.ts`, exportados en
       `src/index.ts`
 
