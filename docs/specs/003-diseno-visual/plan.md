@@ -158,3 +158,27 @@ valiendo.
 | Pesos de fuente que no se ven en Android            | `AppText` usa la familia de cada peso, nunca `fontWeight` con fuente propia       |
 | Colores de categorías del usuario poco contrastados | El texto va siempre en tinta; el color solo pinta el fondo suave y el punto       |
 | Rediseño grande en un solo PR difícil de revisar    | Commits por fase y capturas antes/después en la descripción del PR                |
+
+## Resultado (D020–D023, 2026-10-29)
+
+Medido en local con la web compilada para producción que sirve el servidor.
+
+| Criterio                                 | Resultado | Cómo se ha medido                                                                                                                                                                                                                                                                                   |
+| ---------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CE-201 (WCAG 2.1 AA automático)          | ✅        | axe-core sin problemas en las 13 pantallas. Revisión con la skill de accesibilidad del plugin Design: foco visible y orden lógico con el teclado, Enter en las pestañas, barra anunciada como «Navegación principal», contraste de todos los tokens comprobado por tests (texto 4,5:1, bordes 3:1). |
+| CE-202 (sin valores sueltos)             | ✅        | Regla de ESLint: fuera de `src/design/` no hay colores hex, `rgba()`, `fontSize` ni `fontWeight`; la app la cumple sin excepciones.                                                                                                                                                                 |
+| CE-203 («Mes» < 1 s con 500 movimientos) | ✅        | 899 ms de mediana al recargar la página entera (869 ms antes del rediseño); cambiar de periodo, ~100 ms.                                                                                                                                                                                            |
+| CE-204 (pruebas de punta a punta)        | ✅        | Las cinco historias del MVP y las dos del calendario, adaptadas a la barra inferior.                                                                                                                                                                                                                |
+
+Anchos: sin desplazamiento horizontal a 320, 360 y 1280 px en todas las pantallas; en
+escritorio el contenido se centra con un ancho máximo. Con zoom al 200 % los importes pasan
+a otra línea en lugar de cortarse; a 320 px la etiqueta «Calendario» de la barra se abrevia
+(el lector de pantalla la lee entera).
+
+Encontrado y corregido durante el cierre: en producción el servidor no servía las fuentes
+ni los iconos que Expo exporta bajo `assets/__node_modules/.pnpm/` (D019b).
+
+Pendiente, como en el MVP: TalkBack, texto grande del sistema e icono en un Android real
+con el APK.
+
+Capturas antes/después en [`capturas/`](capturas/).

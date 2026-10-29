@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `003-diseno-visual`
 **Creada**: 2026-10-29
-**Estado**: Aprobada
+**Estado**: Implementada
 **Plan**: [`plan.md`](plan.md)
 **Propuesta visual**: [lienzo «Smartnomic · Propuesta visual»](https://claude.ai/artifact/KrLAujuEQFQMcMccqHHPk5)
 (privado del propietario)

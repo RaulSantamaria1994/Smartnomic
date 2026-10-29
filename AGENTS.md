@@ -43,7 +43,9 @@ actualizan primero los documentos.
 ## Estado actual
 
 Funcionalidades terminadas: **`001-mvp-hogar`** (falta probarla en Android con el APK, T098
-y T099) y **`002-calendario`**. En curso: **`003-diseno-visual`**, documentos aprobados y fases 1 a 5 terminadas; la siguiente es la fase 6 (cierre), desde D020. No inventes comandos, rutas
+y T099), **`002-calendario`** y **`003-diseno-visual`**. El aspecto de la app sale del
+sistema de diseño de `apps/mobile/src/design/` (tokens y componentes); ESLint impide usar
+colores o tamaños de letra sueltos fuera de él. No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 

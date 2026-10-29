@@ -40,7 +40,7 @@ export function SummaryCard({
         <AppText variant="caption" tone="onAccentMuted">
           {title}
         </AppText>
-        <AppText variant="display" tone="onAccent" tabular numberOfLines={1} adjustsFontSizeToFit>
+        <AppText variant="display" tone="onAccent" tabular>
           {value(balanceCents)}
         </AppText>
       </View>
@@ -67,7 +67,7 @@ export function SummaryCard({
           <AppText variant="caption" tone="onAccentMuted">
             {es.month.income}
           </AppText>
-          <AppText variant="heading" tone="onAccent" tabular numberOfLines={1}>
+          <AppText variant="heading" tone="onAccent" tabular>
             {value(incomeCents)}
           </AppText>
         </View>
@@ -75,7 +75,7 @@ export function SummaryCard({
           <AppText variant="caption" tone="onAccentMuted">
             {es.month.expenses}
           </AppText>
-          <AppText variant="heading" tone="onAccent" tabular numberOfLines={1}>
+          <AppText variant="heading" tone="onAccent" tabular>
             {value(expenseCents)}
           </AppText>
         </View>

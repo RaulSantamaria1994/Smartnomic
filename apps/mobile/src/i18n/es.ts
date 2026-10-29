@@ -359,6 +359,7 @@ export const es = {
     recurring: 'Pagos',
     household: 'Hogar',
     add: 'Apuntar un movimiento',
+    navigation: 'Navegación principal',
   },
   home: {
     transactions: 'Movimientos',

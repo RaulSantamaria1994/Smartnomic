@@ -42,7 +42,12 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
         style={styles.tab}
       >
         <Icon name={icon} tint={focused ? color.text.accent : color.text.muted} />
-        <AppText variant="small" tone={focused ? 'accent' : 'muted'}>
+        <AppText
+          variant="small"
+          tone={focused ? 'accent' : 'muted'}
+          numberOfLines={1}
+          style={styles.label}
+        >
           {label}
         </AppText>
       </Pressable>
@@ -50,7 +55,11 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
   };
 
   return (
-    <View style={[styles.bar, { paddingBottom: insets.bottom }]}>
+    <View
+      role="navigation"
+      aria-label={es.tabs.navigation}
+      style={[styles.bar, { paddingBottom: insets.bottom }]}
+    >
       <View style={styles.row} accessibilityRole="tablist">
         {routes.slice(0, 2).map(tab)}
         {canWrite && <View style={styles.slot} />}
@@ -87,7 +96,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: spacing.xs,
   },
-  tab: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', gap: spacing.xxs },
+  tab: {
+    minWidth: 0,
+    paddingHorizontal: spacing.xxs,
+    flex: 1,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xxs,
+  },
+  label: { maxWidth: '100%' },
   slot: { flex: 1 },
   addLayer: {
     position: 'absolute',

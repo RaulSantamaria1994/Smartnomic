@@ -107,12 +107,12 @@ excepciones.
 
 ## Fase 6: Cierre
 
-- [ ] D020 Adaptar las pruebas de punta a punta (barra inferior) y pasarlas todas contra
+- [x] D020 Adaptar las pruebas de punta a punta (barra inferior) y pasarlas todas contra
       la web de producción (CE-204); medir «Mes» con 500 movimientos (CE-203)
-- [ ] D021 [P] axe-core en todas las pantallas (CE-201) y revisión con la skill de
+- [x] D021 [P] axe-core en todas las pantallas (CE-201) y revisión con la skill de
       accesibilidad del plugin Design; pruebas a 360 px y 1280 px
-- [ ] D022 [P] `expo export --platform android` compila
-- [ ] D023 Capturas antes/después; actualizar `README.md`, `AGENTS.md` y marcar tareas
+- [x] D022 [P] `expo export --platform android` compila
+- [x] D023 Capturas antes/después; actualizar `README.md`, `AGENTS.md` y marcar tareas
 
 ---
 

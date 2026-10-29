@@ -4,7 +4,8 @@ import { AppText } from './Text';
 import { color, type TypographyVariant } from './tokens';
 
 /**
- * Importe con cifras tabulares. Con `kind` lleva signo (+/−) y los ingresos van en verde:
+ * Importe con cifras tabulares. Nunca se corta con «…»: con texto grande pasa a otra línea.
+ * Con `kind` lleva signo (+/−) y los ingresos van en verde:
  * el signo hace que no dependa solo del color.
  */
 export function Amount({
@@ -31,7 +32,6 @@ export function Amount({
       variant={variant}
       tabular
       style={[{ color: tone }, strike && { textDecorationLine: 'line-through' }]}
-      numberOfLines={1}
     >
       {text}
     </AppText>
