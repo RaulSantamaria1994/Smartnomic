@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `002-calendario`
 **Creada**: 2026-10-29
-**Estado**: Borrador
+**Estado**: Aclarada, pendiente de aprobación
 **Plan**: pendiente (`plan.md`, cuando se apruebe esta especificación)
 **Entrada**: "Vamos a implementar la opción de ver los pagos programados en un calendario."
 
@@ -15,14 +15,13 @@
 
 ### Sesión 2026-10-29
 
-- P: ¿Qué se muestra en el calendario? → [NECESITA ACLARACIÓN: propuesta: solo los
-  vencimientos de los pagos y cobros recurrentes (pendientes, atrasados, pagados y
-  omitidos); los movimientos puntuales siguen en la pantalla «Mes».]
-- P: ¿El calendario va por mes natural (del 1 al último día) o por el periodo del hogar
-  (por ejemplo, del 25 al 24)? → [NECESITA ACLARACIÓN: propuesta: mes natural, que es lo
-  que se espera de un calendario.]
-- P: ¿Hasta dónde se puede navegar? → [NECESITA ACLARACIÓN: propuesta: hasta 12 meses
-  hacia delante y, hacia atrás, hasta el mes del pago recurrente más antiguo.]
+- P: ¿Qué se muestra en el calendario? → R: Solo los vencimientos de los pagos y cobros
+  recurrentes (pendientes, atrasados, pagados y omitidos). Los movimientos puntuales
+  siguen en la pantalla «Mes».
+- P: ¿El calendario va por mes natural o por el periodo del hogar? → R: Mes natural, del 1
+  al último día.
+- P: ¿Hasta dónde se puede navegar? → R: Hasta 12 meses hacia delante desde el mes actual
+  y, hacia atrás, hasta el mes de inicio del pago recurrente más antiguo del hogar.
 
 ## Escenarios de usuario y pruebas _(obligatorio)_
 
@@ -107,15 +106,16 @@ comprueba que cambian de estado en el calendario, en "Próximos pagos" y en el m
 
 - **RF-101**: Todos los miembros DEBEN poder abrir el calendario desde la pantalla
   principal.
-- **RF-102**: El calendario DEBE mostrar un mes con las semanas empezando en lunes, el día
+- **RF-102**: El calendario DEBE mostrar un mes natural (del 1 al último día) con las semanas empezando en lunes, el día
   de hoy destacado y una marca en cada día con vencimientos que distinga si hay alguno
   atrasado, pendiente o solo resueltos.
 - **RF-103**: El calendario DEBE mostrar los vencimientos de todos los pagos y cobros
   recurrentes del hogar en ese mes, con su estado: pendiente, atrasado, pagado u omitido.
 - **RF-104**: Tocar un día DEBE mostrar sus vencimientos con nombre, importe (real si está
   pagado, previsto si no), categoría y estado.
-- **RF-105**: El miembro DEBE poder pasar al mes anterior y al siguiente, dentro de los
-  límites acordados, y volver al mes actual con un toque.
+- **RF-105**: El miembro DEBE poder pasar al mes anterior y al siguiente, hasta 12 meses
+  después del actual y hasta el mes de inicio del pago recurrente más antiguo, y volver
+  al mes actual con un toque.
 - **RF-106**: El calendario DEBE mostrar, para el mes visible, el total previsto de pagos,
   el de cobros y lo que queda pendiente de pagar.
 - **RF-107**: Los editores y el propietario DEBEN poder pagar u omitir un vencimiento
@@ -148,5 +148,4 @@ comprueba que cambian de estado en el calendario, en "Próximos pagos" y en el m
   recordatorios, para que nunca discrepen.
 - No hace falta sincronizar con calendarios externos (Google Calendar, etc.); queda fuera
   de esta funcionalidad.
-- Los movimientos puntuales no se muestran en el calendario salvo que se decida lo
-  contrario en las aclaraciones.
+- Los movimientos puntuales no se muestran en el calendario.
