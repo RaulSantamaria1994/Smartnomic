@@ -9,6 +9,7 @@ import type { Database } from './db/client';
 import { loggerOptions } from './logging';
 import { registerErrorHandler } from './plugins/errors';
 import { createHouseholdAccess } from './plugins/household-access';
+import { registerSecurityHeaders } from './plugins/security-headers';
 import { registerAccountRoutes } from './routes/account';
 import { registerCalendarRoutes } from './routes/calendar';
 import { registerCategoryRoutes } from './routes/categories';
@@ -39,8 +40,16 @@ export interface ServerOptions {
    * `X-Forwarded-For`. Sin esto, el límite de peticiones vería la IP del proxy.
    */
   trustProxy?: boolean;
+  /**
+   * Cabecera con la IP real del cliente que escribe el proxy (en Railway, `x-real-ip`).
+   * Los límites de peticiones cuentan por ella: el principio de `X-Forwarded-For` lo puede
+   * inventar el cliente y con él saltarse el límite.
+   */
+  clientIpHeader?: string;
   /** Carpeta con la web exportada de Expo. Si existe, se sirve en `/`. */
   webRoot?: string;
+  /** Enviar HSTS: solo en producción, donde la web se sirve siempre por HTTPS. */
+  hsts?: boolean;
   /** Reloj del servidor. Los tests lo fijan (constitución, art. VII.5). */
   now?: () => Date;
   /** Límite para ver y aceptar invitaciones por IP. Por defecto, 20 por minuto. */
@@ -55,6 +64,7 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     trustProxy: options.trustProxy ?? false,
   });
   registerErrorHandler(app);
+  registerSecurityHeaders(app, { hsts: options.hsts ?? false });
 
   if (options.corsOrigins && options.corsOrigins.length > 0) {
     await app.register(cors, {
@@ -64,7 +74,15 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     });
   }
   // Solo se limitan las rutas que lo piden en su configuración.
-  await app.register(rateLimit, { global: false });
+  const ipHeader = options.clientIpHeader?.toLowerCase();
+  await app.register(rateLimit, {
+    global: false,
+    keyGenerator: (request) => {
+      const value = ipHeader ? request.headers[ipHeader] : undefined;
+      const ip = (Array.isArray(value) ? value[0] : value)?.split(',')[0]?.trim();
+      return ip || request.ip;
+    },
+  });
 
   app.get('/health', async (): Promise<HealthResponse> => ({ ok: true }));
 

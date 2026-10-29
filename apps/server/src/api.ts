@@ -10,6 +10,7 @@ export interface ApiOptions {
   secret: string;
   production: boolean;
   trustedOrigins?: string[];
+  clientIpHeader?: string;
   /** Sin él, recuperar la contraseña no está disponible. */
   sendEmail?: SendEmail;
   onEmailError?: (error: unknown) => void;
@@ -32,6 +33,7 @@ export function createApi(options: ApiOptions): Api {
     secret: options.secret,
     production: options.production,
     ...(options.trustedOrigins && { trustedOrigins: options.trustedOrigins }),
+    ...(options.clientIpHeader && { clientIpHeader: options.clientIpHeader }),
     ...(sendEmail && {
       sendResetPassword: ({ to, url }) => sendEmail({ to, ...resetPasswordEmail(url) }),
     }),
