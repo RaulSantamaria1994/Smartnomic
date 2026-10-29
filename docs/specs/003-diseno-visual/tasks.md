@@ -21,19 +21,19 @@ punta y axe-core.
 
 **Objetivo**: tokens, fuente e iconos disponibles, sin cambiar aún ninguna pantalla.
 
-- [ ] D001 Instalar `expo-font`, `@expo-google-fonts/plus-jakarta-sans`,
+- [x] D001 Instalar `expo-font`, `@expo-google-fonts/plus-jakarta-sans`,
       `@expo/vector-icons` y `expo-splash-screen` (versiones del SDK 58) en
       `apps/mobile/package.json`
-- [ ] D002 [P] Tests de `tint` y `contrastRatio` en `apps/mobile/src/design/color.test.ts`:
+- [x] D002 [P] Tests de `tint` y `contrastRatio` en `apps/mobile/src/design/color.test.ts`:
       mezcla con blanco, ratio WCAG conocido (negro/blanco 21:1), y que la tinta sobre el
       fondo suave de cada color de categoría predefinida cumple 4,5:1
-- [ ] D003 Implementar `apps/mobile/src/design/color.ts`
-- [ ] D004 [P] Tokens «Calma» en `apps/mobile/src/design/tokens.ts` (paleta base y
+- [x] D003 Implementar `apps/mobile/src/design/color.ts`
+- [x] D004 [P] Tokens «Calma» en `apps/mobile/src/design/tokens.ts` (paleta base y
       nombres semánticos de color, escala tipográfica, espaciado, esquinas, sombras);
       `src/theme.ts` pasa a reexportarlos mientras dura la migración
-- [ ] D005 [P] Carga de la fuente con `expo-splash-screen` en
+- [x] D005 [P] Carga de la fuente con `expo-splash-screen` en
       `apps/mobile/src/design/fonts.ts` y `app/_layout.tsx`
-- [ ] D006 [P] `AppText` (variantes) e `Icon` (Feather con nombres propios) en
+- [x] D006 [P] `AppText` (variantes) e `Icon` (Feather con nombres propios) en
       `apps/mobile/src/design/`
 
 **Punto de control**: la app arranca igual que antes, con la fuente nueva cargada.
