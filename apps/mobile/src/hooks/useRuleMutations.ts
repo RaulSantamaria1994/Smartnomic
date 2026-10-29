@@ -10,6 +10,7 @@ export function useRefreshRecurring(householdId: string | undefined) {
       queryClient.invalidateQueries({ queryKey: queryKeys.recurring(householdId) }),
       queryClient.invalidateQueries({ queryKey: queryKeys.upcoming(householdId) }),
       queryClient.invalidateQueries({ queryKey: queryKeys.periods(householdId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.calendars(householdId) }),
     ]);
   };
 }

@@ -20,6 +20,7 @@ import { formatDay, formatMoney, formatMonthTitle } from '../../src/format';
 import {
   todayIn,
   useCalendar,
+  useCan,
   useCategories,
   useMe,
   useMembers,
@@ -28,7 +29,7 @@ import {
 import { es } from '../../src/i18n/es';
 import { colors, spacing } from '../../src/theme';
 
-/** Calendario de pagos programados (especificación 002, historia 1). */
+/** Calendario de pagos programados (especificación 002, historias 1 y 2). */
 export default function Calendar() {
   const me = useMe();
   const household = me.data?.household;
@@ -40,6 +41,7 @@ export default function Calendar() {
   const rules = useRecurring(household?.id);
   const categories = useCategories(household?.id);
   const members = useMembers(household?.id);
+  const canResolve = useCan()('occurrences.resolve');
 
   if (!household || !visible) {
     return (
@@ -150,6 +152,11 @@ export default function Calendar() {
                 rule={ruleById.get(item.ruleId)}
                 categories={categoryById}
                 resolvedBy={item.resolvedBy ? memberName.get(item.resolvedBy) : undefined}
+                onPress={
+                  canResolve && (item.status === 'pending' || item.status === 'overdue')
+                    ? () => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)
+                    : undefined
+                }
               />
             ))}
           </View>
@@ -219,11 +226,14 @@ function ItemRow({
   rule,
   categories,
   resolvedBy,
+  onPress,
 }: {
   item: CalendarItem;
   rule: RecurringRule | undefined;
   categories: Map<string, Category>;
   resolvedBy: string | undefined;
+  /** Pagar u omitir (historia 2); solo editores y propietario, y si está sin resolver. */
+  onPress: (() => void) | undefined;
 }) {
   const category = rule ? categories.get(rule.categoryId) : undefined;
   const status =
@@ -238,10 +248,13 @@ function ItemRow({
         ? colors.success
         : colors.muted;
   return (
-    <View
-      style={styles.row}
-      accessible
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={`${rule?.name ?? '—'}, ${formatMoney(item.amountCents)}, ${detail}`}
+      accessibilityHint={onPress ? es.calendar.resolveHint : undefined}
+      style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}
     >
       <Text style={styles.icon}>{category?.icon ?? '•'}</Text>
       <View style={styles.rowText}>
@@ -259,7 +272,8 @@ function ItemRow({
       >
         {formatMoney(item.amountCents)}
       </Text>
-    </View>
+      {onPress && <Text style={styles.chevron}>›</Text>}
+    </Pressable>
   );
 }
 
@@ -322,4 +336,5 @@ const styles = StyleSheet.create({
   rowTitle: { fontSize: 16, color: colors.text, fontWeight: '500' },
   rowAmount: { fontSize: 16, fontWeight: '600' },
   skipped: { textDecorationLine: 'line-through', color: colors.muted },
+  chevron: { fontSize: 24, color: colors.primary },
 });
