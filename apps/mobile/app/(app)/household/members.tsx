@@ -159,11 +159,13 @@ export default function Members() {
                 <Button
                   variant="link"
                   label={es.household.share}
+                  accessibilityLabel={`${es.household.share} ${invitation.code}`}
                   onPress={() => void share(invitation)}
                 />
                 <Button
                   variant="link"
                   label={es.household.revoke}
+                  accessibilityLabel={`${es.household.revoke} ${invitation.code}`}
                   loading={busy === `revoke-${invitation.id}`}
                   onPress={() =>
                     run(`revoke-${invitation.id}`, () =>
@@ -255,18 +257,21 @@ function MemberRow({
           <Button
             variant="link"
             label={other === 'editor' ? es.household.makeEditor : es.household.makeViewer}
+            accessibilityLabel={`${other === 'editor' ? es.household.makeEditor : es.household.makeViewer}: ${member.name}`}
             loading={busy === `role-${member.id}`}
             onPress={() => onRole(other)}
           />
           <Button
             variant="link"
             label={es.household.transfer}
+            accessibilityLabel={`${es.household.transfer}: ${member.name}`}
             loading={busy === `transfer-${member.id}`}
             onPress={onTransfer}
           />
           <Button
             variant="link"
             label={es.household.remove}
+            accessibilityLabel={`${es.household.remove}: ${member.name}`}
             loading={busy === `remove-${member.id}`}
             onPress={onRemove}
           />

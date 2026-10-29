@@ -72,6 +72,7 @@ export const es = {
     balance: 'Balance',
     empty: 'Aún no hay movimientos en este periodo.',
     emptyHint: 'Apunta el primero con el botón de abajo.',
+    showMore: (rest: number) => `Mostrar más (quedan ${rest})`,
     add: 'Apuntar',
     offline: 'Sin conexión: estás viendo los últimos datos cargados.',
     deleted: 'Movimiento borrado.',

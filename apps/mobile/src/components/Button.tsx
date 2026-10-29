@@ -7,16 +7,25 @@ interface Props {
   variant?: 'primary' | 'link';
   loading?: boolean;
   disabled?: boolean;
+  /** Lo que oye un lector de pantalla, si `label` no basta (por ejemplo, «Archivar Ropa»). */
+  accessibilityLabel?: string;
 }
 
-export function Button({ label, onPress, variant = 'primary', loading, disabled }: Props) {
+export function Button({
+  label,
+  onPress,
+  variant = 'primary',
+  loading,
+  disabled,
+  accessibilityLabel,
+}: Props) {
   const inactive = Boolean(disabled || loading);
   return (
     <Pressable
       onPress={onPress}
       disabled={inactive}
       accessibilityRole={variant === 'link' ? 'link' : 'button'}
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: inactive, busy: Boolean(loading) }}
       style={({ pressed }) => [
         variant === 'primary' ? styles.primary : styles.link,

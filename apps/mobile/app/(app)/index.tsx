@@ -38,12 +38,19 @@ import { es } from '../../src/i18n/es';
 import { signOut } from '../../src/session/sign-out';
 import { colors, spacing } from '../../src/theme';
 
+/**
+ * Movimientos que se pintan de una vez. Con cientos en un periodo, pintarlos todos retrasa
+ * también el resumen (CE-003).
+ */
+const PAGE_SIZE = 100;
+
 /** Pantalla «Mes»: resumen del periodo, lista de movimientos y botón para apuntar. */
 export default function Month() {
   const queryClient = useQueryClient();
   const me = useMe();
   const household = me.data?.household;
   const [start, setStart] = useState<DateString | null>(null);
+  const [shown, setShown] = useState(PAGE_SIZE);
   const periodStart =
     start ??
     (household ? currentPeriodStart(household.timezone, household.monthStartDay) : undefined);
@@ -72,7 +79,10 @@ export default function Month() {
   }
 
   const current = periodOf(periodStart, household.monthStartDay);
-  const move = (n: number) => setStart(shiftPeriod(current, n, household.monthStartDay).start);
+  const move = (n: number) => {
+    setStart(shiftPeriod(current, n, household.monthStartDay).start);
+    setShown(PAGE_SIZE);
+  };
   const byId = new Map((categories.data?.categories ?? []).map((c) => [c.id, c]));
   // Se dice quién apuntó cada movimiento (RF-009), salvo si el hogar es de una sola persona
   // y lo apuntó ella.
@@ -188,7 +198,7 @@ export default function Month() {
 
         {data && data.transactions.length > 0 && (
           <View style={styles.list}>
-            {data.transactions.map((t) => (
+            {data.transactions.slice(0, shown).map((t) => (
               <Row
                 key={t.id}
                 transaction={t}
@@ -198,6 +208,13 @@ export default function Month() {
               />
             ))}
           </View>
+        )}
+        {data && data.transactions.length > shown && (
+          <Button
+            variant="link"
+            label={es.month.showMore(data.transactions.length - shown)}
+            onPress={() => setShown((n) => n + PAGE_SIZE)}
+          />
         )}
 
         <Button variant="link" label={es.auth.signOut} onPress={() => void signOut(queryClient)} />

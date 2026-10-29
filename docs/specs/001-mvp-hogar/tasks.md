@@ -328,14 +328,16 @@ funcionan.
 
 ## Fase 8: Cierre
 
-- [ ] T095 [P] Revisar accesibilidad (etiquetas, tamaño de texto, contraste) en todas las
-      pantallas de `apps/mobile/app/`
-- [ ] T096 [P] Revisar que ningún log del servidor contiene importes, notas ni emails
-- [ ] T097 Comprobar los criterios de éxito medibles (CE-001…CE-009) y anotar el
+- [x] T095 [P] Revisar accesibilidad (etiquetas, tamaño de texto, contraste) en todas las
+      pantallas de `apps/mobile/app/` (axe-core en web; TalkBack pendiente en Android)
+- [x] T096 [P] Revisar que ningún log del servidor contiene importes, notas ni emails
+      (`apps/server/src/logging.ts`)
+- [x] T097 Comprobar los criterios de éxito medibles (CE-001…CE-009) y anotar el
       resultado en `docs/specs/001-mvp-hogar/plan.md`
 - [ ] T098 Recorrer la guía de validación de `plan.md` de punta a punta en Android y web
+      (web hecho con la versión de producción; Android pendiente del APK)
 - [ ] T099 Desplegar en Railway (región UE) y generar el APK con EAS
-- [ ] T100 Actualizar `README.md` y `AGENTS.md` con el estado final
+- [x] T100 Actualizar `README.md` y `AGENTS.md` con el estado final
 
 ---
 
