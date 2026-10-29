@@ -43,7 +43,7 @@ fallar antes de implementar.
 - [x] I005 [US1] Test de la migración en `apps/server/test/migrations.test.ts`: filas con
       emoji predefinidos, frecuentes, desconocidos y ya migrados quedan con su
       identificador; ejecutar la SQL dos veces no cambia nada; la tabla de la SQL coincide
-      con `iconFromEmoji`
+      con `iconFromEmoji` (contenida en el dominio, que puede crecer)
 - [x] I006 [US1] Migración `apps/server/src/db/migrations/0005_category_icons.sql` con
       `drizzle-kit generate --custom`
 - [x] I007 [P] [US1] Tests de `iconTone` en `apps/mobile/src/design/color.test.ts`: con
@@ -76,15 +76,15 @@ fallar antes de implementar.
 
 ## Fase 4: Cierre
 
-- [ ] I014 [P] Test `apps/mobile/src/noEmoji.test.ts` (CE-401): ningún emoji en
+- [x] I014 [P] Test `apps/mobile/src/noEmoji.test.ts` (CE-401): ningún emoji en
       `apps/mobile/app`, `apps/mobile/src` ni `packages/*/src`
-- [ ] I015 Adaptar las pruebas de punta a punta (crear categoría con la cuadrícula) y
+- [x] I015 Adaptar las pruebas de punta a punta (crear categoría con la cuadrícula) y
       pasarlas todas contra la web de producción con una base migrada desde datos con
       emoji; medir «Mes» con 500 movimientos (CE-403)
-- [ ] I016 [P] axe-core en las pantallas con categorías, incluida la cuadrícula (CE-402);
+- [x] I016 [P] axe-core en las pantallas con categorías, incluida la cuadrícula (CE-402);
       pruebas a 320 px y 1280 px
-- [ ] I017 [P] `expo export --platform android` compila
-- [ ] I018 Actualizar `README.md`, `AGENTS.md`, el plan de 003 (la decisión de iconos
+- [x] I017 [P] `expo export --platform android` compila
+- [x] I018 Actualizar `README.md`, `AGENTS.md`, el plan de 003 (la decisión de iconos
       queda sustituida por esta) y marcar tareas; abrir el PR
 
 ---

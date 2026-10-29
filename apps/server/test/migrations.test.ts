@@ -74,14 +74,16 @@ describe('0005_category_icons (especificación 004, RF-403)', () => {
     expect(await icons()).toEqual(after);
   });
 
-  it('la SQL repite la tabla de emoji del dominio y el catálogo entero', () => {
-    const pairs = Object.fromEntries(
-      [...CATEGORY_ICONS_SQL.matchAll(/WHEN '([^']+)' THEN '([a-z]+)'/g)].map((m) => [m[1], m[2]]),
-    );
-    expect(pairs).toEqual(EMOJI_TO_CATEGORY_ICON);
+  // Una migración aplicada no se toca, pero el catálogo puede crecer: la SQL debe estar
+  // contenida en el dominio, no ser igual.
+  it('la SQL coincide con la tabla de emoji y el catálogo del dominio', () => {
+    const pairs = [...CATEGORY_ICONS_SQL.matchAll(/WHEN '([^']+)' THEN '([a-z]+)'/g)];
+    expect(pairs.length).toBeGreaterThanOrEqual(14);
+    for (const [, emoji, icon] of pairs) expect(EMOJI_TO_CATEGORY_ICON[emoji!], emoji).toBe(icon);
 
     const list = /NOT IN \(([^)]+)\)/.exec(CATEGORY_ICONS_SQL)?.[1] ?? '';
     const known = [...list.matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
-    expect([...known].sort()).toEqual([...CATEGORY_ICONS].sort());
+    expect(known).toHaveLength(44);
+    for (const icon of known) expect(CATEGORY_ICONS).toContain(icon);
   });
 });

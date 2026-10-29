@@ -2,8 +2,9 @@
 -- identificador del catálogo de iconos (packages/domain/src/categoryIcons.ts). Los emoji
 -- conocidos van a su equivalente (sin el selector de variante U+FE0F ni espacios) y
 -- cualquier otro valor al genérico 'tag'. Solo toca filas que aún no tienen un
--- identificador, así que repetirla no cambia nada. La tabla repite EMOJI_TO_CATEGORY_ICON
--- y la lista, CATEGORY_ICONS; test/migrations.test.ts comprueba que coinciden.
+-- identificador, así que repetirla no cambia nada. La tabla y la lista son las de
+-- EMOJI_TO_CATEGORY_ICON y CATEGORY_ICONS al crearla; test/migrations.test.ts comprueba
+-- que siguen contenidas en ellas.
 UPDATE categories
 SET icon = CASE replace(trim(icon), chr(65039), '')
     WHEN '💼' THEN 'salary'

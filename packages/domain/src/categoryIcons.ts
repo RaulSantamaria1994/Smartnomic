@@ -67,7 +67,8 @@ export function isCategoryIcon(value: string | null | undefined): value is Categ
 /**
  * Emoji que usaban las categorías antes de la 004 y su icono equivalente. Las claves van
  * sin el selector de variante (U+FE0F). La migración `0005_category_icons.sql` repite
- * esta tabla y un test comprueba que coinciden. Escapes para no tener emoji en el código.
+ * esta tabla tal como estaba al crearla y un test comprueba que no se contradicen.
+ * Escapes para no tener emoji en el código.
  */
 export const EMOJI_TO_CATEGORY_ICON: Readonly<Record<string, CategoryIconId>> = {
   // Las predefinidas y el valor por defecto de antes

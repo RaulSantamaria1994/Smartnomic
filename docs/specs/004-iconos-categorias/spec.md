@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `004-iconos-categorias`
 **Creada**: 2026-10-29
-**Estado**: Aprobada
+**Estado**: Implementada
 **Plan**: [`plan.md`](plan.md)
 **Entrada**: "Sustituye los emojis de la app por logos o símbolos de librería."
 
@@ -74,7 +74,8 @@ cuadrícula, sin tener que escribir ni buscar un emoji.
   icono genérico, nunca un hueco ni un texto raro.
 - Clientes antiguos de la app que todavía envían un emoji al crear una categoría: el
   servidor lo rechaza con un error claro; tras actualizar, funciona.
-- La exportación de datos no incluye iconos, así que no cambia.
+- La exportación de datos lleva el identificador del icono de cada categoría (`pet`) en lugar
+  del emoji; el resto del archivo no cambia.
 - Texto grande del sistema y pantallas de 320 px: la cuadrícula sigue siendo usable.
 
 ## Requisitos _(obligatorio)_
