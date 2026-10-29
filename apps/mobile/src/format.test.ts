@@ -6,7 +6,9 @@ import {
   formatDueDate,
   formatMoney,
   formatMonthTitle,
+  formatMonthShort,
   formatPeriod,
+  formatRelativeDue,
   formatShortDate,
   formatSignedMoney,
   parseShortDate,
@@ -19,6 +21,25 @@ describe('formatMonthTitle', () => {
   it('nombre del mes con mayúscula y el año', () => {
     expect(formatMonthTitle('2026-11')).toBe('Noviembre de 2026');
     expect(formatMonthTitle('2027-01')).toBe('Enero de 2027');
+  });
+});
+
+describe('formatRelativeDue y formatMonthShort', () => {
+  const today = '2026-10-29';
+  it('cuándo vence, en relación con hoy', () => {
+    expect(formatRelativeDue('2026-10-29', today)).toBe('Hoy');
+    expect(formatRelativeDue('2026-10-30', today)).toBe('Mañana');
+    expect(formatRelativeDue('2026-10-28', today)).toBe('Ayer');
+    expect(formatRelativeDue('2026-10-31', today)).toBe('En 2 días');
+    expect(formatRelativeDue('2026-11-05', today)).toBe('En 7 días');
+    expect(formatRelativeDue('2026-11-06', today)).toBe('6 de noviembre');
+    expect(formatRelativeDue('2026-10-20', today)).toBe('Hace 9 días');
+  });
+
+  it('mes abreviado en mayúsculas para la fecha de las tarjetas', () => {
+    expect(formatMonthShort('2026-10-29')).toBe('OCT');
+    expect(formatMonthShort('2026-09-01')).toBe('SEP');
+    expect(formatMonthShort('2027-01-15')).toBe('ENE');
   });
 });
 

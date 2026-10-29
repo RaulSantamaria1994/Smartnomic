@@ -9,5 +9,6 @@ export * from './fonts';
 export * from './Icon';
 export * from './ListRow';
 export * from './StatusPill';
+export * from './SummaryCard';
 export * from './Text';
 export * from './tokens';

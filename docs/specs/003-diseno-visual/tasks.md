@@ -65,9 +65,9 @@ excepciones.
 
 ## Fase 3: Historia 2 — Pantalla principal de un vistazo (P2)
 
-- [ ] D013 [US2] `SummaryCard` (balance, barra de gasto sobre ingresos con tope 100 %,
+- [x] D013 [US2] `SummaryCard` (balance, barra de gasto sobre ingresos con tope 100 %,
       totales; sin ingresos, sin barra) en `apps/mobile/src/design/SummaryCard.tsx`
-- [ ] D014 [US2] Rehacer `app/(app)/index.tsx`: cabecera con el hogar, selector de mes,
+- [x] D014 [US2] Rehacer `app/(app)/index.tsx`: cabecera con el hogar, selector de mes,
       `SummaryCard`, próximos pagos en tarjetas con fecha destacada, movimientos con
       `ListRow` y `EmptyState`
 

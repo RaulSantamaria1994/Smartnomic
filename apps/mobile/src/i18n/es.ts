@@ -79,6 +79,12 @@ export const es = {
     deleted: 'Movimiento borrado.',
     undo: 'Deshacer',
   },
+  summary: {
+    leftThisMonth: 'Te quedan este mes',
+    balance: 'Balance del periodo',
+    spentShare: (percent: number) => `Has gastado el ${percent} % de lo que ha entrado`,
+    noIncome: 'Aún no hay ingresos en este periodo.',
+  },
   transaction: {
     newTitle: 'Apuntar',
     editTitle: 'Editar movimiento',
@@ -145,6 +151,8 @@ export const es = {
     today: 'Hoy',
     tomorrow: 'Mañana',
     yesterday: 'Ayer',
+    inDays: (n: number) => `En ${n} días`,
+    daysAgo: (n: number) => `Hace ${n} días`,
     pay: 'Marcar como pagado',
     collect: 'Marcar como cobrado',
     skip: 'Omitir este mes',
@@ -345,6 +353,7 @@ export const es = {
     goHome: 'Ir al inicio',
   },
   home: {
+    transactions: 'Movimientos',
     greeting: (name: string) => `Hola, ${name}`,
     household: 'Tu hogar',
     roles: { owner: 'Propietario', editor: 'Editor', viewer: 'Lector' },
