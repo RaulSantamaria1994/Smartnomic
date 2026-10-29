@@ -313,3 +313,28 @@ stack, justificadas según el artículo I.2:
 - **Proveedor de email (2026-10-27):** Brevo. Se descartó Resend porque guarda en EE. UU.
   los destinatarios y los registros de envío. Antes de publicar, revisar la lista de
   subencargados y el DPA de Brevo.
+
+## Resultado de los criterios de éxito (T097, 2026-10-29)
+
+Medido en local (servidor y PostgreSQL en la misma máquina, Chromium sin interfaz, web
+compilada para producción). Lo que necesita personas o un Android real queda pendiente.
+
+| Criterio                                                  | Resultado     | Cómo se ha medido                                                                                                                                                                                       |
+| --------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CE-001 (cuenta y primer gasto < 2 min)                    | ✅ previsible | 2,3 s en automático; el flujo son 3 campos y 4 toques. Falta medirlo con personas.                                                                                                                      |
+| CE-002 (≤ 3 toques, < 10 s)                               | ✅            | «+ Apuntar», categoría y «Guardar»: 3 toques. El importe ya tiene el foco y la fecha es hoy. 1,1 s en automático.                                                                                       |
+| CE-003 (resumen < 1 s con 500 movimientos)                | ✅            | API: 14 ms de mediana. Web recargando la página entera: 869 ms de mediana (peor 964 ms); cambiando de periodo: ~100 ms. Se pintan 100 movimientos y el resto con «Mostrar más» (sin eso eran 1.073 ms). |
+| CE-004 (totales al céntimo)                               | ✅            | Tests del dominio (dinero, fechas, periodos, resumen) y del servidor; con 500 movimientos el total coincide con la suma (2.244.750 céntimos).                                                           |
+| CE-005 (avisos en Android ≤ 5 min, sin conexión)          | ⏳ pendiente  | Necesita el APK en un móvil (T098/T099).                                                                                                                                                                |
+| CE-006 (90 % dan de alta y pagan un recurrente sin ayuda) | ⏳ pendiente  | Necesita usuarios de prueba.                                                                                                                                                                            |
+| CE-007 (ningún acceso a otro hogar ni fuera del rol)      | ✅            | Tests de integración en todas las rutas con hogares ajenos y con cada rol (24 comprobaciones de 403 y las de 404 de recursos ajenos).                                                                   |
+| CE-008 (invitar y ver los datos < 2 min)                  | ✅ previsible | 2,4 s en automático desde crear la invitación hasta que la otra cuenta ve los datos. Falta medirlo con personas.                                                                                        |
+| CE-009 (cambios visibles < 5 s tras actualizar)           | ✅            | Los datos se recargan al volver a la app o tirar hacia abajo; la otra cuenta ve el cambio en la primera recarga (prueba de la historia 4).                                                              |
+
+Accesibilidad (T095): axe-core (WCAG 2.1 AA) sin problemas en las 12 pantallas. Los chips
+exponen `aria-checked` y los botones repetidos dicen a qué se refieren («Archivar Ropa»).
+Falta probar TalkBack y el texto grande en Android.
+
+Logs (T096): de cada petición solo se escriben el método y la ruta, sin la consulta y con
+los códigos de invitación y el token de restablecer tapados. Los errores se escriben sin el
+mensaje, que en la base de datos lleva los parámetros de la consulta. No se escribe la IP.

@@ -42,8 +42,8 @@ actualizan primero los documentos.
 
 ## Estado actual
 
-Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 a 7 terminadas (las cinco historias). La siguiente es la fase 8
-(cierre), desde T095. No inventes comandos, rutas
+Funcionalidad en curso: **`001-mvp-hogar`**. Fases 1 a 8 terminadas salvo lo que necesita un móvil o
+cuentas externas: recorrer la guía en Android (T098) y generar el APK con EAS (T099). No inventes comandos, rutas
 ni archivos que no existan; si algo de este documento aún no existe, dilo. Cuando cambien
 la estructura o los comandos, actualiza este archivo en el mismo PR.
 

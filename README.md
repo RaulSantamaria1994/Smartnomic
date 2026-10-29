@@ -7,6 +7,10 @@ dinero y reciba recordatorios antes de cada pago. Funciona en Android y en el na
 - Especificación, plan y tareas de cada funcionalidad: [`docs/specs/`](docs/specs/)
 - Forma de trabajar (personas y agentes): [`AGENTS.md`](AGENTS.md)
 
+**Estado:** el MVP (`docs/specs/001-mvp-hogar`) está completo y desplegado en Railway.
+Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
+(ver «Resultado de los criterios de éxito» en su `plan.md`).
+
 ## Requisitos
 
 - Node.js 22 (`nvm use`)
@@ -129,13 +133,19 @@ El repositorio trae un `Dockerfile` (exporta la web y la sirve junto con la API)
 
 ## APK de Android (EAS Build)
 
+El APK se compila en los servidores de Expo, que no ven las variables de tu terminal: la
+dirección del servidor va en `apps/mobile/eas.json` (`build.preview.env.EXPO_PUBLIC_API_URL`).
+Si cambias de dominio, cámbiala ahí.
+
 ```sh
 npm install -g eas-cli
 cd apps/mobile
 eas login
 eas init      # solo la primera vez: enlaza el proyecto y añade su id a app.json
-EXPO_PUBLIC_API_URL=https://<tu-dominio> eas build --platform android --profile preview
+eas build --platform android --profile preview
 ```
+
+Al terminar, EAS da un enlace y un QR para descargar el APK en el móvil.
 
 ## Estructura
 

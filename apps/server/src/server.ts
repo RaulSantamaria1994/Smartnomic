@@ -3,9 +3,10 @@ import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import { errorResponse, type HealthResponse } from '@smartnomic/api';
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
 import { registerAuthRoutes, type Auth, type AuthRateLimit } from './auth';
 import type { Database } from './db/client';
+import { loggerOptions } from './logging';
 import { registerErrorHandler } from './plugins/errors';
 import { createHouseholdAccess } from './plugins/household-access';
 import { registerAccountRoutes } from './routes/account';
@@ -20,7 +21,8 @@ import { registerRecurringRoutes } from './routes/recurring';
 import { registerTransactionRoutes } from './routes/transactions';
 
 export interface ServerOptions {
-  logger?: boolean;
+  /** `true`: logger con los datos sensibles tapados (ver `logging.ts`). */
+  logger?: boolean | FastifyServerOptions['logger'];
   /**
    * Orígenes a los que se permite llamar a la API desde otro dominio. Solo hace falta en
    * desarrollo, cuando Expo sirve la web en otro puerto; en producción la web y la API
@@ -47,7 +49,10 @@ export interface ServerOptions {
 const DEFAULT_AUTH_RATE_LIMIT: AuthRateLimit = { max: 10, timeWindow: '1 minute' };
 
 export async function buildServer(options: ServerOptions = {}): Promise<FastifyInstance> {
-  const app = Fastify({ logger: options.logger ?? false, trustProxy: options.trustProxy ?? false });
+  const app = Fastify({
+    logger: options.logger === true ? loggerOptions() : (options.logger ?? false),
+    trustProxy: options.trustProxy ?? false,
+  });
   registerErrorHandler(app);
 
   if (options.corsOrigins && options.corsOrigins.length > 0) {

@@ -136,12 +136,14 @@ export default function Categories() {
                 <Button
                   variant="link"
                   label={es.categories.edit}
+                  accessibilityLabel={`${es.categories.edit} ${c.name}`}
                   onPress={() => setEditing({ id: c.id, name: c.name, icon: c.icon })}
                 />
               )}
               <Button
                 variant="link"
                 label={c.archived ? es.categories.restore : es.categories.archive}
+                accessibilityLabel={`${c.archived ? es.categories.restore : es.categories.archive} ${c.name}`}
                 loading={busy === `archive-${c.id}`}
                 onPress={() =>
                   void run(`archive-${c.id}`, () =>
@@ -206,6 +208,7 @@ export default function Categories() {
                 accessibilityRole="radio"
                 accessibilityLabel={colorName}
                 accessibilityState={{ selected: color === value, checked: color === value }}
+                aria-checked={color === value}
                 style={[
                   styles.colorDot,
                   { backgroundColor: value },

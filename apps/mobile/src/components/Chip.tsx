@@ -14,6 +14,8 @@ export function Chip({ label, selected, onPress, color = colors.primary }: Props
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected, checked: selected }}
+      // react-native-web no pasa `checked` a `aria-checked`, que el rol radio necesita.
+      aria-checked={selected}
       accessibilityLabel={label}
       style={({ pressed }) => [
         styles.chip,
