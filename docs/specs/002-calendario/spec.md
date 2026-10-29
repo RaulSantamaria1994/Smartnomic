@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `002-calendario`
 **Creada**: 2026-10-29
-**Estado**: Aprobada
+**Estado**: Implementada
 **Plan**: [`plan.md`](plan.md)
 **Entrada**: "Vamos a implementar la opción de ver los pagos programados en un calendario."
 

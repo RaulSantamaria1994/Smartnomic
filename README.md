@@ -7,7 +7,8 @@ dinero y reciba recordatorios antes de cada pago. Funciona en Android y en el na
 - Especificación, plan y tareas de cada funcionalidad: [`docs/specs/`](docs/specs/)
 - Forma de trabajar (personas y agentes): [`AGENTS.md`](AGENTS.md)
 
-**Estado:** el MVP (`docs/specs/001-mvp-hogar`) está completo y desplegado en Railway.
+**Estado:** el MVP (`docs/specs/001-mvp-hogar`) está completo y desplegado en Railway, y el
+calendario de pagos programados (`docs/specs/002-calendario`) también está terminado.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 
@@ -49,6 +50,9 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 - `GET /api/households/:id/periods/:start`: resumen y movimientos de un periodo.
 - `GET|PUT|DELETE /api/households/:id/recurring[/:ruleId]`: pagos y cobros recurrentes.
 - `GET /api/households/:id/upcoming?days=30`: vencimientos atrasados y próximos.
+- `GET /api/households/:id/calendar/:month` (`YYYY-MM`): vencimientos de un mes natural con
+  su estado, importe real de los pagados y totales; desde el pago más antiguo hasta 12
+  meses vista.
 - `PATCH /api/households/:id/members/me`: mis avisos (activados y hora).
 - `GET /api/households/:id/members`, `PATCH|DELETE …/members/:memberId`, `POST …/leave` y
   `POST …/transfer-ownership`: miembros, roles, quitar, salir y pasar la propiedad.
