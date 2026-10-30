@@ -1,6 +1,7 @@
 import {
   calendarResponseSchema,
   errorResponseSchema,
+  householdExportSchema,
   periodResponseSchema,
   savingsEntriesResponseSchema,
   savingsEntrySchema,
@@ -750,5 +751,46 @@ describe('conseguir el objetivo o cambiar de planes (historia 4)', () => {
     const other = (await me(ctx.app, intruso)).household.id;
     expect((await close(intruso, goal.id, other)).statusCode).toBe(404);
     expect((await goalOf(goal.id)).closedAt).toBeNull();
+  });
+});
+
+describe('exportación (RF-508)', () => {
+  it('incluye las huchas y sus movimientos no deshechos, y nada de otros hogares', async () => {
+    const goal = await createGoal();
+    const kept = newId();
+    const undone = newId();
+    for (const [id, amountCents] of [
+      [kept, 30000],
+      [undone, 1000],
+    ] as const) {
+      await ctx.app.inject({
+        method: 'PUT',
+        url: `/api/households/${householdId}/savings/${goal.id}/entries/${id}`,
+        headers: { cookie: owner.cookie },
+        payload: { kind: 'deposit', amountCents, date: '2026-10-27' },
+      });
+    }
+    await ctx.app.inject({
+      method: 'DELETE',
+      url: `/api/households/${householdId}/savings/${goal.id}/entries/${undone}`,
+      headers: { cookie: owner.cookie },
+    });
+    const intruso = await signUp(ctx.app);
+    const otherHousehold = (await me(ctx.app, intruso)).household.id;
+    await putGoal(intruso, newId(), { ...vacations, name: 'Ajena' }, otherHousehold);
+
+    const response = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/households/${householdId}/export`,
+      headers: { cookie: owner.cookie },
+    });
+
+    const data = householdExportSchema.parse(response.json());
+    expect(data.savingsGoals).toEqual([
+      expect.objectContaining({ id: goal.id, name: 'Vacaciones', targetCents: 120000 }),
+    ]);
+    expect(data.savingsEntries).toEqual([
+      expect.objectContaining({ id: kept, goalId: goal.id, kind: 'deposit', amountCents: 30000 }),
+    ]);
   });
 });

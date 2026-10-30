@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `005-hucha`
 **Creada**: 2026-10-30
-**Estado**: Aprobada
+**Estado**: Implementada
 **Plan**: [`plan.md`](plan.md)
 **Entrada**: "Quiero añadir una hucha para objetivos que establezca el usuario, para ahorrar
 una cantidad en un plazo establecido."

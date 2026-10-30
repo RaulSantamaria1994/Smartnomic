@@ -175,3 +175,25 @@ exportación gana `savingsGoals` y `savingsEntries`.
   apartado en «Mes», cerrar; CE-503 (suma de huchas = suma de apartados).
 - axe-core en las pantallas nuevas; 320 y 1280 px; «Mes» con 500 movimientos y 10 huchas.
 - `expo export --platform android` compila.
+
+## Resultados
+
+- `pnpm check` en verde. Servidor: 39 tests de huchas (crear, editar, borrar, confirmar
+  una sola vez aunque sea a la vez, saltar, aportar, sacar sin pasarse aunque sea a la vez,
+  historial, deshacer, cerrar, plazo vencido, exportación; lector y otro hogar en cada
+  ruta); dominio: 16; contrato, permisos, avisos y migración con los suyos.
+- Batería de ataques de la auditoría ampliada a las huchas: otro hogar, IDOR con ids de
+  huchas y movimientos ajenos, lector, importes/fechas/nombres absurdos y sacar de más; sin
+  accesos, sin filtraciones en lista, calendario, próximos pagos ni exportación, sin 500.
+  Logs sin nombres de huchas ni importes. Resultado global 28/29 (solo el riesgo aceptado
+  R1 de la auditoría).
+- Pruebas de punta a punta contra la web de producción: las del MVP, calendario y
+  categorías siguen pasando; las de huchas (crear, confirmar el mes, saltar, aportar, sacar,
+  deshacer, conseguir, cerrar, editar, borrar) a 390 y 320 px sin errores.
+- CE-503: con aportaciones en cuatro meses, retiradas, un movimiento deshecho y una hucha
+  cerrada, lo ahorrado (717,76 €) coincide con la suma de «apartado» de todos los periodos.
+- CE-504: «Mes» con 500 movimientos y 10 huchas, 893 ms de mediana (antes 885 ms).
+- axe-core: 0 problemas en 9 pantallas a 320 y 1280 px, sin scroll horizontal.
+- `expo export --platform android` compila.
+- Cambios sobre el plan: el resumen no lleva `remainingCents` (lo calcula la app); un
+  fallo encontrado al probar: crear una hucha no refrescaba «próximos pagos».

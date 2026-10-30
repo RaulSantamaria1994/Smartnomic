@@ -99,15 +99,15 @@ fallar antes de implementar.
 
 ## Fase 6: Cierre
 
-- [ ] H019 Exportación con huchas y movimientos (RF-508), con test
-- [ ] H020 Batería de ataques de la auditoría ampliada a las rutas nuevas (IDOR con ids de
+- [x] H019 Exportación con huchas y movimientos (RF-508), con test
+- [x] H020 Batería de ataques de la auditoría ampliada a las rutas nuevas (IDOR con ids de
       otro hogar, roles, importes y fechas absurdos)
-- [ ] H021 Pruebas de punta a punta contra la web de producción: crear, confirmar el mes,
+- [x] H021 Pruebas de punta a punta contra la web de producción: crear, confirmar el mes,
       aportar, sacar, ver el apartado en «Mes», cerrar; CE-503; las del MVP, calendario y
       categorías siguen pasando; «Mes» con 500 movimientos y 10 huchas (CE-504)
-- [ ] H022 [P] axe-core en las pantallas nuevas; 320 y 1280 px
-- [ ] H023 [P] `expo export --platform android` compila
-- [ ] H024 Actualizar `README.md` y `AGENTS.md`, marcar tareas y abrir el PR
+- [x] H022 [P] axe-core en las pantallas nuevas; 320 y 1280 px
+- [x] H023 [P] `expo export --platform android` compila
+- [x] H024 Actualizar `README.md` y `AGENTS.md`, marcar tareas y abrir el PR
 
 ---
 

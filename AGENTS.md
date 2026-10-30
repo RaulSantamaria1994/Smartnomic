@@ -43,7 +43,9 @@ actualizan primero los documentos.
 ## Estado actual
 
 Funcionalidades terminadas: **`001-mvp-hogar`** (falta probarla en Android con el APK, T098
-y T099), **`002-calendario`**, **`003-diseno-visual`** y **`004-iconos-categorias`**. El
+y T099), **`002-calendario`**, **`003-diseno-visual`**, **`004-iconos-categorias`** y
+**`005-hucha`** (huchas: lo ahorrado, la cuota y las pendientes se calculan en
+`packages/domain/src/savings.ts`, nunca se guardan). El
 aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores o tamaños de letra sueltos fuera de él, y un test
 impide los emoji: los iconos de categoría son identificadores de un catálogo cerrado del
