@@ -571,3 +571,184 @@ describe('aportar o sacar cuando se quiera (historia 3)', () => {
     expect(await saved(goal.id)).toBe(1000);
   });
 });
+
+describe('conseguir el objetivo o cambiar de planes (historia 4)', () => {
+  const entry = (goalId: string, body: Record<string, unknown>, id = newId()) =>
+    ctx.app.inject({
+      method: 'PUT',
+      url: `/api/households/${householdId}/savings/${goalId}/entries/${id}`,
+      headers: { cookie: owner.cookie },
+      payload: body,
+    });
+  const close = (user: TestUser, goalId: string, household = householdId) =>
+    ctx.app.inject({
+      method: 'POST',
+      url: `/api/households/${household}/savings/${goalId}/close`,
+      headers: { cookie: user.cookie },
+    });
+  const goalOf = async (id: string) =>
+    savingsListSchema.parse((await listGoals(owner)).json()).goals.find((g) => g.id === id)!;
+  const upcomingSavings = async () =>
+    upcomingResponseSchema.parse(
+      (
+        await ctx.app.inject({
+          method: 'GET',
+          url: `/api/households/${householdId}/upcoming?days=60`,
+          headers: { cookie: owner.cookie },
+        })
+      ).json(),
+    ).savings;
+  const periodSetAside = async (start: string) =>
+    periodResponseSchema.parse(
+      (
+        await ctx.app.inject({
+          method: 'GET',
+          url: `/api/households/${householdId}/periods/${start}`,
+          headers: { cookie: owner.cookie },
+        })
+      ).json(),
+    ).summary.setAsideCents;
+
+  it('al llegar al objetivo queda conseguida y deja de pedir aportaciones', async () => {
+    const goal = await createGoal();
+    await entry(goal.id, { kind: 'deposit', amountCents: 120000, date: '2026-10-27' });
+
+    const { plan } = await goalOf(goal.id);
+    expect(plan).toMatchObject({ status: 'achieved', quotaCents: 0, contributionsLeft: 0 });
+    expect(await upcomingSavings()).toEqual([]);
+  });
+
+  it('cerrar devuelve el saldo al mes como retirada y deja de pedir aportaciones', async () => {
+    const goal = await createGoal();
+    await entry(goal.id, { kind: 'deposit', amountCents: 50000, date: '2026-09-10' });
+
+    const response = await close(owner, goal.id);
+
+    expect(response.statusCode).toBe(200);
+    const closed = savingsGoalSchema.parse(response.json());
+    expect(closed.closedAt).not.toBeNull();
+    expect(closed.plan).toMatchObject({ status: 'closed', savedCents: 0, contributionsLeft: 0 });
+    // Septiembre conserva lo apartado; octubre (hoy) lo recupera.
+    expect(await periodSetAside('2026-09-01')).toBe(50000);
+    expect(await periodSetAside('2026-10-01')).toBe(-50000);
+    expect(await upcomingSavings()).toEqual([]);
+    const rows = await ctx.db
+      .select()
+      .from(savingsEntries)
+      .where(eq(savingsEntries.goalId, goal.id));
+    expect(rows.find((r) => r.kind === 'withdrawal')).toMatchObject({
+      amountCents: 50000,
+      date: '2026-10-27',
+    });
+  });
+
+  it('una hucha cerrada no admite aportar, saltar, deshacer, editar ni cerrarse otra vez', async () => {
+    const goal = await createGoal();
+    const id = newId();
+    await entry(goal.id, { kind: 'deposit', amountCents: 1000, date: '2026-10-27' }, id);
+    await close(owner, goal.id);
+
+    expect(
+      (await entry(goal.id, { kind: 'deposit', amountCents: 1000, date: '2026-10-27' })).statusCode,
+    ).toBe(409);
+    const skip = await ctx.app.inject({
+      method: 'POST',
+      url: `/api/households/${householdId}/savings/${goal.id}/due/2026-11-01/skip`,
+      headers: { cookie: owner.cookie },
+    });
+    expect(skip.statusCode).toBe(409);
+    const undo = await ctx.app.inject({
+      method: 'DELETE',
+      url: `/api/households/${householdId}/savings/${goal.id}/entries/${id}`,
+      headers: { cookie: owner.cookie },
+    });
+    expect(undo.statusCode).toBe(409);
+    expect((await putGoal(owner, goal.id, { ...vacations, name: 'Otra' })).statusCode).toBe(409);
+    expect((await close(owner, goal.id)).statusCode).toBe(409);
+  });
+
+  it('cerrar una hucha vacía no crea ninguna retirada', async () => {
+    const goal = await createGoal();
+    expect((await close(owner, goal.id)).statusCode).toBe(200);
+    expect(await ctx.db.select().from(savingsEntries)).toHaveLength(0);
+  });
+
+  it('con el plazo vencido sin llegar se indica y se puede ampliar el plazo', async () => {
+    const old = newId();
+    await ctx.db.insert(savingsGoals).values({
+      id: old,
+      householdId,
+      name: 'Coche',
+      icon: 'car',
+      targetCents: 60000,
+      deadline: '2026-10-20',
+      contributionDay: 1,
+      startDate: '2026-08-15',
+    });
+    expect((await goalOf(old)).plan).toMatchObject({ status: 'expired', contributionsLeft: 0 });
+    // Cambiar solo el nombre no obliga a cambiar el plazo vencido.
+    const rename = await putGoal(owner, old, {
+      name: 'Coche nuevo',
+      icon: 'car',
+      targetCents: 60000,
+      deadline: '2026-10-20',
+      contributionDay: 1,
+    });
+    expect(rename.statusCode).toBe(200);
+
+    const extended = await putGoal(owner, old, {
+      name: 'Coche nuevo',
+      icon: 'car',
+      targetCents: 60000,
+      deadline: '2027-01-31',
+      contributionDay: 1,
+    });
+
+    expect(extended.statusCode).toBe(200);
+    expect(savingsGoalSchema.parse(extended.json()).plan).toMatchObject({
+      status: 'active',
+      nextDueDate: '2026-09-01',
+    });
+  });
+
+  it('editar el día o el objetivo recalcula las pendientes sin tocar lo ya apartado', async () => {
+    const goal = await createGoal();
+    await entry(goal.id, {
+      kind: 'deposit',
+      amountCents: 13334,
+      date: '2026-10-27',
+      dueDate: '2026-11-01',
+    });
+
+    const response = await putGoal(owner, goal.id, {
+      ...vacations,
+      targetCents: 60000,
+      contributionDay: 15,
+    });
+
+    const { plan } = savingsGoalSchema.parse(response.json());
+    expect(plan.savedCents).toBe(13334);
+    // Del 15 de noviembre al 15 de julio: 9 fechas; noviembre-1 ya no es día de apartar.
+    expect(plan.nextDueDate).toBe('2026-11-15');
+    expect(plan.contributionsLeft).toBe(9);
+    expect(plan.quotaCents).toBe(5186); // (600 € − 133,34 €) / 9 = 51,85… → 51,86 €
+  });
+
+  it('bajar el objetivo por debajo de lo ahorrado la deja conseguida', async () => {
+    const goal = await createGoal();
+    await entry(goal.id, { kind: 'deposit', amountCents: 50000, date: '2026-10-27' });
+    const response = await putGoal(owner, goal.id, { ...vacations, targetCents: 40000 });
+    expect(savingsGoalSchema.parse(response.json()).plan.status).toBe('achieved');
+  });
+
+  it('un lector no puede cerrar; nadie de otro hogar puede cerrar la hucha', async () => {
+    const goal = await createGoal();
+    const viewer = await signUp(ctx.app);
+    await joinHousehold(ctx.db, owner, viewer, 'viewer');
+    expect((await close(viewer, goal.id)).statusCode).toBe(403);
+    const intruso = await signUp(ctx.app);
+    const other = (await me(ctx.app, intruso)).household.id;
+    expect((await close(intruso, goal.id, other)).statusCode).toBe(404);
+    expect((await goalOf(goal.id)).closedAt).toBeNull();
+  });
+});

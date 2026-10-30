@@ -221,6 +221,7 @@ export function registerSavingsRoutes(
       if (existing && existing.householdId !== household.id) {
         throw new ApiError('not_found', GOAL_NOT_FOUND);
       }
+      if (existing?.closedAt) throw new ApiError('conflict', 'Esta hucha está cerrada.');
       // Un plazo nuevo no puede estar en el pasado; editar otra cosa de una hucha vencida, sí.
       if (!existing || existing.deadline !== input.deadline) {
         if (compareDates(input.deadline, today) < 0) {
@@ -497,6 +498,55 @@ export function registerSavingsRoutes(
           .where(eq(savingsEntries.id, entryId));
       });
       return reply.status(204).send();
+    },
+  );
+
+  // Cerrar (RF-507): lo ahorrado vuelve hoy al mes como retirada, para que los gastos que se
+  // paguen con ese dinero no cuenten dos veces. Después no pide más aportaciones.
+  app.post(
+    `${base}/:goalId/close`,
+    { preHandler: access.requireMember('savings.write') },
+    async (request): Promise<SavingsGoalDto> => {
+      const { goalId } = goalParams.parse(request.params);
+      const { household, member } = request.membership!;
+      const today = civilDateIn(now(), household.timezone);
+      await loadGoal(household.id, goalId);
+
+      const closed = await db.transaction(async (tx) => {
+        const [goal] = await tx
+          .select()
+          .from(savingsGoals)
+          .where(eq(savingsGoals.id, goalId))
+          .for('update');
+        if (goal!.closedAt) throw new ApiError('conflict', 'Esta hucha ya está cerrada.');
+        const entries = await tx
+          .select()
+          .from(savingsEntries)
+          .where(and(eq(savingsEntries.goalId, goalId), isNull(savingsEntries.deletedAt)));
+        const saved = savedCents(entries.map(toEntry));
+        if (saved > 0) {
+          await tx.insert(savingsEntries).values({
+            id: uuidV7(now().getTime(), randomBytes(10)),
+            householdId: household.id,
+            goalId,
+            memberId: member.id,
+            kind: 'withdrawal',
+            amountCents: saved,
+            date: today,
+          });
+        }
+        const [row] = await tx
+          .update(savingsGoals)
+          .set({ closedAt: now() })
+          .where(eq(savingsGoals.id, goalId))
+          .returning();
+        return row!;
+      });
+      const entries = await db
+        .select()
+        .from(savingsEntries)
+        .where(and(eq(savingsEntries.goalId, goalId), isNull(savingsEntries.deletedAt)));
+      return toGoal(closed, entries, today);
     },
   );
 }

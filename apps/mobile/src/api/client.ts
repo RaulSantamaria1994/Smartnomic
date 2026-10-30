@@ -169,6 +169,11 @@ export const api = {
       body: input,
       schema: savingsEntrySchema,
     }),
+  closeSavingsGoal: (householdId: string, goalId: string) =>
+    request(`${household(householdId)}/savings/${goalId}/close`, {
+      method: 'POST',
+      schema: savingsGoalSchema,
+    }),
   savingsEntries: (householdId: string, goalId: string) =>
     request(`${household(householdId)}/savings/${goalId}/entries`, {
       schema: savingsEntriesResponseSchema,

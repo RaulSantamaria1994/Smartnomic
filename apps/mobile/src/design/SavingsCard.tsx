@@ -15,7 +15,7 @@ export function savingsPill(goal: SavingsGoalDto): { kind: PillKind; label: stri
     case 'expired':
       return { kind: 'overdue', label: es.savings.expired };
     case 'closed':
-      return { kind: 'skipped', label: es.savings.closed };
+      return { kind: 'skipped', label: es.savings.closedStatus };
     default:
       return goal.plan.onTrack
         ? { kind: 'paid', label: es.savings.onTrack }

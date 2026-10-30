@@ -72,7 +72,9 @@ export function SavingsForm({ initial, today, onSubmit }: Props) {
     setError(null);
     if (!name.trim()) return setError(es.savings.errors.name);
     if (!parsedAmount.ok) return setError(amountErrorMessage(parsedAmount.error));
-    if (!parsedDeadline || compareDates(parsedDeadline, today) < 0) {
+    // Un plazo nuevo no puede estar en el pasado; el de una hucha vencida, si no se cambia, sí.
+    const unchanged = parsedDeadline !== null && parsedDeadline === initial?.deadline;
+    if (!parsedDeadline || (!unchanged && compareDates(parsedDeadline, today) < 0)) {
       return setError(es.savings.errors.deadline);
     }
     if (!Number.isInteger(dayNumber) || dayNumber < 1 || dayNumber > 31) {

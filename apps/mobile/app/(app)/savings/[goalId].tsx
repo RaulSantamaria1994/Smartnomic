@@ -47,6 +47,7 @@ export default function SavingsDetail() {
   const [dateText, setDateText] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   if (!household || !savings.data) {
     return (
@@ -106,6 +107,32 @@ export default function SavingsDetail() {
     }
   }
 
+  async function close() {
+    setMessage(null);
+    setBusy(true);
+    try {
+      await api.closeSavingsGoal(household!.id, goal!.id);
+      setConfirmClose(false);
+      await refresh();
+      setMessage({ kind: 'success', text: es.savings.closed });
+    } catch (e) {
+      fail(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    setMessage(null);
+    try {
+      await api.deleteSavingsGoal(household!.id, goal!.id);
+      await refresh();
+      router.back();
+    } catch (e) {
+      fail(e);
+    }
+  }
+
   async function undo(entry: SavingsEntryDto) {
     setMessage(null);
     try {
@@ -120,6 +147,56 @@ export default function SavingsDetail() {
   return (
     <Screen title={goal.name} align="top">
       <SavingsCard goal={goal} />
+
+      {canWrite && open && confirmClose && (
+        <Card style={styles.form}>
+          <AppText variant="bodyStrong">
+            {goal.plan.savedCents > 0
+              ? es.savings.closeConfirm(formatMoney(goal.plan.savedCents))
+              : es.savings.closeConfirmEmpty}
+          </AppText>
+          <Button
+            variant="danger"
+            label={es.savings.closeYes}
+            loading={busy}
+            onPress={() => void close()}
+          />
+          <Button
+            variant="link"
+            label={es.transaction.cancel}
+            onPress={() => setConfirmClose(false)}
+          />
+        </Card>
+      )}
+
+      {goal.plan.status === 'achieved' && (
+        <Card style={styles.form}>
+          <AppText variant="title" tone="accent" accessibilityRole="header">
+            {es.savings.achievedTitle}
+          </AppText>
+          <AppText variant="body">{es.savings.achievedHint}</AppText>
+          {canWrite && !confirmClose && (
+            <Button label={es.savings.closeAndUse} onPress={() => setConfirmClose(true)} />
+          )}
+        </Card>
+      )}
+      {goal.plan.status === 'expired' && (
+        <Card style={styles.form}>
+          <Message text={es.savings.expiredTitle(formatShortDate(goal.deadline))} />
+          <AppText variant="body">{es.savings.expiredHint}</AppText>
+          {canWrite && (
+            <Button
+              label={es.savings.extend}
+              onPress={() => router.push(`/savings/${goal.id}/edit`)}
+            />
+          )}
+        </Card>
+      )}
+      {goal.closedAt && (
+        <AppText variant="body" tone="muted">
+          {es.savings.closedTitle(formatShortDate(goal.closedAt.slice(0, 10)))}
+        </AppText>
+      )}
 
       {canWrite && open && goal.plan.nextDueDate && (
         <Button
@@ -185,6 +262,29 @@ export default function SavingsDetail() {
           </Card>
         )}
       </View>
+
+      {canWrite && open && (
+        <View style={styles.section}>
+          {!confirmClose && (
+            <>
+              <Button
+                variant="secondary"
+                label={es.savings.edit}
+                onPress={() => router.push(`/savings/${goal.id}/edit`)}
+              />
+              {entries.data && list.length === 0 ? (
+                <Button variant="danger" label={es.savings.remove} onPress={() => void remove()} />
+              ) : (
+                <Button
+                  variant="secondary"
+                  label={es.savings.close}
+                  onPress={() => setConfirmClose(true)}
+                />
+              )}
+            </>
+          )}
+        </View>
+      )}
 
       <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
     </Screen>

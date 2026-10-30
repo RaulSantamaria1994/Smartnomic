@@ -86,11 +86,11 @@ fallar antes de implementar.
 
 ## Fase 5: Historia 4 — Conseguir el objetivo o cambiar de planes (P4)
 
-- [ ] H016 [US4] Tests del servidor: conseguida al llegar al objetivo (sin más
+- [x] H016 [US4] Tests del servidor: conseguida al llegar al objetivo (sin más
       pendientes), cerrar (retirada por el saldo, sin pendientes), plazo vencido, editar
       objetivo/plazo/día recalcula pendientes sin tocar lo hecho
-- [ ] H017 [US4] Ruta `POST …/close` y estados en las respuestas
-- [ ] H018 [US4] App: estado conseguida (celebración accesible), plazo vencido con
+- [x] H017 [US4] Ruta `POST …/close` y estados en las respuestas
+- [x] H018 [US4] App: estado conseguida (celebración accesible), plazo vencido con
       ampliar/cambiar/cerrar, editar y cerrar desde el detalle, lista con cerradas
 
 **Punto de control**: RF-507 cubierto.
