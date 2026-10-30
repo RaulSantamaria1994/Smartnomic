@@ -24,6 +24,7 @@ const NAMES = {
   trash: 'trash-2',
   share: 'share-2',
   tag: 'tag',
+  savings: 'target',
   user: 'user',
   wifiOff: 'wifi-off',
 } as const;

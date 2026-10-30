@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { localNow, planReminders, reminderInstant, reminderText } from './plan';
+import { localNow, planReminders, reminderInstant, reminderRoute, reminderText } from './plan';
 
 const rule = {
   id: '019a2b3c-4d5e-7f60-8a1b-2c3d4e5f6a7b',
@@ -117,6 +117,31 @@ describe('planReminders', () => {
       ['2026-10-31', 'Mañana vence Alquiler'],
       ['2026-11-01', 'Hoy vence Alquiler'],
     ]);
+  });
+
+  it('las huchas avisan solo el día de apartar, sin el importe (especificación 005)', () => {
+    const goalId = '019a2b3c-4d5e-7f60-8a1b-2c3d4e5f6a7c';
+    const planned = planReminders(
+      [{ ruleId: rule.id, dueDate: '2026-11-01', overdue: false }],
+      [rule],
+      { remindersEnabled: true, reminderTime: '09:00' },
+      new Date(2026, 9, 27, 8, 0),
+      {
+        pending: [{ goalId, dueDate: '2026-11-01', overdue: false, quotaCents: 13334 }],
+        goals: [{ id: goalId, name: 'Vacaciones' }],
+      },
+    );
+    expect(planned.map((p) => [p.reminder.date, p.title, p.body])).toEqual([
+      ['2026-10-31', 'Mañana vence Alquiler', '1 de noviembre · Toca para ver el importe'],
+      ['2026-11-01', 'Hoy vence Alquiler', 'Toca para ver el importe'],
+      ['2026-11-01', 'Hoy apartas para Vacaciones', 'Toca para ver el importe'],
+    ]);
+    const savings = planned[2]!;
+    expect(`${savings.title} ${savings.body}`).not.toMatch(/133|€/);
+    expect(reminderRoute(savings.reminder.ruleId, savings.reminder.dueDate)).toBe(
+      `/savings/${goalId}/due/2026-11-01`,
+    );
+    expect(reminderRoute(rule.id, '2026-11-01')).toBe(`/occurrence/${rule.id}/2026-11-01`);
   });
 
   it('nada si el miembro desactivó los avisos', () => {

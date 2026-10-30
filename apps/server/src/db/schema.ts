@@ -1,4 +1,4 @@
-import { FREQUENCIES, ROLES, TRANSACTION_KINDS } from '@smartnomic/domain';
+import { FREQUENCIES, ROLES, SAVINGS_ENTRY_KINDS, TRANSACTION_KINDS } from '@smartnomic/domain';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -325,5 +325,83 @@ export const invitations = pgTable(
     // Se invita como editor o lector: la propiedad solo se transfiere.
     check('invitations_role_check', sql`${table.role} <> 'owner'`),
     index('invitations_household_idx').on(table.householdId),
+  ],
+);
+
+// ---------------------------------------------------------------------------------------
+// Huchas para objetivos de ahorro (especificación 005). Lo ahorrado, el estado y la cuota
+// no se guardan: se calculan en packages/domain a partir de los movimientos.
+// ---------------------------------------------------------------------------------------
+
+export const savingsGoals = pgTable(
+  'savings_goals',
+  {
+    /** UUIDv7 que genera la app: crear dos veces la misma hucha no la duplica. */
+    id: uuid('id').primaryKey(),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    icon: text('icon').notNull(),
+    targetCents: bigint('target_cents', { mode: 'number' }).notNull(),
+    deadline: date('deadline', { mode: 'string' }).notNull(),
+    contributionDay: smallint('contribution_day').notNull(),
+    /** Fecha de creación en la zona del hogar: no hay aportaciones antes. */
+    startDate: date('start_date', { mode: 'string' }).notNull(),
+    closedAt: instant('closed_at'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    // Destino de la clave compuesta de `savings_entries`: misma hucha y mismo hogar.
+    unique('savings_goals_id_household_unique').on(table.id, table.householdId),
+    check('savings_goals_target_check', sql`${table.targetCents} > 0`),
+    check('savings_goals_name_check', sql`length(trim(${table.name})) BETWEEN 1 AND 40`),
+    check('savings_goals_day_check', sql`${table.contributionDay} BETWEEN 1 AND 31`),
+    index('savings_goals_household_idx').on(table.householdId),
+  ],
+);
+
+export const savingsEntryKind = pgEnum('savings_entry_kind', SAVINGS_ENTRY_KINDS);
+
+export const savingsEntries = pgTable(
+  'savings_entries',
+  {
+    /** UUIDv7 que genera la app: reenviar una aportación no la duplica. */
+    id: uuid('id').primaryKey(),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    goalId: uuid('goal_id').notNull(),
+    memberId: uuid('member_id').references(() => members.id, { onDelete: 'set null' }),
+    kind: savingsEntryKind('kind').notNull(),
+    amountCents: bigint('amount_cents', { mode: 'number' }).notNull(),
+    date: date('date', { mode: 'string' }).notNull(),
+    /** Mes de aportación que resuelve (aportación confirmada o mes saltado). */
+    dueDate: date('due_date', { mode: 'string' }),
+    createdAt: createdAt(),
+    deletedAt: instant('deleted_at'),
+  },
+  (table) => [
+    // Un movimiento nunca apunta a la hucha de otro hogar.
+    foreignKey({
+      name: 'savings_entries_goal_fk',
+      columns: [table.goalId, table.householdId],
+      foreignColumns: [savingsGoals.id, savingsGoals.householdId],
+    }).onDelete('cascade'),
+    check(
+      'savings_entries_amount_check',
+      sql`(${table.kind} = 'skip' AND ${table.amountCents} = 0) OR (${table.kind} <> 'skip' AND ${table.amountCents} > 0)`,
+    ),
+    check(
+      'savings_entries_due_check',
+      sql`${table.kind} = 'deposit' OR (${table.kind} = 'skip' AND ${table.dueDate} IS NOT NULL) OR ${table.dueDate} IS NULL`,
+    ),
+    // Cada mes de una hucha se resuelve una sola vez: dos confirmaciones no apartan dos veces.
+    uniqueIndex('savings_entries_due_unique')
+      .on(table.goalId, table.dueDate)
+      .where(sql`${table.dueDate} IS NOT NULL AND ${table.deletedAt} IS NULL`),
+    index('savings_entries_household_date_idx').on(table.householdId, table.date),
+    index('savings_entries_goal_idx').on(table.goalId),
   ],
 );

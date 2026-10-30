@@ -20,6 +20,7 @@ import { registerMeRoutes } from './routes/me';
 import { registerMemberRoutes } from './routes/members';
 import { registerPeriodRoutes } from './routes/periods';
 import { registerRecurringRoutes } from './routes/recurring';
+import { registerSavingsRoutes } from './routes/savings';
 import { registerTransactionRoutes } from './routes/transactions';
 
 export interface ServerOptions {
@@ -108,6 +109,7 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     });
     registerRecurringRoutes(app, { db, access, now });
     registerCalendarRoutes(app, { db, access, now });
+    registerSavingsRoutes(app, { db, access, now });
     registerInvitationRoutes(app, {
       db,
       access,

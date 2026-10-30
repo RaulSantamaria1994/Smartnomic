@@ -39,6 +39,24 @@ export function useRecurring(householdId: string | undefined) {
   });
 }
 
+/** Huchas del hogar con su progreso calculado (especificación 005). */
+export function useSavings(householdId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.savings(householdId ?? ''),
+    queryFn: () => api.savings(householdId!),
+    enabled: Boolean(householdId),
+  });
+}
+
+/** Historial de una hucha (especificación 005, RF-505). */
+export function useSavingsEntries(householdId: string | undefined, goalId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.savingsEntries(householdId ?? '', goalId ?? ''),
+    queryFn: () => api.savingsEntries(householdId!, goalId!),
+    enabled: Boolean(householdId && goalId),
+  });
+}
+
 /** Vencimientos pendientes: los de los próximos `days` días y los atrasados. */
 export function useUpcoming(householdId: string | undefined, days = 30) {
   return useQuery({

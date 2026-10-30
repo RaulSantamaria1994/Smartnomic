@@ -119,6 +119,11 @@ export default function Account() {
           label={es.householdMenu.categories}
           onPress={() => router.push('/household/categories')}
         />
+        <MenuRow
+          icon="savings"
+          label={es.householdMenu.savings}
+          onPress={() => router.push('/savings')}
+        />
       </Card>
 
       <AppText variant="heading" accessibilityRole="header">

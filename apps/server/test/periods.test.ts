@@ -64,6 +64,7 @@ describe('GET /periods/:start', () => {
       incomeCents: 180000,
       expenseCents: 123456,
       balanceCents: 56544,
+      setAsideCents: 0,
     });
     expect(body.transactions).toHaveLength(3);
   });
@@ -80,7 +81,7 @@ describe('GET /periods/:start', () => {
 
     const body = periodResponseSchema.parse((await get('2026-10-01')).json());
 
-    expect(body.summary).toEqual(summarize(body.transactions));
+    expect(body.summary).toEqual({ ...summarize(body.transactions), setAsideCents: 0 });
   });
 
   it('excluye los movimientos borrados y los de otros periodos', async () => {
@@ -132,7 +133,12 @@ describe('GET /periods/:start', () => {
   it('un mes sin movimientos devuelve ceros', async () => {
     const body = periodResponseSchema.parse((await get('2027-03-01')).json());
 
-    expect(body.summary).toEqual({ incomeCents: 0, expenseCents: 0, balanceCents: 0 });
+    expect(body.summary).toEqual({
+      incomeCents: 0,
+      expenseCents: 0,
+      balanceCents: 0,
+      setAsideCents: 0,
+    });
     expect(body.transactions).toEqual([]);
   });
 

@@ -87,7 +87,10 @@ export type Transaction = z.infer<typeof transactionSchema>;
 export const summarySchema = z.object({
   incomeCents: z.int(),
   expenseCents: z.int(),
+  /** Ingresos menos gastos (no incluye lo apartado en huchas). */
   balanceCents: z.int(),
+  /** Apartado para objetivos en el periodo: aportado menos sacado (especificación 005). */
+  setAsideCents: z.int().default(0),
 });
 
 /** Respuesta de `GET /api/households/:householdId/periods/:start`. */

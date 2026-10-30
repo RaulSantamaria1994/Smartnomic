@@ -7,6 +7,7 @@ import type { Database } from '../db/client';
 import { transactions } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import { setAsideBetween } from './savings';
 import { toTransaction } from './transactions';
 
 const paramsSchema = z.object({ householdId: z.uuid(), start: dateSchema });
@@ -57,7 +58,12 @@ export function registerPeriodRoutes(
       const expenseCents = Number(totals?.expense ?? 0);
       return {
         period,
-        summary: { incomeCents, expenseCents, balanceCents: incomeCents - expenseCents },
+        summary: {
+          incomeCents,
+          expenseCents,
+          balanceCents: incomeCents - expenseCents,
+          setAsideCents: await setAsideBetween(db, household.id, period.start, period.end),
+        },
         transactions: rows.map(toTransaction),
       };
     },

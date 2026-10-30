@@ -8,17 +8,22 @@ import { color, radius, spacing } from './tokens';
 
 /**
  * Resumen del periodo (RF-203): lo que queda en grande, cuánto se ha gastado de lo que ha
- * entrado y los totales. Para el lector de pantalla es un único bloque con todo dicho.
+ * entrado y los totales. Lo apartado en huchas se resta de lo que queda y se enseña aparte,
+ * sin contarlo como gasto (especificación 005, RF-506). Para el lector de pantalla es un
+ * único bloque con todo dicho.
  */
 export function SummaryCard({
   incomeCents,
   expenseCents,
   balanceCents,
+  setAsideCents = 0,
   current,
 }: {
   incomeCents: Cents | undefined;
   expenseCents: Cents | undefined;
   balanceCents: Cents | undefined;
+  /** Apartado para objetivos en el periodo (aportado menos sacado). */
+  setAsideCents?: Cents;
   /** Es el periodo actual («Te quedan este mes») u otro («Balance del periodo»). */
   current: boolean;
 }) {
@@ -28,10 +33,12 @@ export function SummaryCard({
   const percent = share === null ? null : Math.round(share * 100);
   const title = current ? es.summary.leftThisMonth : es.summary.balance;
   const value = (cents: Cents | undefined) => (cents === undefined ? '—' : formatMoney(cents));
+  const remaining = balanceCents === undefined ? undefined : balanceCents - setAsideCents;
+  const setAsideText = setAsideCents !== 0 ? es.summary.setAside(formatMoney(setAsideCents)) : null;
   const spentText =
     percent === null ? (loaded ? es.summary.noIncome : '') : es.summary.spentShare(percent);
   const label = loaded
-    ? `${title}: ${value(balanceCents)}. ${es.month.income}: ${value(incomeCents)}. ${es.month.expenses}: ${value(expenseCents)}. ${spentText}`
+    ? `${title}: ${value(remaining)}. ${es.month.income}: ${value(incomeCents)}. ${es.month.expenses}: ${value(expenseCents)}. ${setAsideText ? `${setAsideText}. ` : ''}${spentText}`
     : title;
 
   return (
@@ -41,8 +48,13 @@ export function SummaryCard({
           {title}
         </AppText>
         <AppText variant="display" tone="onAccent" tabular>
-          {value(balanceCents)}
+          {value(remaining)}
         </AppText>
+        {loaded && setAsideText && (
+          <AppText variant="caption" tone="onAccentMuted" tabular>
+            {setAsideText}
+          </AppText>
+        )}
       </View>
       {loaded && (
         <View style={styles.block}>

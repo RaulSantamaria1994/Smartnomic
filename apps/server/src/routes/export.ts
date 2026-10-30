@@ -7,6 +7,8 @@ import {
   members,
   occurrences,
   recurringRules,
+  savingsEntries,
+  savingsGoals,
   transactions,
   users,
 } from '../db/schema';
@@ -33,35 +35,52 @@ export function registerExportRoutes(
       const { household } = request.membership!;
       const user = request.user!;
       const id = household.id;
-      const [memberRows, categoryRows, transactionRows, ruleRows, occurrenceRows] =
-        await Promise.all([
-          db
-            .select({ member: members, name: users.name })
-            .from(members)
-            .innerJoin(users, eq(users.id, members.userId))
-            .where(eq(members.householdId, id))
-            .orderBy(asc(members.joinedAt), asc(members.id)),
-          db
-            .select()
-            .from(categories)
-            .where(eq(categories.householdId, id))
-            .orderBy(asc(categories.kind), asc(categories.position)),
-          db
-            .select()
-            .from(transactions)
-            .where(and(eq(transactions.householdId, id), isNull(transactions.deletedAt)))
-            .orderBy(asc(transactions.date), asc(transactions.id)),
-          db
-            .select()
-            .from(recurringRules)
-            .where(eq(recurringRules.householdId, id))
-            .orderBy(asc(recurringRules.name), asc(recurringRules.id)),
-          db
-            .select()
-            .from(occurrences)
-            .where(eq(occurrences.householdId, id))
-            .orderBy(asc(occurrences.dueDate), asc(occurrences.recurringId)),
-        ]);
+      const [
+        memberRows,
+        categoryRows,
+        transactionRows,
+        ruleRows,
+        occurrenceRows,
+        goalRows,
+        entryRows,
+      ] = await Promise.all([
+        db
+          .select({ member: members, name: users.name })
+          .from(members)
+          .innerJoin(users, eq(users.id, members.userId))
+          .where(eq(members.householdId, id))
+          .orderBy(asc(members.joinedAt), asc(members.id)),
+        db
+          .select()
+          .from(categories)
+          .where(eq(categories.householdId, id))
+          .orderBy(asc(categories.kind), asc(categories.position)),
+        db
+          .select()
+          .from(transactions)
+          .where(and(eq(transactions.householdId, id), isNull(transactions.deletedAt)))
+          .orderBy(asc(transactions.date), asc(transactions.id)),
+        db
+          .select()
+          .from(recurringRules)
+          .where(eq(recurringRules.householdId, id))
+          .orderBy(asc(recurringRules.name), asc(recurringRules.id)),
+        db
+          .select()
+          .from(occurrences)
+          .where(eq(occurrences.householdId, id))
+          .orderBy(asc(occurrences.dueDate), asc(occurrences.recurringId)),
+        db
+          .select()
+          .from(savingsGoals)
+          .where(eq(savingsGoals.householdId, id))
+          .orderBy(asc(savingsGoals.createdAt), asc(savingsGoals.id)),
+        db
+          .select()
+          .from(savingsEntries)
+          .where(and(eq(savingsEntries.householdId, id), isNull(savingsEntries.deletedAt)))
+          .orderBy(asc(savingsEntries.date), asc(savingsEntries.id)),
+      ]);
 
       const exportedAt = now();
       const body: HouseholdExport = {
@@ -80,6 +99,25 @@ export function registerExportRoutes(
         transactions: transactionRows.map(toTransaction),
         recurring: ruleRows.map(toRule),
         occurrences: occurrenceRows.map(toResolved),
+        savingsGoals: goalRows.map((g) => ({
+          id: g.id,
+          name: g.name,
+          icon: g.icon,
+          targetCents: g.targetCents,
+          deadline: g.deadline,
+          contributionDay: g.contributionDay,
+          startDate: g.startDate,
+          closedAt: g.closedAt?.toISOString() ?? null,
+        })),
+        savingsEntries: entryRows.map((e) => ({
+          id: e.id,
+          goalId: e.goalId,
+          kind: e.kind,
+          amountCents: e.amountCents,
+          date: e.date,
+          dueDate: e.dueDate,
+          createdAt: e.createdAt.toISOString(),
+        })),
       };
       const day = exportedAt.toISOString().slice(0, 10);
       return reply

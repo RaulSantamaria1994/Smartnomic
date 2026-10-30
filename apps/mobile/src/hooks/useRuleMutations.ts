@@ -14,3 +14,17 @@ export function useRefreshRecurring(householdId: string | undefined) {
     ]);
   };
 }
+
+/** Refresca lo que depende de las huchas (especificación 005). */
+export function useRefreshSavings(householdId: string | undefined) {
+  const queryClient = useQueryClient();
+  return async () => {
+    if (!householdId) return;
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings(householdId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.upcoming(householdId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.periods(householdId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.calendars(householdId) }),
+    ]);
+  };
+}

@@ -8,6 +8,7 @@ export * from './EmptyState';
 export * from './fonts';
 export * from './Icon';
 export * from './ListRow';
+export * from './SavingsCard';
 export * from './StatusPill';
 export * from './SummaryCard';
 export * from './Text';
