@@ -1,4 +1,10 @@
-import type { Category, RecurringRule, Transaction, UpcomingOccurrenceDto } from '@smartnomic/api';
+import type {
+  Category,
+  RecurringRule,
+  SavingsGoalDto,
+  Transaction,
+  UpcomingOccurrenceDto,
+} from '@smartnomic/api';
 import {
   addDays,
   compareDates,
@@ -31,6 +37,7 @@ import {
   EmptyState,
   Icon,
   ListRow,
+  SavingsCard,
   StatusPill,
   SummaryCard,
   type IconName,
@@ -53,6 +60,7 @@ import {
   useMembers,
   usePeriod,
   useRecurring,
+  useSavings,
   useUpcoming,
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
@@ -83,6 +91,7 @@ export default function Month() {
   const can = useCan();
   const canWrite = can('transactions.write');
   const members = useMembers(household?.id);
+  const savings = useSavings(household?.id);
 
   if (me.isPending) {
     return (
@@ -133,6 +142,7 @@ export default function Month() {
               void upcoming.refetch();
               void rules.refetch();
               void members.refetch();
+              void savings.refetch();
             }}
           />
         }
@@ -185,6 +195,8 @@ export default function Month() {
           canResolve={can('occurrences.resolve')}
         />
 
+        <SavingsSection goals={savings.data?.goals} canWrite={can('savings.write')} />
+
         <View style={styles.section}>
           <AppText variant="heading" accessibilityRole="header">
             {es.home.transactions}
@@ -227,6 +239,49 @@ export default function Month() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** Huchas en curso o conseguidas (especificación 005); las cerradas, solo en su pantalla. */
+function SavingsSection({
+  goals,
+  canWrite,
+}: {
+  goals: SavingsGoalDto[] | undefined;
+  canWrite: boolean;
+}) {
+  if (!goals) return null;
+  const open = goals.filter((g) => g.plan.status !== 'closed');
+  if (open.length === 0 && !canWrite) return null;
+  return (
+    <View style={styles.section}>
+      <AppText variant="heading" accessibilityRole="header">
+        {es.savings.title}
+      </AppText>
+      {open.length === 0 ? (
+        <Card padded={false}>
+          <ListRow
+            first
+            title={es.savings.startOne}
+            detail={es.savings.emptyHint}
+            onPress={() => router.push('/savings/new')}
+            accessibilityLabel={es.savings.startOne}
+            leading={<CategoryIcon icon="savings" tone={color.text.accent} />}
+          />
+        </Card>
+      ) : (
+        <>
+          {open.slice(0, 3).map((goal) => (
+            <SavingsCard key={goal.id} goal={goal} onPress={() => router.push('/savings')} />
+          ))}
+          <Button
+            variant="link"
+            label={es.savings.seeAll}
+            onPress={() => router.push('/savings')}
+          />
+        </>
+      )}
+    </View>
   );
 }
 

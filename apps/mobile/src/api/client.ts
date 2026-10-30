@@ -13,12 +13,15 @@ import {
   meResponseSchema,
   periodResponseSchema,
   recurringListSchema,
+  savingsGoalSchema,
+  savingsListSchema,
   recurringRuleSchema,
   resolvedOccurrenceSchema,
   transactionSchema,
   upcomingResponseSchema,
   type PayOccurrenceInput,
   type RecurringInput,
+  type SavingsGoalInput,
   type TransactionInput,
   type CreateCategoryInput,
   type UpdateCategoryInput,
@@ -147,6 +150,16 @@ export const api = {
       body: { confirmLoseData },
       schema: meResponseSchema,
     }),
+  savings: (householdId: string) =>
+    request(`${household(householdId)}/savings`, { schema: savingsListSchema }),
+  saveSavingsGoal: (householdId: string, id: string, input: SavingsGoalInput) =>
+    request(`${household(householdId)}/savings/${id}`, {
+      method: 'PUT',
+      body: input,
+      schema: savingsGoalSchema,
+    }),
+  deleteSavingsGoal: (householdId: string, id: string) =>
+    request(`${household(householdId)}/savings/${id}`, { method: 'DELETE', schema: z.null() }),
   restoreTransaction: (householdId: string, id: string) =>
     request(`${household(householdId)}/transactions/${id}/restore`, {
       method: 'POST',
@@ -164,6 +177,7 @@ export const queryKeys = {
   calendar: (householdId: string, month: string) => ['calendar', householdId, month] as const,
   period: (householdId: string, start: string) => ['periods', householdId, start] as const,
   recurring: (householdId: string) => ['recurring', householdId] as const,
+  savings: (householdId: string) => ['savings', householdId] as const,
   members: (householdId: string) => ['members', householdId] as const,
   invitations: (householdId: string) => ['invitations', householdId] as const,
   upcoming: (householdId: string, days?: number) =>

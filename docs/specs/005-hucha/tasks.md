@@ -40,11 +40,11 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Crear una hucha y ver cuánto apartar (P1) 🎯
 
-- [ ] H006 [US1] Tests en `apps/server/test/savings.test.ts`: crear (idempotente), editar,
+- [x] H006 [US1] Tests en `apps/server/test/savings.test.ts`: crear (idempotente), editar,
       listar con plan calculado, borrar sin movimientos y 409 con ellos; lector 403; otro
       hogar 403; no sobrescribir la hucha de otro hogar con su id
-- [ ] H007 [US1] Rutas `GET/PUT/DELETE /savings[/:goalId]` en `apps/server/src/routes/savings.ts`
-- [ ] H008 [US1] App: `api.savings`, `useSavings`, `SavingsCard` (barra de progreso,
+- [x] H007 [US1] Rutas `GET/PUT/DELETE /savings[/:goalId]` en `apps/server/src/routes/savings.ts`
+- [x] H008 [US1] App: `api.savings`, `useSavings`, `SavingsCard` (barra de progreso,
       cuota, plazo, «al día»/«retrasada»), `SavingsForm` (nombre, icono del catálogo,
       objetivo, plazo, día), pantallas `savings/index.tsx` y `savings/new.tsx`; entrada
       en «Hogar» y tarjeta «Huchas» en «Mes»; textos en `es.ts`
