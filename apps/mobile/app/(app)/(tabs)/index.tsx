@@ -277,7 +277,11 @@ function SavingsSection({
       ) : (
         <>
           {open.slice(0, 3).map((goal) => (
-            <SavingsCard key={goal.id} goal={goal} onPress={() => router.push('/savings')} />
+            <SavingsCard
+              key={goal.id}
+              goal={goal}
+              onPress={() => router.push(`/savings/${goal.id}`)}
+            />
           ))}
           <Button
             variant="link"

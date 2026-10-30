@@ -23,7 +23,7 @@ import {
   type SavingsGoal,
 } from '@smartnomic/domain';
 import { randomBytes } from 'node:crypto';
-import { and, asc, count, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNull, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Database } from '../db/client';
@@ -427,6 +427,76 @@ export function registerSavingsRoutes(
       if (existing?.kind === 'skip')
         return toEntryDto(existing, await memberName(existing.memberId));
       throw new ApiError('conflict', await alreadyResolved(goalId, dueDate));
+    },
+  );
+
+  // Historial de una hucha (RF-505): del más reciente al más antiguo, con quién lo hizo.
+  app.get(
+    `${base}/:goalId/entries`,
+    { preHandler: access.requireMember('household.view') },
+    async (request) => {
+      const { goalId } = goalParams.parse(request.params);
+      const householdId = request.membership!.household.id;
+      await loadGoal(householdId, goalId);
+      const rows = await db
+        .select({ entry: savingsEntries, name: users.name })
+        .from(savingsEntries)
+        .leftJoin(members, eq(members.id, savingsEntries.memberId))
+        .leftJoin(users, eq(users.id, members.userId))
+        .where(
+          and(
+            eq(savingsEntries.goalId, goalId),
+            eq(savingsEntries.householdId, householdId),
+            isNull(savingsEntries.deletedAt),
+          ),
+        )
+        .orderBy(desc(savingsEntries.createdAt), desc(savingsEntries.id));
+      return { entries: rows.map(({ entry, name }) => toEntryDto(entry, name)) };
+    },
+  );
+
+  // Deshacer el último movimiento (RF-505). Borrado lógico (constitución, art. IV.4).
+  app.delete(
+    `${base}/:goalId/entries/:entryId`,
+    { preHandler: access.requireMember('savings.write') },
+    async (request, reply) => {
+      const { goalId, entryId } = entryParams.parse(request.params);
+      const householdId = request.membership!.household.id;
+      const goal = await loadGoal(householdId, goalId);
+      if (goal.closedAt) throw new ApiError('conflict', 'Esta hucha está cerrada.');
+
+      await db.transaction(async (tx) => {
+        await tx
+          .select({ id: savingsGoals.id })
+          .from(savingsGoals)
+          .where(eq(savingsGoals.id, goalId))
+          .for('update');
+        const [last] = await tx
+          .select()
+          .from(savingsEntries)
+          .where(and(eq(savingsEntries.goalId, goalId), isNull(savingsEntries.deletedAt)))
+          .orderBy(desc(savingsEntries.createdAt), desc(savingsEntries.id))
+          .limit(1);
+        if (last?.id !== entryId) {
+          const [target] = await tx
+            .select({ id: savingsEntries.id })
+            .from(savingsEntries)
+            .where(
+              and(
+                eq(savingsEntries.id, entryId),
+                eq(savingsEntries.goalId, goalId),
+                isNull(savingsEntries.deletedAt),
+              ),
+            );
+          if (!target) throw new ApiError('not_found', 'Este movimiento no existe.');
+          throw new ApiError('conflict', 'Solo se puede deshacer el último movimiento.');
+        }
+        await tx
+          .update(savingsEntries)
+          .set({ deletedAt: now() })
+          .where(eq(savingsEntries.id, entryId));
+      });
+      return reply.status(204).send();
     },
   );
 }

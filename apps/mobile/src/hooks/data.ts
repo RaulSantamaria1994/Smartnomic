@@ -48,6 +48,15 @@ export function useSavings(householdId: string | undefined) {
   });
 }
 
+/** Historial de una hucha (especificación 005, RF-505). */
+export function useSavingsEntries(householdId: string | undefined, goalId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.savingsEntries(householdId ?? '', goalId ?? ''),
+    queryFn: () => api.savingsEntries(householdId!, goalId!),
+    enabled: Boolean(householdId && goalId),
+  });
+}
+
 /** Vencimientos pendientes: los de los próximos `days` días y los atrasados. */
 export function useUpcoming(householdId: string | undefined, days = 30) {
   return useQuery({

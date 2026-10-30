@@ -72,12 +72,12 @@ fallar antes de implementar.
 
 ## Fase 4: Historia 3 — Aportar o sacar cuando se quiera (P3)
 
-- [ ] H013 [US3] Tests del servidor: aportar con fecha, sacar, sacar más que el saldo
+- [x] H013 [US3] Tests del servidor: aportar con fecha, sacar, sacar más que el saldo
       (409), dos retiradas a la vez sin saldo negativo, historial con quién, deshacer el
       último (y 409 con otro)
-- [ ] H014 [US3] Rutas de aportar/sacar sin `dueDate`, `GET …/entries` y `DELETE
+- [x] H014 [US3] Rutas de aportar/sacar sin `dueDate`, `GET …/entries` y `DELETE
 …/entries/:entryId`
-- [ ] H015 [US3] App: pantalla `savings/[goalId].tsx` con historial, aportar, sacar y
+- [x] H015 [US3] App: pantalla `savings/[goalId].tsx` con historial, aportar, sacar y
       deshacer
 
 **Punto de control**: RF-505 cubierto.

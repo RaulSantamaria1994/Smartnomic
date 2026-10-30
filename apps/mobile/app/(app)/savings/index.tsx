@@ -60,7 +60,11 @@ export default function SavingsList() {
                   {title}
                 </AppText>
                 {list.map((goal) => (
-                  <SavingsCard key={goal.id} goal={goal} />
+                  <SavingsCard
+                    key={goal.id}
+                    goal={goal}
+                    onPress={() => router.push(`/savings/${goal.id}`)}
+                  />
                 ))}
               </View>
             ))}

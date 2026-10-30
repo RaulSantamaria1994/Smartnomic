@@ -2,6 +2,7 @@ import {
   calendarResponseSchema,
   errorResponseSchema,
   periodResponseSchema,
+  savingsEntriesResponseSchema,
   savingsEntrySchema,
   savingsGoalSchema,
   savingsListSchema,
@@ -387,5 +388,186 @@ describe('apartar la cuota el día elegido (historia 2)', () => {
     });
     expect(crossSkip.statusCode).toBe(404);
     expect(await ctx.db.select().from(savingsEntries)).toHaveLength(0);
+  });
+});
+
+describe('aportar o sacar cuando se quiera (historia 3)', () => {
+  const entry = (user: TestUser, goalId: string, id: string, body: Record<string, unknown>) =>
+    ctx.app.inject({
+      method: 'PUT',
+      url: `/api/households/${householdId}/savings/${goalId}/entries/${id}`,
+      headers: { cookie: user.cookie },
+      payload: body,
+    });
+  const history = (user: TestUser, goalId: string) =>
+    ctx.app.inject({
+      method: 'GET',
+      url: `/api/households/${householdId}/savings/${goalId}/entries`,
+      headers: { cookie: user.cookie },
+    });
+  const undo = (user: TestUser, goalId: string, id: string) =>
+    ctx.app.inject({
+      method: 'DELETE',
+      url: `/api/households/${householdId}/savings/${goalId}/entries/${id}`,
+      headers: { cookie: user.cookie },
+    });
+  const saved = async (goalId: string) =>
+    savingsListSchema.parse((await listGoals(owner)).json()).goals.find((g) => g.id === goalId)!
+      .plan.savedCents;
+  const deposit = (amountCents: number, date = '2026-10-20') => ({
+    kind: 'deposit',
+    amountCents,
+    date,
+  });
+  const withdrawal = (amountCents: number, date = '2026-10-25') => ({
+    kind: 'withdrawal',
+    amountCents,
+    date,
+  });
+
+  it('aportar con fecha suma a la hucha y cuenta en el periodo de esa fecha', async () => {
+    const goal = await createGoal();
+    expect((await entry(owner, goal.id, newId(), deposit(30000, '2026-09-15'))).statusCode).toBe(
+      200,
+    );
+    expect(await saved(goal.id)).toBe(30000);
+    const september = periodResponseSchema.parse(
+      (
+        await ctx.app.inject({
+          method: 'GET',
+          url: `/api/households/${householdId}/periods/2026-09-01`,
+          headers: { cookie: owner.cookie },
+        })
+      ).json(),
+    );
+    expect(september.summary.setAsideCents).toBe(30000);
+  });
+
+  it('sacar resta de la hucha y del apartado del periodo', async () => {
+    const goal = await createGoal();
+    await entry(owner, goal.id, newId(), deposit(30000));
+    expect((await entry(owner, goal.id, newId(), withdrawal(10000))).statusCode).toBe(200);
+
+    expect(await saved(goal.id)).toBe(20000);
+    const october = periodResponseSchema.parse(
+      (
+        await ctx.app.inject({
+          method: 'GET',
+          url: `/api/households/${householdId}/periods/2026-10-01`,
+          headers: { cookie: owner.cookie },
+        })
+      ).json(),
+    );
+    expect(october.summary.setAsideCents).toBe(20000);
+  });
+
+  it('no se puede sacar más de lo ahorrado', async () => {
+    const goal = await createGoal();
+    await entry(owner, goal.id, newId(), deposit(5000));
+    const response = await entry(owner, goal.id, newId(), withdrawal(5001));
+
+    expect(response.statusCode).toBe(409);
+    expect(errorResponseSchema.parse(response.json()).error.message).toMatch(/más de lo que hay/i);
+    expect(await saved(goal.id)).toBe(5000);
+  });
+
+  it('dos retiradas a la vez nunca dejan la hucha en negativo', async () => {
+    const goal = await createGoal();
+    await entry(owner, goal.id, newId(), deposit(10000));
+    const editor = await signUp(ctx.app);
+    await joinHousehold(ctx.db, owner, editor, 'editor');
+
+    const statuses = (
+      await Promise.all([
+        entry(owner, goal.id, newId(), withdrawal(8000)),
+        entry(editor, goal.id, newId(), withdrawal(8000)),
+      ])
+    ).map((r) => r.statusCode);
+
+    expect(statuses.sort()).toEqual([200, 409]);
+    expect(await saved(goal.id)).toBe(2000);
+  });
+
+  it('el historial va del más reciente al más antiguo y dice quién hizo cada movimiento', async () => {
+    const goal = await createGoal();
+    const editor = await signUp(ctx.app);
+    await joinHousehold(ctx.db, owner, editor, 'editor');
+    const ownerName = (await me(ctx.app, owner)).user.name;
+    const editorName = (await me(ctx.app, editor)).user.name;
+    await entry(owner, goal.id, newId(), deposit(30000, '2026-10-01'));
+    await entry(editor, goal.id, newId(), withdrawal(5000, '2026-10-20'));
+
+    const response = await history(owner, goal.id);
+
+    expect(response.statusCode).toBe(200);
+    const { entries } = savingsEntriesResponseSchema.parse(response.json());
+    expect(entries.map((e) => [e.kind, e.amountCents, e.memberName])).toEqual([
+      ['withdrawal', 5000, editorName],
+      ['deposit', 30000, ownerName],
+    ]);
+  });
+
+  it('deshacer el último movimiento lo quita; otro que no sea el último da 409', async () => {
+    const goal = await createGoal();
+    const first = newId();
+    const last = newId();
+    await entry(owner, goal.id, first, deposit(30000, '2026-10-01'));
+    await entry(owner, goal.id, last, deposit(10000, '2026-10-02'));
+
+    const notLast = await undo(owner, goal.id, first);
+    expect(notLast.statusCode).toBe(409);
+    expect((await undo(owner, goal.id, last)).statusCode).toBe(204);
+    expect(await saved(goal.id)).toBe(30000);
+    expect(
+      savingsEntriesResponseSchema.parse((await history(owner, goal.id)).json()).entries,
+    ).toHaveLength(1);
+    // Se borra de forma lógica (constitución, art. IV.4).
+    const [row] = await ctx.db.select().from(savingsEntries).where(eq(savingsEntries.id, last));
+    expect(row?.deletedAt).not.toBeNull();
+    expect((await undo(owner, goal.id, last)).statusCode).toBe(404);
+  });
+
+  it('deshacer una aportación del mes la deja otra vez pendiente', async () => {
+    const goal = await createGoal();
+    const id = newId();
+    await entry(owner, goal.id, id, { ...deposit(13334, '2026-10-27'), dueDate: '2026-11-01' });
+    expect((await undo(owner, goal.id, id)).statusCode).toBe(204);
+    const plan = savingsListSchema.parse((await listGoals(owner)).json()).goals[0]!.plan;
+    expect(plan.nextDueDate).toBe('2026-11-01');
+    expect(
+      (
+        await entry(owner, goal.id, newId(), {
+          ...deposit(13334, '2026-10-27'),
+          dueDate: '2026-11-01',
+        })
+      ).statusCode,
+    ).toBe(200);
+  });
+
+  it('un lector ve el historial pero no aporta ni deshace; otro hogar no ve nada', async () => {
+    const goal = await createGoal();
+    const id = newId();
+    await entry(owner, goal.id, id, deposit(1000));
+    const viewer = await signUp(ctx.app);
+    await joinHousehold(ctx.db, owner, viewer, 'viewer');
+    expect((await history(viewer, goal.id)).statusCode).toBe(200);
+    expect((await entry(viewer, goal.id, newId(), deposit(1000))).statusCode).toBe(403);
+    expect((await undo(viewer, goal.id, id)).statusCode).toBe(403);
+
+    const intruso = await signUp(ctx.app);
+    const other = (await me(ctx.app, intruso)).household.id;
+    const peek = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/households/${other}/savings/${goal.id}/entries`,
+      headers: { cookie: intruso.cookie },
+    });
+    expect(peek.statusCode).toBe(404);
+    const remove = await ctx.app.inject({
+      method: 'DELETE',
+      url: `/api/households/${other}/savings/${goal.id}/entries/${id}`,
+      headers: { cookie: intruso.cookie },
+    });
+    expect(remove.statusCode).toBe(404);
+    expect(await saved(goal.id)).toBe(1000);
   });
 });

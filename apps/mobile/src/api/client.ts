@@ -13,6 +13,7 @@ import {
   meResponseSchema,
   periodResponseSchema,
   recurringListSchema,
+  savingsEntriesResponseSchema,
   savingsEntrySchema,
   savingsGoalSchema,
   savingsListSchema,
@@ -168,6 +169,15 @@ export const api = {
       body: input,
       schema: savingsEntrySchema,
     }),
+  savingsEntries: (householdId: string, goalId: string) =>
+    request(`${household(householdId)}/savings/${goalId}/entries`, {
+      schema: savingsEntriesResponseSchema,
+    }),
+  undoSavingsEntry: (householdId: string, goalId: string, id: string) =>
+    request(`${household(householdId)}/savings/${goalId}/entries/${id}`, {
+      method: 'DELETE',
+      schema: z.null(),
+    }),
   skipSavings: (householdId: string, goalId: string, dueDate: string) =>
     request(`${household(householdId)}/savings/${goalId}/due/${dueDate}/skip`, {
       method: 'POST',
@@ -191,6 +201,9 @@ export const queryKeys = {
   period: (householdId: string, start: string) => ['periods', householdId, start] as const,
   recurring: (householdId: string) => ['recurring', householdId] as const,
   savings: (householdId: string) => ['savings', householdId] as const,
+  /** Bajo `savings`: al refrescar las huchas se refresca también su historial. */
+  savingsEntries: (householdId: string, goalId: string) =>
+    ['savings', householdId, goalId, 'entries'] as const,
   members: (householdId: string) => ['members', householdId] as const,
   invitations: (householdId: string) => ['invitations', householdId] as const,
   upcoming: (householdId: string, days?: number) =>
