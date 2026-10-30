@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { CATEGORY_ICONS, EMOJI_TO_CATEGORY_ICON } from '@smartnomic/domain';
 import { eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { categories } from '../src/db/schema';
-import { me, signUp, useTestServer } from './helpers';
+import { categories, savingsEntries, savingsGoals } from '../src/db/schema';
+import { me, newId, signUp, useTestServer } from './helpers';
 
 const ctx = useTestServer();
 
@@ -85,5 +85,70 @@ describe('0005_category_icons (especificación 004, RF-403)', () => {
     const known = [...list.matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
     expect(known).toHaveLength(44);
     for (const icon of known) expect(CATEGORY_ICONS).toContain(icon);
+  });
+});
+
+describe('0006_savings (especificación 005)', () => {
+  async function twoHouseholds() {
+    const a = (await me(ctx.app, await signUp(ctx.app))).household.id;
+    const b = (await me(ctx.app, await signUp(ctx.app))).household.id;
+    const goalId = newId();
+    await ctx.db.insert(savingsGoals).values({
+      id: goalId,
+      householdId: a,
+      name: 'Vacaciones',
+      icon: 'travel',
+      targetCents: 120000,
+      deadline: '2027-07-31',
+      contributionDay: 1,
+      startDate: '2026-10-27',
+    });
+    return { a, b, goalId };
+  }
+
+  const entry = (householdId: string, goalId: string, extra: Record<string, unknown> = {}) => ({
+    id: newId(),
+    householdId,
+    goalId,
+    kind: 'deposit' as const,
+    amountCents: 13334,
+    date: '2026-11-01',
+    ...extra,
+  });
+
+  it('un movimiento no puede apuntar a la hucha de otro hogar', async () => {
+    const { b, goalId } = await twoHouseholds();
+    await expect(ctx.db.insert(savingsEntries).values(entry(b, goalId))).rejects.toThrow();
+  });
+
+  it('un mes se resuelve una sola vez, salvo que el anterior se haya deshecho', async () => {
+    const { a, goalId } = await twoHouseholds();
+    const first = entry(a, goalId, { dueDate: '2026-11-01' });
+    await ctx.db.insert(savingsEntries).values(first);
+    await expect(
+      ctx.db.insert(savingsEntries).values(entry(a, goalId, { dueDate: '2026-11-01' })),
+    ).rejects.toThrow();
+    await ctx.db
+      .update(savingsEntries)
+      .set({ deletedAt: new Date() })
+      .where(eq(savingsEntries.id, first.id));
+    await ctx.db.insert(savingsEntries).values(entry(a, goalId, { dueDate: '2026-11-01' }));
+  });
+
+  it('saltar no lleva importe ni sacar va asociado a un mes', async () => {
+    const { a, goalId } = await twoHouseholds();
+    await expect(
+      ctx.db
+        .insert(savingsEntries)
+        .values(entry(a, goalId, { kind: 'skip', dueDate: '2026-11-01' })),
+    ).rejects.toThrow();
+    await ctx.db
+      .insert(savingsEntries)
+      .values(entry(a, goalId, { kind: 'skip', amountCents: 0, dueDate: '2026-11-01' }));
+    await expect(
+      ctx.db
+        .insert(savingsEntries)
+        .values(entry(a, goalId, { kind: 'withdrawal', dueDate: '2026-12-01' })),
+    ).rejects.toThrow();
   });
 });

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { householdSchema } from './households';
 import { recurringRuleSchema, resolvedOccurrenceSchema } from './recurring';
 import { roleSchema } from './common';
+import { savingsEntryRecordSchema, savingsGoalRecordSchema } from './savings';
 import { categorySchema, transactionSchema } from './transactions';
 
 /**
@@ -21,6 +22,8 @@ export const householdExportSchema = z.object({
   transactions: z.array(transactionSchema),
   recurring: z.array(recurringRuleSchema),
   occurrences: z.array(resolvedOccurrenceSchema),
+  savingsGoals: z.array(savingsGoalRecordSchema).default([]),
+  savingsEntries: z.array(savingsEntryRecordSchema).default([]),
 });
 
 export type HouseholdExport = z.infer<typeof householdExportSchema>;

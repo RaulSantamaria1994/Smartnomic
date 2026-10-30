@@ -29,7 +29,7 @@ describe('calendarResponseSchema', () => {
       ],
       totals: { expenseCents: 75000, incomeCents: 0, pendingExpenseCents: 75000 },
     };
-    expect(calendarResponseSchema.parse(response)).toEqual(response);
+    expect(calendarResponseSchema.parse(response)).toEqual({ ...response, savings: [] });
     expect(
       calendarResponseSchema.safeParse({
         ...response,

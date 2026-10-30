@@ -43,6 +43,13 @@
       "when": 1793272364419,
       "tag": "0005_category_icons",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793348594982,
+      "tag": "0006_savings",
+      "breakpoints": true
     }
   ]
 }

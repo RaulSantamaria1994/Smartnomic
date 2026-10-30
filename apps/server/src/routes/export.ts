@@ -80,6 +80,9 @@ export function registerExportRoutes(
         transactions: transactionRows.map(toTransaction),
         recurring: ruleRows.map(toRule),
         occurrences: occurrenceRows.map(toResolved),
+        // Las huchas se exportan con la tarea H019 de la especificación 005.
+        savingsGoals: [],
+        savingsEntries: [],
       };
       const day = exportedAt.toISOString().slice(0, 10);
       return reply

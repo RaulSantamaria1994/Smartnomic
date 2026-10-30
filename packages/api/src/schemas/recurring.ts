@@ -1,6 +1,7 @@
 import { FREQUENCIES, MAX_INTERVAL } from '@smartnomic/domain';
 import { z } from 'zod';
 import { centsSchema, dateSchema, uuidV7Schema } from './common';
+import { upcomingSavingsSchema } from './savings';
 import { NOTE_MAX_LENGTH, transactionKindSchema } from './transactions';
 
 export const frequencySchema = z.enum(FREQUENCIES);
@@ -85,6 +86,8 @@ export type UpcomingOccurrenceDto = z.infer<typeof upcomingOccurrenceSchema>;
 export const upcomingResponseSchema = z.object({
   today: dateSchema,
   occurrences: z.array(upcomingOccurrenceSchema),
+  /** Aportaciones de huchas pendientes (especificación 005). */
+  savings: z.array(upcomingSavingsSchema).default([]),
 });
 
 export const occurrenceStatusSchema = z.enum(['paid', 'skipped']);

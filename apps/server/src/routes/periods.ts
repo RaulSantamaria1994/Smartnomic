@@ -57,7 +57,13 @@ export function registerPeriodRoutes(
       const expenseCents = Number(totals?.expense ?? 0);
       return {
         period,
-        summary: { incomeCents, expenseCents, balanceCents: incomeCents - expenseCents },
+        // Lo apartado en huchas llega con la historia 2 de la especificación 005 (H010).
+        summary: {
+          incomeCents,
+          expenseCents,
+          balanceCents: incomeCents - expenseCents,
+          setAsideCents: 0,
+        },
         transactions: rows.map(toTransaction),
       };
     },

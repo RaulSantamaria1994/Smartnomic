@@ -93,6 +93,8 @@ export function registerCalendarRoutes(
           };
         }),
         totals: calendarTotals(entries),
+        // Las huchas llegan con la historia 2 de la especificación 005 (H010).
+        savings: [],
       };
     },
   );

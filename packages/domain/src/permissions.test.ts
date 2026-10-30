@@ -10,6 +10,7 @@ const expected: Record<Role, Action[]> = {
     'recurring.write',
     'occurrences.resolve',
     'categories.write',
+    'savings.write',
     'data.export',
     'reminders.manageOwn',
     'household.leave',
@@ -26,6 +27,12 @@ describe('can', () => {
       });
     }
   }
+
+  it('propietario y editor gestionan las huchas; el lector solo las ve (especificación 005)', () => {
+    expect(can('owner', 'savings.write')).toBe(true);
+    expect(can('editor', 'savings.write')).toBe(true);
+    expect(can('viewer', 'savings.write')).toBe(false);
+  });
 
   it('el propietario no puede salir del hogar sin pasar antes la propiedad', () => {
     expect(can('owner', 'household.leave')).toBe(false);

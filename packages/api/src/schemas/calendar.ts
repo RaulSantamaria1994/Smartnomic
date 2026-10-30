@@ -1,6 +1,7 @@
 import { CALENDAR_STATUSES, isValidMonth } from '@smartnomic/domain';
 import { z } from 'zod';
 import { centsSchema, dateSchema, uuidV7Schema } from './common';
+import { calendarSavingsSchema } from './savings';
 import { transactionKindSchema } from './transactions';
 
 /** Mes natural `YYYY-MM` (especificación 002). */
@@ -42,6 +43,8 @@ export const calendarResponseSchema = z.object({
     incomeCents: totalSchema,
     pendingExpenseCents: totalSchema,
   }),
+  /** Aportaciones de huchas del mes (especificación 005). */
+  savings: z.array(calendarSavingsSchema).default([]),
 });
 
 export type CalendarResponse = z.infer<typeof calendarResponseSchema>;

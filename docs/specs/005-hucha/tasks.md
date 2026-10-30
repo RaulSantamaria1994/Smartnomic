@@ -20,18 +20,18 @@ fallar antes de implementar.
 
 **Objetivo**: cálculos, esquemas y tablas listos, sin rutas ni pantallas.
 
-- [ ] H001 [P] Tests de `packages/domain/src/savings.test.ts`: fechas de aportación (día
+- [x] H001 [P] Tests de `packages/domain/src/savings.test.ts`: fechas de aportación (día
       31 y febrero, cambio de año, desde la creación hasta el plazo), saldo con retiradas,
       estados (en curso, conseguida, plazo vencido, cerrada), pendientes y atrasadas
       (excluye las resueltas y los meses saltados), cuota con redondeo hacia arriba y con
       0 aportaciones restantes, «al día»/«retrasada», apartado de un periodo
-- [ ] H002 Implementar `packages/domain/src/savings.ts` y exportarlo
-- [ ] H003 [P] Acción `savings.write` (propietario y editor) en `permissions.ts` y su test
-- [ ] H004 [P] Esquemas en `packages/api/src/schemas/savings.ts` (hucha, plan, movimiento,
+- [x] H002 Implementar `packages/domain/src/savings.ts` y exportarlo
+- [x] H003 [P] Acción `savings.write` (propietario y editor) en `permissions.ts` y su test
+- [x] H004 [P] Esquemas en `packages/api/src/schemas/savings.ts` (hucha, plan, movimiento,
       entradas de crear/editar/aportar) con tests de límites (nombre, importes, día,
-      plazo); `summary` + `setAsideCents`/`remainingCents`, `upcoming` + `savings`,
+      plazo); `summary` + `setAsideCents`, `upcoming` + `savings`,
       calendario + `savings`, exportación + huchas
-- [ ] H005 Tablas `savings_goals` y `savings_entries` en `apps/server/src/db/schema.ts` y
+- [x] H005 Tablas `savings_goals` y `savings_entries` en `apps/server/src/db/schema.ts` y
       migración `0006` con `pnpm db:generate` (restricciones e índice único parcial)
 
 **Punto de control**: dominio con tests en verde; la migración se aplica en una base vacía.
@@ -76,7 +76,7 @@ fallar antes de implementar.
       (409), dos retiradas a la vez sin saldo negativo, historial con quién, deshacer el
       último (y 409 con otro)
 - [ ] H014 [US3] Rutas de aportar/sacar sin `dueDate`, `GET …/entries` y `DELETE
-    …/entries/:entryId`
+…/entries/:entryId`
 - [ ] H015 [US3] App: pantalla `savings/[goalId].tsx` con historial, aportar, sacar y
       deshacer
 
