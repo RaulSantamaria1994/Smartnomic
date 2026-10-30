@@ -13,6 +13,7 @@ import {
   meResponseSchema,
   periodResponseSchema,
   recurringListSchema,
+  savingsEntrySchema,
   savingsGoalSchema,
   savingsListSchema,
   recurringRuleSchema,
@@ -21,6 +22,7 @@ import {
   upcomingResponseSchema,
   type PayOccurrenceInput,
   type RecurringInput,
+  type SavingsEntryInput,
   type SavingsGoalInput,
   type TransactionInput,
   type CreateCategoryInput,
@@ -160,6 +162,17 @@ export const api = {
     }),
   deleteSavingsGoal: (householdId: string, id: string) =>
     request(`${household(householdId)}/savings/${id}`, { method: 'DELETE', schema: z.null() }),
+  saveSavingsEntry: (householdId: string, goalId: string, id: string, input: SavingsEntryInput) =>
+    request(`${household(householdId)}/savings/${goalId}/entries/${id}`, {
+      method: 'PUT',
+      body: input,
+      schema: savingsEntrySchema,
+    }),
+  skipSavings: (householdId: string, goalId: string, dueDate: string) =>
+    request(`${household(householdId)}/savings/${goalId}/due/${dueDate}/skip`, {
+      method: 'POST',
+      schema: savingsEntrySchema,
+    }),
   restoreTransaction: (householdId: string, id: string) =>
     request(`${household(householdId)}/transactions/${id}/restore`, {
       method: 'POST',

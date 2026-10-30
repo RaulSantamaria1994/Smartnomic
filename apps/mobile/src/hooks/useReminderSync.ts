@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { queryKeys } from '../api/client';
-import { planReminders } from '../reminders/plan';
+import { planReminders, reminderRoute } from '../reminders/plan';
 import {
   onReminderOpened,
   permissionStatus,
@@ -12,7 +12,7 @@ import {
   syncReminders,
 } from '../reminders/reminders';
 import { useNotificationPermission } from '../state/permission';
-import { useMe, useRecurring, useUpcoming } from './data';
+import { useMe, useRecurring, useSavings, useUpcoming } from './data';
 
 /** Ventana de avisos programados (plan: 60 días, con tope de 50 avisos). */
 const REMINDER_WINDOW_DAYS = 60;
@@ -29,6 +29,7 @@ export function useReminderSync(): void {
   const member = me.data?.member;
   const rules = useRecurring(household?.id);
   const upcoming = useUpcoming(household?.id, REMINDER_WINDOW_DAYS);
+  const goals = useSavings(household?.id).data?.goals;
   const setPermission = useNotificationPermission((state) => state.set);
 
   // Permiso: se pide la primera vez que hay pagos recurrentes de los que avisar.
@@ -47,10 +48,16 @@ export function useReminderSync(): void {
   // Reprogramar con los últimos datos conocidos.
   const occurrences = upcoming.data?.occurrences;
   const ruleList = rules.data?.rules;
+  const pendingSavings = upcoming.data?.savings;
   useEffect(() => {
     if (!remindersSupported || !occurrences || !ruleList || !member) return;
-    void syncReminders(planReminders(occurrences, ruleList, member, new Date()));
-  }, [occurrences, ruleList, member]);
+    void syncReminders(
+      planReminders(occurrences, ruleList, member, new Date(), {
+        pending: pendingSavings ?? [],
+        goals: goals ?? [],
+      }),
+    );
+  }, [occurrences, ruleList, member, pendingSavings, goals]);
 
   // Al volver a primer plano: refrescar (otro miembro pudo pagar algo) y el permiso.
   useEffect(() => {
@@ -65,8 +72,7 @@ export function useReminderSync(): void {
 
   // Tocar un aviso abre el vencimiento (RF-034).
   useEffect(
-    () =>
-      onReminderOpened(({ ruleId, dueDate }) => router.push(`/occurrence/${ruleId}/${dueDate}`)),
+    () => onReminderOpened(({ ruleId, dueDate }) => router.push(reminderRoute(ruleId, dueDate))),
     [],
   );
 }

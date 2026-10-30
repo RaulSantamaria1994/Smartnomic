@@ -1,4 +1,3 @@
-import type { CalendarItem } from '@smartnomic/api';
 import { monthGrid, parseDate, type DateString } from '@smartnomic/domain';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatDay } from '../format';
@@ -8,7 +7,8 @@ import { color, typography } from '../design/tokens';
 
 interface Props {
   month: string;
-  items: CalendarItem[];
+  /** Vencimientos y aportaciones a huchas del mes, con su estado. */
+  items: readonly { dueDate: DateString; status: string }[];
   today: DateString;
   selected: DateString | null;
   onSelect: (date: DateString) => void;

@@ -55,15 +55,15 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Apartar la cuota el día elegido (P2)
 
-- [ ] H009 [US2] Tests del servidor: confirmar con la cuota y con otro importe, reenviar
+- [x] H009 [US2] Tests del servidor: confirmar con la cuota y con otro importe, reenviar
       (idempotente), dos confirmaciones a la vez (una sola, 409 con quién), saltar,
       atrasada, pendientes en `/upcoming` y en el calendario, apartado en el periodo
-- [ ] H010 [US2] Rutas `PUT …/entries/:entryId` (con `dueDate`) y `POST …/due/:dueDate/skip`;
+- [x] H010 [US2] Rutas `PUT …/entries/:entryId` (con `dueDate`) y `POST …/due/:dueDate/skip`;
       `/upcoming`, calendario y periodo con huchas
-- [ ] H011 [US2] App: pendientes en «Próximos pagos» de «Mes» y en el calendario; pantalla
+- [x] H011 [US2] App: pendientes en «Próximos pagos» de «Mes» y en el calendario; pantalla
       `savings/[goalId]/due/[dueDate].tsx` (confirmar con importe editable o saltar);
       `SummaryCard` con «Apartado para objetivos» y lo que queda
-- [ ] H012 [US2] Avisos del día de apartar en `src/reminders/plan.ts` (sin importe), con
+- [x] H012 [US2] Avisos del día de apartar en `src/reminders/plan.ts` (sin importe), con
       test
 
 **Punto de control**: RF-503, RF-504 y RF-506 cubiertos.

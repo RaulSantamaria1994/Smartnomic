@@ -21,6 +21,7 @@ import {
 } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import { upcomingSavings } from './savings';
 
 type RuleRow = typeof recurringRules.$inferSelect;
 type OccurrenceRow = typeof occurrences.$inferSelect;
@@ -204,6 +205,7 @@ export function registerRecurringRoutes(
           days,
           earliest,
         ),
+        savings: await upcomingSavings(db, household.id, today, days),
       };
     },
   );

@@ -1,4 +1,10 @@
-import type { CalendarItem, CalendarResponse, Category, RecurringRule } from '@smartnomic/api';
+import type {
+  CalendarItem,
+  CalendarResponse,
+  CalendarSavings,
+  Category,
+  RecurringRule,
+} from '@smartnomic/api';
 import { monthOf, monthRange, shiftMonth, type DateString } from '@smartnomic/domain';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -31,6 +37,7 @@ import {
   useCalendar,
   useCan,
   useCategories,
+  useSavings,
   useMe,
   useMembers,
   useRecurring,
@@ -51,7 +58,10 @@ export default function Calendar() {
   const rules = useRecurring(household?.id);
   const categories = useCategories(household?.id);
   const members = useMembers(household?.id);
-  const canResolve = useCan()('occurrences.resolve');
+  const can = useCan();
+  const canResolve = can('occurrences.resolve');
+  const canSave = can('savings.write');
+  const savings = useSavings(household?.id);
 
   if (!household || !visible) {
     return (
@@ -76,6 +86,9 @@ export default function Calendar() {
   const categoryById = new Map((categories.data?.categories ?? []).map((c) => [c.id, c]));
   const memberName = new Map((members.data?.members ?? []).map((m) => [m.id, m.name]));
   const dayItems = shown && day ? shown.items.filter((i) => i.dueDate === day) : [];
+  const daySavings = shown && day ? shown.savings.filter((s) => s.dueDate === day) : [];
+  const goalById = new Map((savings.data?.goals ?? []).map((g) => [g.id, g]));
+  const hasAny = shown ? shown.items.length + shown.savings.length > 0 : false;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -130,7 +143,7 @@ export default function Calendar() {
         {shown ? (
           <MonthGrid
             month={visible}
-            items={shown.items}
+            items={[...shown.items, ...shown.savings]}
             today={shown.today}
             selected={day}
             onSelect={setSelected}
@@ -139,16 +152,16 @@ export default function Calendar() {
           <ActivityIndicator accessibilityLabel={es.common.loading} />
         )}
 
-        {shown && shown.items.length === 0 && (
+        {shown && !hasAny && (
           <EmptyState icon="calendar" title={es.calendar.empty} hint={es.calendar.emptyHint} />
         )}
 
-        {shown && day && shown.items.length > 0 && (
+        {shown && day && hasAny && (
           <View style={styles.list}>
             <Text style={styles.listTitle} accessibilityRole="header">
               {capitalize(formatDay(day))}
             </Text>
-            {dayItems.length === 0 && (
+            {dayItems.length + daySavings.length === 0 && (
               <Text style={[styles.muted, styles.listNote]}>{es.calendar.noneThatDay}</Text>
             )}
             {dayItems.map((item) => (
@@ -165,6 +178,19 @@ export default function Calendar() {
                 }
               />
             ))}
+            {daySavings.map((item) => (
+              <SavingsRow
+                key={`${item.goalId}-${item.dueDate}`}
+                item={item}
+                name={goalById.get(item.goalId)?.name ?? '—'}
+                icon={goalById.get(item.goalId)?.icon}
+                onPress={
+                  canSave && (item.status === 'pending' || item.status === 'overdue')
+                    ? () => router.push(`/savings/${item.goalId}/due/${item.dueDate}`)
+                    : undefined
+                }
+              />
+            ))}
           </View>
         )}
       </ScrollView>
@@ -176,7 +202,7 @@ export default function Calendar() {
 function defaultDay(data: CalendarResponse): DateString {
   const { start, end } = monthRange(data.month);
   if (data.today >= start && data.today <= end) return data.today;
-  return data.items[0]?.dueDate ?? start;
+  return data.items[0]?.dueDate ?? data.savings[0]?.dueDate ?? start;
 }
 
 function capitalize(text: string): string {
@@ -270,6 +296,47 @@ function ItemRow({
       onPress={onPress}
       accessibilityLabel={`${rule?.name ?? '—'}, ${formatMoney(item.amountCents)}, ${detail}`}
       accessibilityHint={onPress ? es.calendar.resolveHint : undefined}
+    />
+  );
+}
+
+const SAVINGS_PILL: Record<CalendarSavings['status'], PillKind> = {
+  overdue: 'overdue',
+  pending: 'pending',
+  saved: 'paid',
+  skipped: 'skipped',
+};
+
+/** Aportación a una hucha en el día elegido (especificación 005, RF-503). */
+function SavingsRow({
+  item,
+  name,
+  icon,
+  onPress,
+}: {
+  item: CalendarSavings;
+  name: string;
+  icon: string | undefined;
+  onPress: (() => void) | undefined;
+}) {
+  const title = es.savings.setAsideFor(name);
+  const status = es.savings.calendarStatus[item.status];
+  return (
+    <ListRow
+      title={title}
+      detail={<StatusPill kind={SAVINGS_PILL[item.status]} label={status} />}
+      leading={<CategoryIcon icon={icon} tone={color.text.accent} />}
+      trailing={
+        <Amount
+          cents={item.amountCents}
+          muted={item.status === 'skipped'}
+          strike={item.status === 'skipped'}
+        />
+      }
+      strike={item.status === 'skipped'}
+      onPress={onPress}
+      accessibilityLabel={`${title}, ${formatMoney(item.amountCents)}, ${status}`}
+      accessibilityHint={onPress ? es.savings.resolveHint : undefined}
     />
   );
 }

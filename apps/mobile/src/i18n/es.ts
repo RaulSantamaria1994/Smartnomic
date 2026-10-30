@@ -82,6 +82,8 @@ export const es = {
     undo: 'Deshacer',
   },
   summary: {
+    /** Especificación 005: lo apartado en huchas, ya descontado de lo que queda. */
+    setAside: (amount: string) => `Apartado para objetivos: ${amount}`,
     leftThisMonth: 'Te quedan este mes',
     balance: 'Balance del periodo',
     spentShare: (percent: number) => `Has gastado el ${percent} % de lo que ha entrado`,
@@ -180,6 +182,7 @@ export const es = {
     tomorrow: 'Mañana',
     inDays: (days: number) => `En ${days} días`,
     seeAmount: 'Toca para ver el importe',
+    setAside: 'apartas para',
     deniedTitle: 'Los avisos están desactivados',
     deniedText:
       'No recibirás recordatorios de tus pagos. Actívalos en los ajustes del móvil: Notificaciones → Smartnomic.',
@@ -341,6 +344,21 @@ export const es = {
     emptyHint: 'Ponle un objetivo y un plazo, y te diremos cuánto apartar cada mes.',
     seeAll: 'Ver todas las huchas',
     startOne: 'Ahorrar para un objetivo',
+    setAsideFor: (name: string) => `Apartar · ${name}`,
+    dueTitle: (name: string) => `Apartar para ${name}`,
+    dueOn: (when: string) => `Toca apartar: ${when}`,
+    quotaHint: (amount: string) => `La cuota para llegar a tiempo es ${amount}.`,
+    amount: 'Cuánto apartas',
+    confirm: 'Apartar',
+    skip: 'Saltar este mes',
+    notFound: 'Esta hucha ya no existe.',
+    resolveHint: 'Abre la aportación para apartarla o saltarla.',
+    calendarStatus: {
+      pending: 'Por apartar',
+      overdue: 'Atrasada',
+      saved: 'Apartado',
+      skipped: 'Saltado',
+    },
     errors: {
       name: 'Escribe un nombre.',
       deadline: 'Escribe una fecha límite válida (dd/mm/aaaa) que no esté en el pasado.',

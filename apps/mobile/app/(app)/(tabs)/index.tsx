@@ -4,6 +4,7 @@ import type {
   SavingsGoalDto,
   Transaction,
   UpcomingOccurrenceDto,
+  UpcomingSavings,
 } from '@smartnomic/api';
 import {
   addDays,
@@ -184,11 +185,15 @@ export default function Month() {
           incomeCents={data?.summary.incomeCents}
           expenseCents={data?.summary.expenseCents}
           balanceCents={data?.summary.balanceCents}
+          setAsideCents={data?.summary.setAsideCents}
           current={periodStart === thisPeriod}
         />
 
         <Upcoming
           items={upcoming.data?.occurrences}
+          savings={upcoming.data?.savings}
+          goals={savings.data?.goals}
+          canSave={can('savings.write')}
           today={upcoming.data?.today}
           rules={rules.data?.rules}
           categories={byId}
@@ -311,22 +316,86 @@ function RoundButton({
   );
 }
 
-/** «Próximos pagos»: atrasados y de los próximos 30 días (RF-023), en tarjetas. */
+/** Una tarjeta de «Próximos pagos»: un vencimiento o una aportación a una hucha. */
+interface UpcomingEntry {
+  key: string;
+  dueDate: DateString;
+  overdue: boolean;
+  name: string;
+  amountCents: number;
+  income: boolean;
+  icon: string | undefined;
+  tone: string | undefined;
+  onPress: (() => void) | undefined;
+}
+
+/**
+ * «Próximos pagos»: atrasados y de los próximos 30 días (RF-023), en tarjetas, junto con
+ * las aportaciones pendientes de las huchas (especificación 005, RF-503).
+ */
 function Upcoming({
   items,
+  savings,
+  goals,
   today,
   rules,
   categories,
   canResolve,
+  canSave,
 }: {
   items: UpcomingOccurrenceDto[] | undefined;
+  savings: UpcomingSavings[] | undefined;
+  goals: SavingsGoalDto[] | undefined;
   today: string | undefined;
   rules: RecurringRule[] | undefined;
   categories: Map<string, Category>;
   canResolve: boolean;
+  canSave: boolean;
 }) {
   if (!items || !today || !rules) return null;
   const byId = new Map(rules.map((r) => [r.id, r]));
+  const goalById = new Map((goals ?? []).map((g) => [g.id, g]));
+  const entries: UpcomingEntry[] = [
+    ...items.flatMap((item) => {
+      const rule = byId.get(item.ruleId);
+      if (!rule) return [];
+      const category = categories.get(rule.categoryId);
+      return [
+        {
+          key: `${item.ruleId}-${item.dueDate}`,
+          dueDate: item.dueDate,
+          overdue: item.overdue,
+          name: rule.name,
+          amountCents: rule.amountCents,
+          income: rule.kind === 'income',
+          icon: category?.icon,
+          tone: category?.color,
+          onPress: canResolve
+            ? () => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)
+            : undefined,
+        },
+      ];
+    }),
+    ...(savings ?? []).flatMap((item) => {
+      const goal = goalById.get(item.goalId);
+      if (!goal) return [];
+      return [
+        {
+          key: `${item.goalId}-${item.dueDate}`,
+          dueDate: item.dueDate,
+          overdue: item.overdue,
+          name: es.savings.setAsideFor(goal.name),
+          amountCents: item.quotaCents,
+          income: false,
+          icon: goal.icon,
+          tone: color.text.accent,
+          onPress: canSave
+            ? () => router.push(`/savings/${item.goalId}/due/${item.dueDate}`)
+            : undefined,
+        },
+      ];
+    }),
+  ].sort((a, b) => compareDates(a.dueDate, b.dueDate));
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -334,87 +403,60 @@ function Upcoming({
           {es.recurring.upcomingTitle}
         </AppText>
       </View>
-      {rules.length === 0 && (
+      {rules.length === 0 && entries.length === 0 && (
         <Card>
           <EmptyState icon="recurring" title={es.recurring.empty} />
         </Card>
       )}
-      {rules.length > 0 && items.length === 0 && (
+      {rules.length > 0 && entries.length === 0 && (
         <AppText variant="caption" tone="muted">
           {es.recurring.noUpcoming}
         </AppText>
       )}
-      {items.length > 0 && (
+      {entries.length > 0 && (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.cards}
         >
-          {items.map((item) => {
-            const rule = byId.get(item.ruleId);
-            if (!rule) return null;
-            return (
-              <UpcomingCard
-                key={`${item.ruleId}-${item.dueDate}`}
-                item={item}
-                rule={rule}
-                category={categories.get(rule.categoryId)}
-                today={today}
-                onPress={
-                  canResolve
-                    ? () => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)
-                    : undefined
-                }
-              />
-            );
-          })}
+          {entries.map((entry) => (
+            <UpcomingCard key={entry.key} entry={entry} today={today} />
+          ))}
         </ScrollView>
       )}
     </View>
   );
 }
 
-function UpcomingCard({
-  item,
-  rule,
-  category,
-  today,
-  onPress,
-}: {
-  item: UpcomingOccurrenceDto;
-  rule: RecurringRule;
-  category: Category | undefined;
-  today: string;
-  onPress: (() => void) | undefined;
-}) {
-  const soon = !item.overdue && compareDates(item.dueDate, addDays(today, SOON_DAYS)) <= 0;
-  const kind: PillKind = item.overdue ? 'overdue' : soon ? 'soon' : 'pending';
-  const when = formatRelativeDue(item.dueDate, today);
-  const pill = item.overdue ? es.recurring.overdue : when;
+function UpcomingCard({ entry, today }: { entry: UpcomingEntry; today: string }) {
+  const soon = !entry.overdue && compareDates(entry.dueDate, addDays(today, SOON_DAYS)) <= 0;
+  const kind: PillKind = entry.overdue ? 'overdue' : soon ? 'soon' : 'pending';
+  const when = formatRelativeDue(entry.dueDate, today);
+  const pill = entry.overdue ? es.recurring.overdue : when;
   const status = color.status[kind];
   return (
     <Pressable
-      onPress={onPress}
-      disabled={!onPress}
-      accessibilityRole={onPress ? 'button' : 'text'}
-      accessibilityLabel={`${rule.name}, ${formatMoney(rule.amountCents)}, ${when}${item.overdue ? `, ${es.recurring.overdue}` : ''}`}
+      onPress={entry.onPress}
+      disabled={!entry.onPress}
+      accessibilityRole={entry.onPress ? 'button' : 'text'}
+      accessibilityLabel={`${entry.name}, ${formatMoney(entry.amountCents)}, ${when}${entry.overdue ? `, ${es.recurring.overdue}` : ''}`}
       style={({ pressed }) => [styles.upcomingCard, pressed && styles.pressed]}
     >
       <View style={styles.cardTop}>
         <View style={[styles.dateBadge, { backgroundColor: status.bg }]}>
           <AppText variant="heading" style={{ color: status.fg }}>
-            {parseDate(item.dueDate).day}
+            {parseDate(entry.dueDate).day}
           </AppText>
           <AppText variant="small" style={{ color: status.fg }}>
-            {formatMonthShort(item.dueDate)}
+            {formatMonthShort(entry.dueDate)}
           </AppText>
         </View>
-        <CategoryIcon icon={category?.icon} tone={category?.color} />
+        <CategoryIcon icon={entry.icon} tone={entry.tone} />
       </View>
       <AppText variant="bodyStrong" numberOfLines={1}>
-        {rule.name}
+        {entry.name}
       </AppText>
-      <Amount cents={rule.amountCents} kind={rule.kind === 'income' ? 'income' : undefined} />
+      <Amount cents={entry.amountCents} kind={entry.income ? 'income' : undefined} />
       <StatusPill kind={kind} label={pill} />
     </Pressable>
   );

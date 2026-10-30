@@ -13,6 +13,7 @@ import type { Database } from '../db/client';
 import { occurrences, recurringRules, transactions } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import { calendarSavings } from './savings';
 
 const params = z.object({ householdId: z.uuid(), month: monthSchema });
 
@@ -93,8 +94,7 @@ export function registerCalendarRoutes(
           };
         }),
         totals: calendarTotals(entries),
-        // Las huchas llegan con la historia 2 de la especificación 005 (H010).
-        savings: [],
+        savings: await calendarSavings(db, household.id, today, start, end),
       };
     },
   );

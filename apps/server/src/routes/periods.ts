@@ -7,6 +7,7 @@ import type { Database } from '../db/client';
 import { transactions } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import { setAsideBetween } from './savings';
 import { toTransaction } from './transactions';
 
 const paramsSchema = z.object({ householdId: z.uuid(), start: dateSchema });
@@ -57,12 +58,11 @@ export function registerPeriodRoutes(
       const expenseCents = Number(totals?.expense ?? 0);
       return {
         period,
-        // Lo apartado en huchas llega con la historia 2 de la especificación 005 (H010).
         summary: {
           incomeCents,
           expenseCents,
           balanceCents: incomeCents - expenseCents,
-          setAsideCents: 0,
+          setAsideCents: await setAsideBetween(db, household.id, period.start, period.end),
         },
         transactions: rows.map(toTransaction),
       };
