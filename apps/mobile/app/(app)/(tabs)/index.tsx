@@ -38,11 +38,11 @@ import {
   EmptyState,
   Icon,
   ListRow,
-  SavingsCard,
-  StatusPill,
-  SummaryCard,
+  SavingsRow,
+  StatusText,
+  SummaryBlock,
   type IconName,
-  type PillKind,
+  type StatusKind,
 } from '../../../src/design';
 import { color, layout, radius, size, spacing } from '../../../src/design/tokens';
 import {
@@ -181,7 +181,7 @@ export default function Month() {
           remindersEnabled={me.data.member.remindersEnabled}
         />
 
-        <SummaryCard
+        <SummaryBlock
           incomeCents={data?.summary.incomeCents}
           expenseCents={data?.summary.expenseCents}
           balanceCents={data?.summary.balanceCents}
@@ -221,10 +221,9 @@ export default function Month() {
 
           {data && data.transactions.length > 0 && (
             <Card padded={false}>
-              {data.transactions.slice(0, shown).map((t, index) => (
+              {data.transactions.slice(0, shown).map((t) => (
                 <TransactionRow
                   key={t.id}
-                  first={index === 0}
                   transaction={t}
                   today={today}
                   category={byId.get(t.categoryId)}
@@ -266,7 +265,6 @@ function SavingsSection({
       {open.length === 0 ? (
         <Card padded={false}>
           <ListRow
-            first
             title={es.savings.startOne}
             detail={es.savings.emptyHint}
             onPress={() => router.push('/savings/new')}
@@ -277,7 +275,7 @@ function SavingsSection({
       ) : (
         <>
           {open.slice(0, 3).map((goal) => (
-            <SavingsCard
+            <SavingsRow
               key={goal.id}
               goal={goal}
               onPress={() => router.push(`/savings/${goal.id}`)}
@@ -434,7 +432,7 @@ function Upcoming({
 
 function UpcomingCard({ entry, today }: { entry: UpcomingEntry; today: string }) {
   const soon = !entry.overdue && compareDates(entry.dueDate, addDays(today, SOON_DAYS)) <= 0;
-  const kind: PillKind = entry.overdue ? 'overdue' : soon ? 'soon' : 'pending';
+  const kind: StatusKind = entry.overdue ? 'overdue' : soon ? 'soon' : 'pending';
   const when = formatRelativeDue(entry.dueDate, today);
   const pill = entry.overdue ? es.recurring.overdue : when;
   const status = color.status[kind];
@@ -461,7 +459,7 @@ function UpcomingCard({ entry, today }: { entry: UpcomingEntry; today: string })
         {entry.name}
       </AppText>
       <Amount cents={entry.amountCents} kind={entry.income ? 'income' : undefined} />
-      <StatusPill kind={kind} label={pill} />
+      <StatusText kind={kind} label={pill} />
     </Pressable>
   );
 }
@@ -480,14 +478,12 @@ function TransactionRow({
   category,
   author,
   onPress,
-  first,
 }: {
   transaction: Transaction;
   today: DateString;
   category: Category | undefined;
   author: string | null;
   onPress: (() => void) | undefined;
-  first: boolean;
 }) {
   const name = category?.name ?? '—';
   const detail = [
@@ -499,7 +495,6 @@ function TransactionRow({
     .join(' · ');
   return (
     <ListRow
-      first={first}
       title={name}
       detail={detail}
       leading={<CategoryIcon icon={category?.icon} tone={category?.color} />}

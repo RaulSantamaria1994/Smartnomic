@@ -6,7 +6,7 @@ import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { Card } from '../../../src/design/Card';
 import { EmptyState } from '../../../src/design/EmptyState';
-import { SavingsCard } from '../../../src/design/SavingsCard';
+import { SavingsRow } from '../../../src/design/SavingsRow';
 import { AppText } from '../../../src/design/Text';
 import { spacing } from '../../../src/design/tokens';
 import { useCan, useMe, useSavings } from '../../../src/hooks/data';
@@ -60,7 +60,7 @@ export default function SavingsList() {
                   {title}
                 </AppText>
                 {list.map((goal) => (
-                  <SavingsCard
+                  <SavingsRow
                     key={goal.id}
                     goal={goal}
                     onPress={() => router.push(`/savings/${goal.id}`)}

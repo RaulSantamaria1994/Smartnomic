@@ -28,8 +28,8 @@ import {
   EmptyState,
   Icon,
   ListRow,
-  StatusPill,
-  type PillKind,
+  StatusText,
+  type StatusKind,
 } from '../../../src/design';
 import { formatDay, formatMoney, formatMonthTitle } from '../../../src/format';
 import {
@@ -253,7 +253,7 @@ function Total({
   );
 }
 
-const PILL: Record<CalendarItem['status'], PillKind> = {
+const PILL: Record<CalendarItem['status'], StatusKind> = {
   overdue: 'overdue',
   pending: 'pending',
   paid: 'paid',
@@ -283,7 +283,7 @@ function ItemRow({
   return (
     <ListRow
       title={rule?.name ?? '—'}
-      detail={<StatusPill kind={PILL[item.status]} label={detail} />}
+      detail={<StatusText kind={PILL[item.status]} label={detail} />}
       leading={<CategoryIcon icon={category?.icon} tone={category?.color} />}
       trailing={
         <Amount
@@ -300,7 +300,7 @@ function ItemRow({
   );
 }
 
-const SAVINGS_PILL: Record<CalendarSavings['status'], PillKind> = {
+const SAVINGS_PILL: Record<CalendarSavings['status'], StatusKind> = {
   overdue: 'overdue',
   pending: 'pending',
   saved: 'paid',
@@ -324,7 +324,7 @@ function SavingsRow({
   return (
     <ListRow
       title={title}
-      detail={<StatusPill kind={SAVINGS_PILL[item.status]} label={status} />}
+      detail={<StatusText kind={SAVINGS_PILL[item.status]} label={status} />}
       leading={<CategoryIcon icon={icon} tone={color.text.accent} />}
       trailing={
         <Amount

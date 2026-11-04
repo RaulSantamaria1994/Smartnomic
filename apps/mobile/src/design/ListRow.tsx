@@ -14,12 +14,13 @@ interface Props {
   /** Etiqueta completa para lectores de pantalla. */
   accessibilityLabel?: string;
   accessibilityHint?: string;
-  /** Sin línea de separación arriba (la primera fila de una tarjeta). */
-  first?: boolean;
   strike?: boolean;
 }
 
-/** Fila de lista: icono, título y detalle, y a la derecha un importe o una etiqueta. */
+/**
+ * Fila de lista de Android (especificación 006): icono sin fondo, título y detalle, y a la
+ * derecha un importe o un estado, con un separador debajo.
+ */
 export function ListRow({
   title,
   detail,
@@ -28,7 +29,6 @@ export function ListRow({
   onPress,
   accessibilityLabel,
   accessibilityHint,
-  first,
   strike,
 }: Props) {
   return (
@@ -39,12 +39,13 @@ export function ListRow({
       accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
-      style={({ pressed }) => [styles.row, !first && styles.divider, pressed && styles.pressed]}
+      android_ripple={onPress ? { color: color.bg.sunken } : undefined}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
       {leading}
       <View style={styles.text}>
         <AppText
-          variant="bodyStrong"
+          variant="body"
           numberOfLines={1}
           style={strike && styles.strike}
           tone={strike ? 'muted' : 'primary'}
@@ -60,7 +61,7 @@ export function ListRow({
         )}
       </View>
       {trailing}
-      {onPress && <Icon name="forward" size={18} tint={color.text.muted} />}
+      {onPress && <Icon name="forward" size={20} tint={color.text.muted} />}
     </Pressable>
   );
 }
@@ -69,13 +70,15 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.ms,
+    gap: spacing.md,
     paddingVertical: spacing.ms,
     paddingHorizontal: spacing.md,
-    minHeight: 64,
+    minHeight: 56,
+    borderBottomWidth: 1,
+    borderColor: color.border.default,
+    backgroundColor: color.bg.surface,
   },
-  divider: { borderTopWidth: StyleSheet.hairlineWidth, borderColor: color.border.default },
-  pressed: { backgroundColor: color.bg.canvas },
+  pressed: { backgroundColor: color.bg.sunken },
   text: { flex: 1, gap: spacing.xxs, minWidth: 0 },
   strike: { textDecorationLine: 'line-through' },
 });

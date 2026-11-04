@@ -17,6 +17,7 @@ import { remindersSupported } from '../../../src/reminders/reminders';
 import { signOut } from '../../../src/session/sign-out';
 import { AppText, Card, Icon, ListRow, type IconName } from '../../../src/design';
 import { color, radius, spacing } from '../../../src/design/tokens';
+import { switchColors } from '../../../src/components/switchColors';
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -104,7 +105,6 @@ export default function Account() {
     <Screen title={es.tabs.household} align="top">
       <Card padded={false}>
         <MenuRow
-          first
           icon="household"
           label={es.householdMenu.members}
           onPress={() => router.push('/household/members')}
@@ -141,10 +141,10 @@ export default function Account() {
           </AppText>
           <Switch
             value={member.remindersEnabled}
+            {...switchColors(member.remindersEnabled)}
             onValueChange={(value) => void update({ remindersEnabled: value })}
             accessibilityLabel={es.settings.enabled}
             disabled={saving}
-            trackColor={{ true: color.text.link, false: color.border.strong }}
           />
         </View>
         <TextField
@@ -228,20 +228,9 @@ export default function Account() {
   );
 }
 
-function MenuRow({
-  icon,
-  label,
-  onPress,
-  first,
-}: {
-  icon: IconName;
-  label: string;
-  onPress: () => void;
-  first?: boolean;
-}) {
+function MenuRow({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
   return (
     <ListRow
-      first={first}
       title={label}
       onPress={onPress}
       accessibilityLabel={label}

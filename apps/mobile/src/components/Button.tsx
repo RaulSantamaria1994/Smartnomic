@@ -16,7 +16,7 @@ interface Props {
 
 const TEXT_TONE = {
   primary: 'onAccent',
-  secondary: 'primary',
+  secondary: 'link',
   link: 'link',
   danger: 'danger',
 } as const;
@@ -37,6 +37,9 @@ export function Button({
       accessibilityRole={variant === 'link' ? 'link' : 'button'}
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: inactive, busy: Boolean(loading) }}
+      android_ripple={{
+        color: variant === 'primary' ? color.text.onAccentMuted : color.bg.accentSoft,
+      }}
       style={({ pressed }) => [
         styles.base,
         styles[variant],
@@ -47,7 +50,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? color.text.onAccent : color.text.link} />
       ) : (
-        <AppText variant={variant === 'link' ? 'label' : 'bodyStrong'} tone={TEXT_TONE[variant]}>
+        <AppText variant="bodyStrong" tone={TEXT_TONE[variant]}>
           {label}
         </AppText>
       )}
@@ -60,8 +63,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.control,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     minHeight: size.button,
+    overflow: 'hidden',
   },
   primary: { backgroundColor: color.bg.accent },
   secondary: {
@@ -74,7 +78,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.text.danger,
   },
-  link: { minHeight: size.touch, paddingHorizontal: spacing.sm, borderRadius: radius.control },
+  link: { minHeight: size.touch, paddingHorizontal: spacing.sm },
   pressed: { opacity: 0.8 },
   inactive: { opacity: 0.5 },
 });

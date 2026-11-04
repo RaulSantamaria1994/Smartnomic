@@ -10,6 +10,8 @@ export const palette = {
   green900: '#0E5A4C',
   green100: '#D7EBE5',
   greenMist: '#CFE6DF',
+  green300: '#9CC9BE',
+  greenTrack: '#DCE6E3',
   white: '#FFFFFF',
   grey50: '#F1F3F4',
   grey300: '#E0E0E0',
@@ -26,7 +28,6 @@ export const palette = {
   redDeep: '#A8231B',
   redSoft: '#FDECEA',
   stone: '#8A948F',
-  honey: '#F3C77A',
 } as const;
 
 export const color = {
@@ -46,6 +47,8 @@ export const color = {
     link: palette.green900,
     onAccent: palette.white,
     onAccentMuted: palette.greenMist,
+    /** Acción del aviso oscuro de deshacer. */
+    onDarkAction: palette.green300,
     accent: palette.green900,
     danger: palette.red,
     success: palette.income,
@@ -74,8 +77,11 @@ export const color = {
   },
   /** Puntos del calendario y avisos. */
   mark: { overdue: palette.red, pending: palette.amber, resolved: palette.stone },
-  progress: { track: 'rgba(255,255,255,0.18)', fill: palette.honey },
-  overlay: { onAccent: 'rgba(255,255,255,0.10)' },
+  progress: { track: palette.greenTrack, fill: palette.green900, over: palette.red },
+  /** Fondo del aviso de deshacer, que flota sobre todo. */
+  snackbar: palette.ink,
+  /** Interruptor activado: pista y mando. */
+  switch: { track: palette.green300, thumb: palette.green900 },
 } as const;
 
 /**

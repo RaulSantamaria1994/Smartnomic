@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Icon } from '../design/Icon';
 import { AppText } from '../design/Text';
 import { color, radius, size, spacing } from '../design/tokens';
 
-/** Elegir una opción entre pocas (gasto o ingreso), con aspecto de interruptor. */
+/** Botones segmentados de Material para elegir entre pocas opciones (gasto o ingreso). */
 export function SegmentedControl<T extends string>({
   options,
   value,
@@ -20,7 +21,7 @@ export function SegmentedControl<T extends string>({
       accessibilityRole="radiogroup"
       accessibilityLabel={accessibilityLabel}
     >
-      {options.map((option) => {
+      {options.map((option, index) => {
         const selected = option.value === value;
         return (
           <Pressable
@@ -30,9 +31,11 @@ export function SegmentedControl<T extends string>({
             accessibilityState={{ selected, checked: selected }}
             aria-checked={selected}
             accessibilityLabel={option.label}
-            style={[styles.segment, selected && styles.selected]}
+            android_ripple={{ color: color.bg.accentSoft }}
+            style={[styles.segment, index > 0 && styles.divider, selected && styles.selected]}
           >
-            <AppText variant="bodyStrong" tone={selected ? 'primary' : 'muted'}>
+            {selected && <Icon name="check" size={18} tint={color.text.accent} />}
+            <AppText variant="bodyStrong" tone={selected ? 'accent' : 'primary'}>
               {option.label}
             </AppText>
           </Pressable>
@@ -45,17 +48,19 @@ export function SegmentedControl<T extends string>({
 const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
-    backgroundColor: color.bg.sunken,
+    borderWidth: 1,
+    borderColor: color.border.strong,
     borderRadius: radius.control,
-    padding: spacing.xs,
-    gap: spacing.xs,
+    overflow: 'hidden',
   },
   segment: {
     flex: 1,
+    flexDirection: 'row',
+    gap: spacing.xs + 2,
     minHeight: size.touch,
-    borderRadius: radius.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  selected: { backgroundColor: color.bg.surface },
+  divider: { borderLeftWidth: 1, borderColor: color.border.strong },
+  selected: { backgroundColor: color.bg.accentSoft },
 });

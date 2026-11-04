@@ -17,7 +17,7 @@ export function CategoryIcon({
   icon: string | undefined;
   /** Color de la categoría (`#RRGGBB`). */
   tone: string | undefined;
-  size?: 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg';
   /** Fondo sobre el que va, si no es blanco, para ajustar el contraste. */
   background?: string;
 }) {
@@ -30,7 +30,13 @@ export function CategoryIcon({
   return (
     <MaterialCommunityIcons
       name={CATEGORY_GLYPHS[isCategoryIcon(icon) ? icon : DEFAULT_CATEGORY_ICON]}
-      size={size === 'lg' ? sizes.categoryGlyphLarge : sizes.categoryGlyph}
+      size={
+        size === 'lg'
+          ? sizes.categoryGlyphLarge
+          : size === 'sm'
+            ? sizes.iconSmall
+            : sizes.categoryGlyph
+      }
       color={foreground}
       accessible={false}
       importantForAccessibility="no"

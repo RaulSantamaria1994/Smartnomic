@@ -26,6 +26,7 @@ import { Chip } from './Chip';
 import { SegmentedControl } from './SegmentedControl';
 import { Message } from './Message';
 import { TextField } from './TextField';
+import { switchColors } from './switchColors';
 
 type RemindDays = (typeof REMIND_DAYS_OPTIONS)[number];
 
@@ -238,6 +239,7 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
           <AppText variant="label">{es.recurring.active}</AppText>
           <Switch
             value={active}
+            {...switchColors(active)}
             onValueChange={setActive}
             accessibilityLabel={es.recurring.active}
           />

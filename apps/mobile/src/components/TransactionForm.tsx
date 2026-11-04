@@ -1,12 +1,13 @@
 import type { Category, TransactionInput } from '@smartnomic/api';
 import { addDays, parseAmount, type DateString, type TransactionKind } from '@smartnomic/domain';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, TextInput, View, type TextStyle } from 'react-native';
+import type { TextInput } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { ApiError } from '../api/http';
 import { amountErrorMessage, formatAmountInput, formatShortDate, parseShortDate } from '../format';
 import { es } from '../i18n/es';
 import { AppText } from '../design/Text';
-import { color, spacing, typography } from '../design/tokens';
+import { spacing } from '../design/tokens';
 import { Button } from './Button';
 import { CategoryPicker } from './CategoryPicker';
 import { Chip } from './Chip';
@@ -117,25 +118,19 @@ export function TransactionForm({ initial, categories, today, onSubmit, extraAct
         ]}
       />
 
-      <View style={styles.amountBlock}>
-        <View style={styles.amountBox}>
-          <TextInput
-            value={amount}
-            onChangeText={setAmount}
-            placeholder="0,00"
-            placeholderTextColor={color.text.muted}
-            keyboardType="decimal-pad"
-            ref={amountRef}
-            accessibilityLabel={es.transaction.amount}
-            style={styles.amount}
-          />
-          <AppText variant="headline" tone="muted">
-            €
-          </AppText>
-        </View>
-      </View>
+      <TextField
+        label={es.transaction.amount}
+        value={amount}
+        onChangeText={setAmount}
+        placeholder="0,00"
+        keyboardType="decimal-pad"
+        suffix="€"
+        ref={amountRef}
+      />
 
-      <AppText variant="label">{es.transaction.category}</AppText>
+      <AppText variant="small" tone="muted">
+        {es.transaction.category}
+      </AppText>
       <CategoryPicker
         accessibilityLabel={es.transaction.category}
         categories={options}
@@ -143,7 +138,9 @@ export function TransactionForm({ initial, categories, today, onSubmit, extraAct
         onChange={setCategoryId}
       />
 
-      <AppText variant="label">{es.transaction.date}</AppText>
+      <AppText variant="small" tone="muted">
+        {es.transaction.date}
+      </AppText>
       <View style={styles.row}>
         <Chip
           label={es.transaction.today}
@@ -175,31 +172,7 @@ export function TransactionForm({ initial, categories, today, onSubmit, extraAct
   );
 }
 
-// `outlineStyle: 'none'` existe en la web pero no en los tipos de React Native.
-const webWithoutOutline: TextStyle =
-  Platform.OS === 'web' ? ({ outlineStyle: 'none' } as unknown as TextStyle) : {};
-
 const styles = StyleSheet.create({
   form: { gap: spacing.md },
   row: { flexDirection: 'row', gap: spacing.sm },
-  amountBlock: { alignItems: 'center', paddingVertical: spacing.sm },
-  amountBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    borderBottomWidth: 3,
-    borderColor: color.border.focus,
-    alignSelf: 'stretch',
-  },
-  amount: {
-    ...typography.display,
-    flex: 1,
-    // En la web un <input> no se encoge por debajo de su ancho propio sin esto.
-    minWidth: 0,
-    color: color.text.primary,
-    textAlign: 'center',
-    paddingVertical: spacing.sm,
-    // El subrayado verde ya indica el foco; sin esto el navegador añade su recuadro.
-    ...webWithoutOutline,
-  },
 });

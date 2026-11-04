@@ -26,14 +26,13 @@ export default function RecurringList() {
       )}
       {rules.data && rules.data.rules.length > 0 && (
         <Card padded={false}>
-          {rules.data.rules.map((rule, index) => {
+          {rules.data.rules.map((rule) => {
             const category = byId.get(rule.categoryId);
             const schedule =
               describeSchedule(rule) + (rule.active ? '' : ` · ${es.recurring.inactive}`);
             return (
               <ListRow
                 key={rule.id}
-                first={index === 0}
                 title={rule.name}
                 detail={schedule}
                 strike={!rule.active}

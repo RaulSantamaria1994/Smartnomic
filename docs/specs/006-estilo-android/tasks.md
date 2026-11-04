@@ -37,16 +37,17 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Componentes al estilo Android (P1) 🎯
 
-- [ ] A005 [US1] `AppBar.tsx` y `Screen.tsx` con barra superior (título, subtítulo,
+- [x] A005 [US1] `AppBar.tsx` y `Screen.tsx` con barra superior (título, subtítulo,
       atrás con «Volver», flechas de mes); atrás sin historial va a «Mes»
-- [ ] A006 [P] [US1] `Button`, `TextField`, `Chip`, `SegmentedControl` al estilo de Figma
-- [ ] A007 [P] [US1] `ListRow` con separador, `Section`, `StatusText` (sustituye a
+- [x] A006 [P] [US1] `Button`, `TextField`, `Chip`, `SegmentedControl` al estilo de Figma
+- [x] A007 [P] [US1] `ListRow` con separador, `Section`, `StatusText` (sustituye a
       `StatusPill`), `EmptyState` sin círculo, `ProgressBar` (aún sin animación)
-- [ ] A008 [US1] `TabBar` con cuatro pestañas y `Fab.tsx` (solo con `transactions.write`)
+- [x] A008 [US1] `TabBar` con cuatro pestañas y `Fab.tsx` (solo con `transactions.write`)
       en el layout de pestañas
-- [ ] A009 [US1] `SummaryCard` → bloque de resumen (cifra, barra, tres líneas);
-      `SavingsCard` → fila de hucha; `Brand` sin eslogan; fuera el saludo y las iniciales
-- [ ] A010 [P] [US1] `MonthGrid`, `CategoryPicker`, `IconPicker`, `UndoSnackbar`,
+- [x] A009 [US1] `SummaryCard` → bloque de resumen (cifra, barra, tres líneas);
+      `SavingsCard` → fila de hucha; `Brand` sin eslogan (el saludo y las iniciales salen con la
+      cabecera de «Mes» en A011)
+- [x] A010 [P] [US1] `MonthGrid`, `CategoryPicker`, `IconPicker`, `UndoSnackbar`,
       `ReminderBanners`, `RuleForm`, `SavingsForm`, `TransactionForm` al nuevo estilo
 
 **Punto de control**: componentes listos; RF-601 a RF-606 en las piezas.
@@ -55,7 +56,8 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 1 — Pantallas
 
-- [ ] A011 [US1] Pestañas: «Mes», «Calendario», «Pagos», «Hogar» como en Figma
+- [ ] A011 [US1] Pestañas: «Mes» (sin saludo ni iniciales), «Calendario», «Pagos», «Hogar»
+      como en Figma
 - [ ] A012 [US1] Sin sesión: Entrar, Registro, Recuperar, Restablecer, Invitación
 - [ ] A013 [US1] Formularios y detalles: Apuntar, movimiento, pago recurrente (nuevo y
       detalle), vencimiento, Categorías, Miembros, Ajustes

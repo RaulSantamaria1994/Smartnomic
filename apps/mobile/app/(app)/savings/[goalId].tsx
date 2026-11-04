@@ -13,7 +13,7 @@ import { TextField } from '../../../src/components/TextField';
 import { Amount } from '../../../src/design/Amount';
 import { Card } from '../../../src/design/Card';
 import { ListRow } from '../../../src/design/ListRow';
-import { SavingsCard } from '../../../src/design/SavingsCard';
+import { SavingsRow } from '../../../src/design/SavingsRow';
 import { AppText } from '../../../src/design/Text';
 import { spacing } from '../../../src/design/tokens';
 import {
@@ -146,7 +146,7 @@ export default function SavingsDetail() {
 
   return (
     <Screen title={goal.name} align="top">
-      <SavingsCard goal={goal} />
+      <SavingsRow goal={goal} />
 
       {canWrite && open && confirmClose && (
         <Card style={styles.form}>
@@ -255,7 +255,6 @@ export default function SavingsDetail() {
               <EntryRow
                 key={entry.id}
                 entry={entry}
-                first={index === 0}
                 onUndo={canWrite && open && index === 0 ? () => void undo(entry) : undefined}
               />
             ))}
@@ -291,15 +290,7 @@ export default function SavingsDetail() {
   );
 }
 
-function EntryRow({
-  entry,
-  first,
-  onUndo,
-}: {
-  entry: SavingsEntryDto;
-  first: boolean;
-  onUndo: (() => void) | undefined;
-}) {
+function EntryRow({ entry, onUndo }: { entry: SavingsEntryDto; onUndo: (() => void) | undefined }) {
   const title = es.savings.kinds[entry.kind];
   const detail = [
     formatShortDate(entry.date),
@@ -311,7 +302,6 @@ function EntryRow({
   return (
     <View>
       <ListRow
-        first={first}
         title={title}
         detail={detail}
         trailing={
