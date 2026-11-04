@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../design/Text';
-import { color, radius, shadow, size, spacing } from '../design/tokens';
+import { color, radius, size, spacing } from '../design/tokens';
 
 /** Elegir una opción entre pocas (gasto o ingreso), con aspecto de interruptor. */
 export function SegmentedControl<T extends string>({
@@ -46,16 +46,16 @@ const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
     backgroundColor: color.bg.sunken,
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     padding: spacing.xs,
     gap: spacing.xs,
   },
   segment: {
     flex: 1,
     minHeight: size.touch,
-    borderRadius: radius.md,
+    borderRadius: radius.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  selected: { backgroundColor: color.bg.surface, ...shadow.card },
+  selected: { backgroundColor: color.bg.surface },
 });

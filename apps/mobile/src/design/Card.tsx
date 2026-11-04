@@ -24,7 +24,7 @@ export function Card({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: color.bg.surface,
-    borderRadius: radius.xl,
+    borderRadius: radius.control,
     borderWidth: 1,
     borderColor: color.border.default,
     overflow: 'hidden',
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   accent: {
     backgroundColor: color.bg.accent,
     borderColor: color.bg.accent,
-    borderRadius: radius.xxl,
+    borderRadius: radius.control,
   },
   padded: { padding: spacing.md },
 });

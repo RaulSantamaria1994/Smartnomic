@@ -3,7 +3,7 @@ import { CATEGORY_ICONS, type CategoryIconId } from '@smartnomic/domain';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { CATEGORY_GLYPHS } from '../design/categoryGlyphs';
-import { categoryBackground, iconTone } from '../design/color';
+import { iconTone } from '../design/color';
 import { color, radius, size, spacing } from '../design/tokens';
 import { es } from '../i18n/es';
 import { iconColumnsFor, MIN_ICON_CELL } from './iconGrid';
@@ -49,17 +49,14 @@ export function IconPicker({
             style={({ pressed }) => [
               styles.cell,
               { width: cell, height: Math.max(cell, MIN_ICON_CELL) },
-              selected && {
-                backgroundColor: categoryBackground(tone),
-                borderColor: iconTone(tone),
-              },
+              selected && styles.selected,
               pressed && styles.pressed,
             ]}
           >
             <MaterialCommunityIcons
               name={CATEGORY_GLYPHS[icon]}
               size={size.categoryGlyph}
-              color={selected ? iconTone(tone) : color.text.muted}
+              color={iconTone(tone, selected ? color.bg.accentSoft : color.bg.surface)}
               accessible={false}
               importantForAccessibility="no"
               aria-hidden
@@ -74,12 +71,17 @@ export function IconPicker({
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP },
   cell: {
-    borderRadius: radius.md,
-    borderWidth: 2,
-    borderColor: color.border.default,
+    borderRadius: radius.control,
+    borderWidth: 1,
+    borderColor: color.border.strong,
     backgroundColor: color.bg.surface,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  selected: {
+    backgroundColor: color.bg.accentSoft,
+    borderColor: color.border.accent,
+    borderWidth: 2,
   },
   pressed: { opacity: 0.8 },
 });

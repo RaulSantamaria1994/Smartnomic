@@ -20,15 +20,15 @@ fallar antes de implementar.
 
 **Objetivo**: los cimientos del estilo nuevo, sin tocar aún las pantallas.
 
-- [ ] A001 [P] Tests en `apps/mobile/src/design/tokens.test.ts`: radios 4/8/16, fondo
+- [x] A001 [P] Tests en `apps/mobile/src/design/tokens.test.ts`: radios 4/8/16, fondo
       blanco, sin familias de Plus Jakarta, contraste 4,5:1 de texto y secundario sobre
       blanco, 3:1 del borde y de los iconos de las categorías predefinidas y de la paleta
-- [ ] A002 [P] Tests de `iconTone(hex, '#FFFFFF')` en `color.test.ts` (un amarillo claro se
+- [x] A002 [P] Tests de `iconTone(hex, '#FFFFFF')` en `color.test.ts` (un amarillo claro se
       oscurece hasta 3:1; los de serie quedan igual)
-- [ ] A003 Tokens nuevos en `src/design/tokens.ts` (colores de Figma, `#757575` de borde,
+- [x] A003 Tokens nuevos en `src/design/tokens.ts` (colores de Figma, `#757575` de borde,
       escala de texto con `fontWeight`, sin `shadow.card`); `Text.tsx` sin familias;
       `fonts.ts` solo con la fuente de iconos; quitar `@expo-google-fonts/plus-jakarta-sans`
-- [ ] A004 `Icon.tsx` con Material Community Icons (mismos nombres de uso);
+- [x] A004 `Icon.tsx` con Material Community Icons (mismos nombres de uso);
       `CategoryIcon.tsx` sin fondo con `iconTone` sobre blanco; fuera `categoryBackground`
 
 **Punto de control**: `pnpm check` en verde; la app arranca con la fuente del sistema.

@@ -97,7 +97,11 @@ export default tseslint.config(
         },
         {
           selector: "Property[key.name='fontWeight']",
-          message: 'Usa una variante de `typography`: con la fuente propia, el peso es la familia.',
+          message: 'Usa una variante de `typography` (src/design/tokens.ts), no un peso suelto.',
+        },
+        {
+          selector: "Property[key.name='fontFamily']",
+          message: 'La app usa la fuente del sistema (especificación 006): no fijes la familia.',
         },
       ],
     },

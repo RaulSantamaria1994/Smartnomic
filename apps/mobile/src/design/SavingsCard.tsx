@@ -84,7 +84,7 @@ export function SavingsCard({ goal, onPress }: { goal: SavingsGoalDto; onPress?:
 const styles = StyleSheet.create({
   card: {
     backgroundColor: color.bg.surface,
-    borderRadius: radius.xl,
+    borderRadius: radius.control,
     borderWidth: 1,
     borderColor: color.border.default,
     padding: spacing.md,

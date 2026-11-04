@@ -1,31 +1,33 @@
-import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { color, size as sizes } from './tokens';
 
 /**
- * Iconos de interfaz (trazo fino, Feather). Los nombres son los de la app, no los del
- * juego de iconos, para poder cambiarlo sin tocar las pantallas. Son decorativos: quien
+ * Iconos de interfaz de Material Community Icons, el mismo juego que las categorías
+ * (especificación 006, RF-603). Los nombres son los de la app, no los del juego de iconos,
+ * para poder cambiarlo sin tocar las pantallas. Son decorativos: quien
  * los usa en un botón le pone su propia etiqueta.
  */
 const NAMES = {
-  home: 'home',
-  calendar: 'calendar',
+  home: 'home-outline',
+  calendar: 'calendar-blank-outline',
   plus: 'plus',
   recurring: 'repeat',
-  household: 'users',
+  household: 'account-group-outline',
   back: 'chevron-left',
+  arrowBack: 'arrow-left',
   forward: 'chevron-right',
-  bell: 'bell',
-  close: 'x',
+  bell: 'bell-outline',
+  close: 'close',
   check: 'check',
-  alert: 'alert-circle',
-  settings: 'settings',
-  signOut: 'log-out',
+  alert: 'alert-circle-outline',
+  settings: 'cog-outline',
+  signOut: 'logout',
   download: 'download',
-  trash: 'trash-2',
-  share: 'share-2',
-  tag: 'tag',
-  savings: 'target',
-  user: 'user',
+  trash: 'trash-can-outline',
+  share: 'share-variant-outline',
+  tag: 'tag-outline',
+  savings: 'piggy-bank-outline',
+  user: 'account-outline',
   wifiOff: 'wifi-off',
 } as const;
 
@@ -41,7 +43,7 @@ export function Icon({
   tint?: string;
 }) {
   return (
-    <Feather
+    <MaterialCommunityIcons
       name={NAMES[name]}
       size={size}
       color={tint}

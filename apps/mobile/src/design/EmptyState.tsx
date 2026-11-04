@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   badge: {
     width: 48,
     height: 48,
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     backgroundColor: color.bg.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',

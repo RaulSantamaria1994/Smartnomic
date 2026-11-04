@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     paddingHorizontal: spacing.lg,
     minHeight: size.button,
   },
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.text.danger,
   },
-  link: { minHeight: size.touch, paddingHorizontal: spacing.sm, borderRadius: radius.sm },
+  link: { minHeight: size.touch, paddingHorizontal: spacing.sm, borderRadius: radius.control },
   pressed: { opacity: 0.8 },
   inactive: { opacity: 0.5 },
 });

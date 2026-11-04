@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.bg.surface,
     borderWidth: 1,
     borderColor: color.border.strong,
-    borderRadius: radius.md,
+    borderRadius: radius.control,
     paddingHorizontal: spacing.md,
     minHeight: 48,
     // En la web un <input> no se encoge por debajo de su ancho propio sin esto.

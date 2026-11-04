@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP },
   item: {
     minHeight: 88,
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     borderWidth: 2,
     borderColor: color.border.default,
     backgroundColor: color.bg.surface,

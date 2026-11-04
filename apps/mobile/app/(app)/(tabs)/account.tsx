@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   menuIcon: {
     width: 40,
     height: 40,
-    borderRadius: radius.md,
+    borderRadius: radius.control,
     backgroundColor: color.bg.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',

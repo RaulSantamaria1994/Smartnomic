@@ -5,7 +5,7 @@ import { color, radius, spacing } from '../design/tokens';
 
 /** Mensaje de error o de éxito, anunciado por los lectores de pantalla. */
 export function Message({ text, kind = 'error' }: { text: string; kind?: 'error' | 'success' }) {
-  const status = kind === 'error' ? color.status.overdue : color.status.paid;
+  const status = kind === 'error' ? color.notice.danger : color.notice.success;
   return (
     <View
       style={[styles.box, { backgroundColor: status.bg }]}
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    borderRadius: radius.md,
+    borderRadius: radius.control,
     paddingHorizontal: spacing.ms,
     paddingVertical: spacing.sm,
   },

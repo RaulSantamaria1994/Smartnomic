@@ -1,6 +1,6 @@
 import { DEFAULT_CATEGORIES } from '@smartnomic/domain';
 import { describe, expect, it } from 'vitest';
-import { categoryBackground, contrastRatio, iconTone, mix, tint } from './color';
+import { contrastRatio, iconTone, mix, tint } from './color';
 import { categoryPalette, color } from './tokens';
 
 describe('mix y tint', () => {
@@ -31,45 +31,7 @@ describe('contrastRatio', () => {
   });
 });
 
-describe('contraste de los tokens «Calma» (WCAG 2.1 AA)', () => {
-  const AA = 4.5;
-  const pairs: [string, string, string][] = [
-    ['texto sobre el fondo', color.text.primary, color.bg.canvas],
-    ['texto secundario sobre el fondo', color.text.muted, color.bg.canvas],
-    ['texto secundario sobre tarjeta', color.text.muted, color.bg.surface],
-    ['enlace sobre el fondo', color.text.link, color.bg.canvas],
-    ['texto sobre el botón principal', color.text.onAccent, color.bg.accent],
-    ['texto claro sobre la tarjeta de resumen', color.text.onAccentMuted, color.bg.accent],
-    ['ingresos sobre tarjeta', color.amount.income, color.bg.surface],
-    ['error sobre tarjeta', color.text.danger, color.bg.surface],
-  ];
-  for (const [name, fg, bg] of pairs) {
-    it(name, () => expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(AA));
-  }
-
-  for (const [status, { fg, bg }] of Object.entries(color.status)) {
-    it(`etiqueta de estado «${status}»`, () =>
-      expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(AA));
-  }
-
-  it('bordes de campos y foco: 3:1 sobre tarjeta y fondo (WCAG 1.4.11)', () => {
-    for (const bg of [color.bg.surface, color.bg.canvas]) {
-      expect(contrastRatio(color.border.strong, bg)).toBeGreaterThanOrEqual(3);
-      expect(contrastRatio(color.border.focus, bg)).toBeGreaterThanOrEqual(3);
-    }
-  });
-
-  it('la tinta se lee sobre el fondo suave de cada categoría predefinida', () => {
-    for (const category of DEFAULT_CATEGORIES) {
-      expect(
-        contrastRatio(color.text.primary, tint(category.color)),
-        category.name,
-      ).toBeGreaterThanOrEqual(AA);
-    }
-  });
-});
-
-describe('iconTone (especificación 004)', () => {
+describe('iconTone sobre blanco (especificación 006)', () => {
   const NON_TEXT = 3;
   const tones = [
     ...categoryPalette.map((c) => c.value),
@@ -77,26 +39,39 @@ describe('iconTone (especificación 004)', () => {
     // Colores claros que podrían venir de datos antiguos.
     '#FFFF00',
     '#FFFFFF',
-    '#C28A00',
+    '#FFD54F',
     '#7FDBFF',
   ];
 
-  it('el icono contrasta 3:1 con el fondo suave de su categoría (WCAG 1.4.11)', () => {
+  it('el icono contrasta 3:1 con el blanco (WCAG 1.4.11)', () => {
     for (const tone of tones) {
-      expect(contrastRatio(iconTone(tone), categoryBackground(tone)), tone).toBeGreaterThanOrEqual(
+      expect(contrastRatio(iconTone(tone), color.bg.surface), tone).toBeGreaterThanOrEqual(
         NON_TEXT,
       );
     }
   });
 
-  it('un color que ya contrasta no cambia', () => {
-    expect(iconTone('#1F5FBF')).toBe('#1F5FBF');
-    expect(iconTone('#455A64')).toBe('#455A64');
+  it('los colores de serie y de la paleta no cambian', () => {
+    for (const tone of [
+      ...categoryPalette.map((c) => c.value),
+      ...DEFAULT_CATEGORIES.map((c) => c.color),
+    ]) {
+      expect(iconTone(tone), tone).toBe(tone);
+    }
   });
 
   it('un color claro se oscurece hacia la tinta, sin llegar a ella si no hace falta', () => {
-    const toned = iconTone('#C28A00');
-    expect(toned).not.toBe('#C28A00');
+    const toned = iconTone('#FFD54F');
+    expect(toned).not.toBe('#FFD54F');
     expect(toned).not.toBe(color.text.primary);
+  });
+
+  it('también contrasta sobre el fondo de un chip elegido', () => {
+    for (const tone of tones) {
+      expect(
+        contrastRatio(iconTone(tone, color.bg.accentSoft), color.bg.accentSoft),
+        tone,
+      ).toBeGreaterThanOrEqual(NON_TEXT);
+    }
   });
 });

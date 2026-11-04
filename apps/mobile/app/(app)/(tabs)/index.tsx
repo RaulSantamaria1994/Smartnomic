@@ -447,11 +447,11 @@ function UpcomingCard({ entry, today }: { entry: UpcomingEntry; today: string })
       style={({ pressed }) => [styles.upcomingCard, pressed && styles.pressed]}
     >
       <View style={styles.cardTop}>
-        <View style={[styles.dateBadge, { backgroundColor: status.bg }]}>
-          <AppText variant="heading" style={{ color: status.fg }}>
+        <View style={[styles.dateBadge, { backgroundColor: color.bg.sunken }]}>
+          <AppText variant="heading" style={{ color: status }}>
             {parseDate(entry.dueDate).day}
           </AppText>
-          <AppText variant="small" style={{ color: status.fg }}>
+          <AppText variant="small" style={{ color: status }}>
             {formatMonthShort(entry.dueDate)}
           </AppText>
         </View>
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
   upcomingCard: {
     width: 168,
     backgroundColor: color.bg.surface,
-    borderRadius: radius.xl,
+    borderRadius: radius.control,
     borderWidth: 1,
     borderColor: color.border.default,
     padding: spacing.ms,
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
   dateBadge: {
     width: 48,
     paddingVertical: spacing.xs,
-    borderRadius: radius.md,
+    borderRadius: radius.control,
     alignItems: 'center',
   },
   pressed: { opacity: 0.8 },

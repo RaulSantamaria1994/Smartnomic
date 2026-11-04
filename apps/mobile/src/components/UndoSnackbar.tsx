@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxFormWidth,
     alignSelf: 'center',
     backgroundColor: color.text.primary,
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     paddingLeft: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',

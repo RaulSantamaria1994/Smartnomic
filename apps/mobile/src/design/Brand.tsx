@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   mark: {
     width: 48,
     height: 48,
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     borderWidth: 1,
     borderColor: color.border.default,
   },

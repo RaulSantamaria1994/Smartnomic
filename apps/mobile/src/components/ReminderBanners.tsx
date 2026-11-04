@@ -59,10 +59,10 @@ export function ReminderBanners({
 }
 
 const styles = StyleSheet.create({
-  banner: { borderRadius: radius.lg, padding: spacing.md, gap: spacing.xs },
-  warning: { backgroundColor: color.status.soon.bg },
-  danger: { backgroundColor: color.status.overdue.bg },
-  info: { backgroundColor: color.status.soon.bg },
+  banner: { borderRadius: radius.control, padding: spacing.md, gap: spacing.xs },
+  warning: { backgroundColor: color.notice.warning.bg },
+  danger: { backgroundColor: color.notice.danger.bg },
+  info: { backgroundColor: color.notice.warning.bg },
   title: { ...typography.bodyStrong, color: color.text.primary },
   text: { ...typography.caption, color: color.text.primary },
 });

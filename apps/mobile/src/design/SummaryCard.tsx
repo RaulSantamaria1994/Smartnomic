@@ -99,7 +99,7 @@ export function SummaryCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: color.bg.accent,
-    borderRadius: radius.xxl,
+    borderRadius: radius.control,
     padding: spacing.ml,
     gap: spacing.md,
   },
@@ -111,12 +111,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   fill: { height: 8, borderRadius: radius.pill, backgroundColor: color.progress.fill },
-  over: { backgroundColor: color.status.overdue.bg },
+  over: { backgroundColor: color.notice.danger.bg },
   totals: { flexDirection: 'row', gap: spacing.sm },
   total: {
     flex: 1,
     backgroundColor: color.overlay.onAccent,
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     padding: spacing.ms,
     gap: spacing.xxs,
   },

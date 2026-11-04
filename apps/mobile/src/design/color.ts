@@ -40,20 +40,15 @@ export function contrastRatio(a: string, b: string): number {
   return (light + 0.05) / (dark + 0.05);
 }
 
-/** Fondo suave sobre el que va el icono de una categoría (RF-205). */
-export function categoryBackground(hex: string): string {
-  return tint(hex, 0.16);
-}
-
 /** Tinta hacia la que se oscurecen los iconos claros (`color.text.primary`). */
-const ICON_DARKEN_TOWARD = '#15201E';
+const ICON_DARKEN_TOWARD = '#1F1F1F';
 
 /**
- * Color del icono de una categoría (especificación 004): el suyo, oscurecido hacia la
- * tinta lo justo para contrastar 3:1 con su fondo suave (WCAG 1.4.11).
+ * Color del icono de una categoría (especificaciones 004 y 006): el suyo, oscurecido
+ * hacia la tinta lo justo para contrastar 3:1 con el fondo sobre el que va (blanco si no
+ * se dice otro), según WCAG 1.4.11.
  */
-export function iconTone(hex: string): string {
-  const background = categoryBackground(hex);
+export function iconTone(hex: string, background = '#FFFFFF'): string {
   for (let step = 0; step <= 20; step++) {
     const toned = mix(hex, ICON_DARKEN_TOWARD, step / 20);
     if (contrastRatio(toned, background) >= 3) return toned;

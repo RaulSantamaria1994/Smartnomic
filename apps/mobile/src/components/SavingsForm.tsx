@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   form: { gap: spacing.md },
   preview: {
     backgroundColor: color.bg.accentSoft,
-    borderRadius: radius.md,
+    borderRadius: radius.control,
     padding: spacing.ms,
   },
 });
