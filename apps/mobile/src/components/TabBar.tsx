@@ -5,9 +5,7 @@ import { Icon, type IconName } from '../design/Icon';
 import { animate, DURATION, useReduceMotion } from '../design/motion';
 import { AppText } from '../design/Text';
 import { color, layout, spacing } from '../design/tokens';
-import { useCan } from '../hooks/data';
 import { es } from '../i18n/es';
-import { Fab } from './Fab';
 
 /** Altura de la barra sin el margen inferior del sistema. */
 export const TAB_BAR_HEIGHT = 64;
@@ -20,12 +18,10 @@ const TABS: Record<string, { icon: IconName; label: string }> = {
 };
 
 /**
- * Barra inferior de cuatro pestañas (Mes, Calendario, Pagos y Hogar) con el botón flotante
- * «+» encima, a la derecha (especificación 006, RF-605). El «+» no se muestra a quien solo
- * puede leer.
+ * Barra inferior de cuatro pestañas: Mes, Calendario, Pagos y Hogar (especificación 006,
+ * RF-605). El botón flotante «+» va aparte, en `FabLayer`.
  */
 export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
-  const canWrite = useCan()('transactions.write');
   const routes = state.routes.filter((route) => TABS[route.name]);
   const reduce = useReduceMotion();
   // El valor vive en la barra: la pestaña elegida se vuelve a pintar al activarse y perdería
@@ -79,11 +75,6 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
       <View style={styles.row} accessibilityRole="tablist">
         {routes.map(tab)}
       </View>
-      {canWrite && (
-        <View style={styles.fabLayer} pointerEvents="box-none">
-          <Fab />
-        </View>
-      )}
     </View>
   );
 }
@@ -152,15 +143,4 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
   },
   label: { maxWidth: '100%' },
-  // El botón flotante va justo encima de la barra, alineado con el contenido.
-  fabLayer: {
-    position: 'absolute',
-    bottom: '100%',
-    left: 0,
-    right: 0,
-    height: 88,
-    width: '100%',
-    maxWidth: layout.maxWidth,
-    alignSelf: 'center',
-  },
 });

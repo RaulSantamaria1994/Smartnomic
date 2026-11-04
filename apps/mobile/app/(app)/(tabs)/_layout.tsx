@@ -1,6 +1,7 @@
 import { Tabs, useIsFocused } from 'expo-router';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { FabLayer } from '../../../src/components/Fab';
 import { TabBar } from '../../../src/components/TabBar';
 import { color } from '../../../src/design/tokens';
 
@@ -16,16 +17,19 @@ function OnlyWhenFocused({ children }: { children: ReactNode }) {
 /** Pantallas principales con la barra inferior (especificación 003, historia 3). */
 export default function TabsLayout() {
   return (
-    <Tabs
-      tabBar={(props) => <TabBar {...props} />}
-      screenLayout={({ children }) => <OnlyWhenFocused>{children}</OnlyWhenFocused>}
-      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: color.bg.canvas } }}
-    >
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="calendar" />
-      <Tabs.Screen name="recurring" />
-      <Tabs.Screen name="account" />
-    </Tabs>
+    <View style={styles.scene}>
+      <Tabs
+        tabBar={(props) => <TabBar {...props} />}
+        screenLayout={({ children }) => <OnlyWhenFocused>{children}</OnlyWhenFocused>}
+        screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: color.bg.canvas } }}
+      >
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="calendar" />
+        <Tabs.Screen name="recurring" />
+        <Tabs.Screen name="account" />
+      </Tabs>
+      <FabLayer />
+    </View>
   );
 }
 
