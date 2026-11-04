@@ -15,17 +15,30 @@ interface Props extends Omit<TextInputProps, 'style'> {
   hint?: string;
   /** Texto fijo a la derecha dentro del campo (por ejemplo, «€»). */
   suffix?: string;
+  /** Sin etiqueta visible (en una fila que ya la dice); el lector de pantalla la sigue oyendo. */
+  hideLabel?: boolean;
   ref?: Ref<React.ComponentRef<typeof TextInput>>;
 }
 
 /** Campo de texto con borde fino y la etiqueta encima (especificación 006). */
-export function TextField({ label, hint, suffix, onFocus, onBlur, ref, ...input }: Props) {
+export function TextField({
+  label,
+  hint,
+  suffix,
+  hideLabel,
+  onFocus,
+  onBlur,
+  ref,
+  ...input
+}: Props) {
   const [focused, setFocused] = useState(false);
   return (
     <View style={styles.field}>
-      <AppText variant="small" tone="muted">
-        {label}
-      </AppText>
+      {!hideLabel && (
+        <AppText variant="small" tone="muted">
+          {label}
+        </AppText>
+      )}
       <View style={[styles.box, focused && styles.focused]}>
         <TextInput
           ref={ref}

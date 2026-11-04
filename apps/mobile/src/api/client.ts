@@ -1,4 +1,6 @@
 import {
+  budgetRecordSchema,
+  type BudgetInput,
   calendarResponseSchema,
   categoriesResponseSchema,
   categorySchema,
@@ -160,6 +162,18 @@ export const api = {
       method: 'PUT',
       body: input,
       schema: savingsGoalSchema,
+    }),
+  /** Presupuesto de una categoría desde el periodo en curso (especificación 007). */
+  saveBudget: (householdId: string, categoryId: string, input: BudgetInput) =>
+    request(`${household(householdId)}/budgets/${categoryId}`, {
+      method: 'PUT',
+      body: input,
+      schema: budgetRecordSchema,
+    }),
+  deleteBudget: (householdId: string, categoryId: string) =>
+    request(`${household(householdId)}/budgets/${categoryId}`, {
+      method: 'DELETE',
+      schema: z.null(),
     }),
   deleteSavingsGoal: (householdId: string, id: string) =>
     request(`${household(householdId)}/savings/${id}`, { method: 'DELETE', schema: z.null() }),

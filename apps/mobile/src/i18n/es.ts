@@ -309,7 +309,21 @@ export const es = {
     members: 'Miembros e invitaciones',
     settings: 'Ajustes del hogar',
     categories: 'Categorías',
+    budgets: 'Presupuestos',
     savings: 'Huchas',
+  },
+  /** Presupuestos por categoría (especificación 007). */
+  budgets: {
+    title: 'Presupuestos',
+    hint: 'El importe vale para este mes y los siguientes. Déjalo vacío para quitar el presupuesto.',
+    none: 'Sin presupuesto',
+    amountLabel: (category: string) => `Presupuesto de ${category}`,
+    save: 'Guardar',
+    saved: 'Presupuestos guardados.',
+    unchanged: 'No hay cambios que guardar.',
+    error: (category: string, message: string) => `${category}: ${message}`,
+    readOnly: 'Solo los editores y el propietario pueden cambiar los presupuestos.',
+    empty: 'No hay categorías de gasto en uso.',
   },
   /** Huchas para objetivos de ahorro (especificación 005). */
   savings: {

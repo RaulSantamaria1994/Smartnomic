@@ -38,12 +38,12 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Ponerle un límite a una categoría (P1) 🎯
 
-- [ ] B006 [US1] Tests en `apps/server/test/budgets.test.ts`: poner, cambiar (el mismo mes
+- [x] B006 [US1] Tests en `apps/server/test/budgets.test.ts`: poner, cambiar (el mismo mes
       deja el último), quitar; repetir no crea filas; lector 403; otro hogar 403/404; categoría
       de ingresos o archivada 409; importes no válidos 400; meses pasados conservan el suyo
-- [ ] B007 [US1] Rutas `PUT` y `DELETE /api/households/:id/budgets/:categoryId` en
+- [x] B007 [US1] Rutas `PUT` y `DELETE /api/households/:id/budgets/:categoryId` en
       `apps/server/src/routes/budgets.ts` (vale desde el periodo en curso del hogar)
-- [ ] B008 [US1] App: `api.saveBudget`/`deleteBudget`, pantalla `app/(app)/budgets.tsx`
+- [x] B008 [US1] App: `api.saveBudget`/`deleteBudget`, pantalla `app/(app)/budgets.tsx`
       (un campo por categoría y un «Guardar» que envía solo lo cambiado; lector sin campos),
       fila «Presupuestos» en «Hogar», icono y textos en `es.ts`
 
