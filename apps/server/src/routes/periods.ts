@@ -7,6 +7,7 @@ import type { Database } from '../db/client';
 import { transactions } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import { budgetsBetween } from './budgets';
 import { setAsideBetween } from './savings';
 import { toTransaction } from './transactions';
 
@@ -38,7 +39,7 @@ export function registerPeriodRoutes(
         between(transactions.date, period.start, period.end),
       );
 
-      const [rows, [totals]] = await Promise.all([
+      const [rows, [totals], budgets] = await Promise.all([
         db
           .select()
           .from(transactions)
@@ -52,6 +53,7 @@ export function registerPeriodRoutes(
           })
           .from(transactions)
           .where(inPeriod),
+        budgetsBetween(db, household.id, period.start, period.end),
       ]);
 
       const incomeCents = Number(totals?.income ?? 0);
@@ -65,7 +67,7 @@ export function registerPeriodRoutes(
           setAsideCents: await setAsideBetween(db, household.id, period.start, period.end),
         },
         transactions: rows.map(toTransaction),
-        budgets: [],
+        budgets,
       };
     },
   );

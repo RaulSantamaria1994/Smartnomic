@@ -17,6 +17,7 @@ import { toCategory } from './categories';
 import { toHousehold } from './households';
 import { toResolved, toRule } from './recurring';
 import { toTransaction } from './transactions';
+import { budgetHistory } from './budgets';
 
 /**
  * Exportar todos los datos del hogar en JSON (RF-038, constitución art. VI.6). Lo puede
@@ -118,7 +119,7 @@ export function registerExportRoutes(
           dueDate: e.dueDate,
           createdAt: e.createdAt.toISOString(),
         })),
-        budgets: [],
+        budgets: await budgetHistory(db, id),
       };
       const day = exportedAt.toISOString().slice(0, 10);
       return reply

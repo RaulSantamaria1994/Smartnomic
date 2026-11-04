@@ -324,6 +324,12 @@ export const es = {
     error: (category: string, message: string) => `${category}: ${message}`,
     readOnly: 'Solo los editores y el propietario pueden cambiar los presupuestos.',
     empty: 'No hay categorías de gasto en uso.',
+    spentOf: (spent: string, amount: string) => `${spent} de ${amount}`,
+    left: (amount: string) => `Te quedan ${amount}`,
+    over: (amount: string) => `Te has pasado ${amount}`,
+    edit: 'Editar presupuestos',
+    start: 'Ponerle un límite a una categoría',
+    startHint: 'Por ejemplo, lo que quieres gastar al mes en el supermercado.',
   },
   /** Huchas para objetivos de ahorro (especificación 005). */
   savings: {

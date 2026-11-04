@@ -1,7 +1,13 @@
-import { budgetRecordSchema, errorResponseSchema } from '@smartnomic/api';
+import {
+  budgetRecordSchema,
+  errorResponseSchema,
+  householdExportSchema,
+  periodResponseSchema,
+  recurringRuleSchema,
+} from '@smartnomic/api';
 import { and, eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { budgets, categories, households } from '../src/db/schema';
+import { budgets, categories, households, transactions } from '../src/db/schema';
 import { joinHousehold, me, newId, signUp, useTestServer, type TestUser } from './helpers';
 
 // Hoy es 2026-10-27 (TEST_NOW): el periodo en curso empieza el 1 de octubre.
@@ -168,5 +174,232 @@ describe('quién puede y qué categorías', () => {
       expect(response.statusCode, JSON.stringify(body)).toBe(400);
     }
     expect(await rowsOf(groceries)).toHaveLength(0);
+  });
+});
+
+async function addExpense(categoryId: string, amountCents: number, date: string, id = newId()) {
+  const response = await ctx.app.inject({
+    method: 'PUT',
+    url: `/api/households/${householdId}/transactions/${id}`,
+    headers: { cookie: owner.cookie },
+    payload: { kind: 'expense', amountCents, date, categoryId },
+  });
+  expect(response.statusCode).toBe(200);
+  return id;
+}
+
+async function periodBudgets(start: string, user = owner) {
+  const response = await ctx.app.inject({
+    method: 'GET',
+    url: `/api/households/${householdId}/periods/${start}`,
+    headers: { cookie: user.cookie },
+  });
+  expect(response.statusCode).toBe(200);
+  return periodResponseSchema.parse(response.json()).budgets;
+}
+
+const sorted = <T extends { categoryId: string }>(list: T[]) =>
+  [...list].sort((a, b) => a.categoryId.localeCompare(b.categoryId));
+
+describe('presupuestos en el periodo (especificación 007, historia 2)', () => {
+  it('cada presupuesto lleva lo gastado en su categoría en el periodo', async () => {
+    const leisure = await categoryOf(householdId, 'Ocio');
+    await putBudget(owner, groceries, { amountCents: 40000 });
+    await putBudget(owner, leisure, { amountCents: 10000 });
+    await addExpense(groceries, 12050, '2026-10-02');
+    await addExpense(groceries, 20000, '2026-10-31');
+    await addExpense(groceries, 9999, '2026-11-01'); // otro periodo
+    await addExpense(groceries, 5000, '2026-09-30'); // otro periodo
+    expect(sorted(await periodBudgets('2026-10-01'))).toEqual(
+      sorted([
+        { categoryId: groceries, amountCents: 40000, spentCents: 32050 },
+        { categoryId: leisure, amountCents: 10000, spentCents: 0 },
+      ]),
+    );
+  });
+
+  it('sin presupuestos la lista está vacía y las categorías sin presupuesto no salen', async () => {
+    await addExpense(groceries, 500, '2026-10-02');
+    expect(await periodBudgets('2026-10-01')).toEqual([]);
+  });
+
+  it('cuenta los gastos editados (importe, fecha y categoría) y no los borrados', async () => {
+    const leisure = await categoryOf(householdId, 'Ocio');
+    await putBudget(owner, groceries, { amountCents: 40000 });
+    const moved = await addExpense(groceries, 1000, '2026-10-02');
+    await addExpense(leisure, 2500, '2026-10-02', moved); // cambia categoría e importe
+    const late = await addExpense(groceries, 3000, '2026-10-02');
+    await addExpense(groceries, 3000, '2026-11-02', late); // pasa al mes siguiente
+    const gone = await addExpense(groceries, 7000, '2026-10-03');
+    const removed = await ctx.app.inject({
+      method: 'DELETE',
+      url: `/api/households/${householdId}/transactions/${gone}`,
+      headers: { cookie: owner.cookie },
+    });
+    expect(removed.statusCode).toBe(204);
+    await addExpense(groceries, 400, '2026-10-04');
+    expect(await periodBudgets('2026-10-01')).toEqual([
+      { categoryId: groceries, amountCents: 40000, spentCents: 400 },
+    ]);
+  });
+
+  it('los pagos recurrentes pagados cuentan; los ingresos y lo apartado en huchas, no', async () => {
+    const utilities = await categoryOf(householdId, 'Suministros');
+    await putBudget(owner, utilities, { amountCents: 10000 });
+    const rule = recurringRuleSchema.parse(
+      (
+        await ctx.app.inject({
+          method: 'PUT',
+          url: `/api/households/${householdId}/recurring/${newId()}`,
+          headers: { cookie: owner.cookie },
+          payload: {
+            kind: 'expense',
+            name: 'Luz',
+            amountCents: 6000,
+            categoryId: utilities,
+            frequency: 'monthly',
+            interval: 1,
+            dayOfMonth: 15,
+            startDate: '2026-10-01',
+          },
+        })
+      ).json(),
+    );
+    const paid = await ctx.app.inject({
+      method: 'POST',
+      url: `/api/households/${householdId}/recurring/${rule.id}/occurrences/2026-10-15/pay`,
+      headers: { cookie: owner.cookie },
+      payload: { transactionId: newId(), amountCents: 6712, date: '2026-10-16' },
+    });
+    expect(paid.statusCode).toBe(200);
+    const goal = newId();
+    await ctx.app.inject({
+      method: 'PUT',
+      url: `/api/households/${householdId}/savings/${goal}`,
+      headers: { cookie: owner.cookie },
+      payload: {
+        name: 'Bici',
+        icon: 'sport',
+        targetCents: 30000,
+        deadline: '2027-07-31',
+        contributionDay: 1,
+      },
+    });
+    await ctx.app.inject({
+      method: 'PUT',
+      url: `/api/households/${householdId}/savings/${goal}/entries/${newId()}`,
+      headers: { cookie: owner.cookie },
+      payload: { kind: 'deposit', amountCents: 5000, date: '2026-10-20' },
+    });
+    expect(await periodBudgets('2026-10-01')).toEqual([
+      { categoryId: utilities, amountCents: 10000, spentCents: 6712 },
+    ]);
+  });
+
+  it('un mes pasado muestra el presupuesto de entonces; uno quitado ya no sale', async () => {
+    await ctx.db.insert(budgets).values([
+      { householdId, categoryId: groceries, validFrom: '2026-08-01', amountCents: 30000 },
+      { householdId, categoryId: groceries, validFrom: '2026-09-01', amountCents: 35000 },
+    ]);
+    await addExpense(groceries, 1000, '2026-08-10');
+    await deleteBudget(owner, groceries); // sin presupuesto desde octubre
+    expect(await periodBudgets('2026-08-01')).toEqual([
+      { categoryId: groceries, amountCents: 30000, spentCents: 1000 },
+    ]);
+    expect(await periodBudgets('2026-09-01')).toEqual([
+      { categoryId: groceries, amountCents: 35000, spentCents: 0 },
+    ]);
+    expect(await periodBudgets('2026-10-01')).toEqual([]);
+    expect(await periodBudgets('2027-03-01')).toEqual([]);
+    expect(await periodBudgets('2026-07-01')).toEqual([]);
+  });
+
+  it('el presupuesto sigue valiendo en los meses siguientes', async () => {
+    await putBudget(owner, groceries, { amountCents: 40000 });
+    await addExpense(groceries, 2000, '2027-02-10');
+    expect(await periodBudgets('2027-02-01')).toEqual([
+      { categoryId: groceries, amountCents: 40000, spentCents: 2000 },
+    ]);
+  });
+
+  it('con el mes empezando el 25, suma del 25 al 24', async () => {
+    await ctx.db
+      .update(households)
+      .set({ monthStartDay: 25 })
+      .where(eq(households.id, householdId));
+    await putBudget(owner, groceries, { amountCents: 40000 }); // vale desde el 25 de octubre
+    await addExpense(groceries, 1000, '2026-10-24'); // periodo anterior
+    await addExpense(groceries, 2000, '2026-10-25');
+    await addExpense(groceries, 3000, '2026-11-24');
+    await addExpense(groceries, 4000, '2026-11-25'); // periodo siguiente
+    expect(await periodBudgets('2026-10-25')).toEqual([
+      { categoryId: groceries, amountCents: 40000, spentCents: 5000 },
+    ]);
+  });
+
+  it('las categorías archivadas no salen; al restaurarlas vuelven con su presupuesto', async () => {
+    await putBudget(owner, groceries, { amountCents: 40000 });
+    await ctx.db
+      .update(categories)
+      .set({ archivedAt: new Date() })
+      .where(eq(categories.id, groceries));
+    expect(await periodBudgets('2026-10-01')).toEqual([]);
+    await ctx.db.update(categories).set({ archivedAt: null }).where(eq(categories.id, groceries));
+    expect(await periodBudgets('2026-10-01')).toHaveLength(1);
+  });
+
+  it('un lector los ve; otro hogar no ve los de este', async () => {
+    await putBudget(owner, groceries, { amountCents: 40000 });
+    const viewer = await signUp(ctx.app);
+    await joinHousehold(ctx.db, owner, viewer, 'viewer');
+    expect(await periodBudgets('2026-10-01', viewer)).toHaveLength(1);
+    const stranger = await signUp(ctx.app);
+    const strangerHousehold = (await me(ctx.app, stranger)).household.id;
+    const theirs = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/households/${strangerHousehold}/periods/2026-10-01`,
+      headers: { cookie: stranger.cookie },
+    });
+    expect(periodResponseSchema.parse(theirs.json()).budgets).toEqual([]);
+  });
+
+  it('CE-702: con cientos de gastos, lo gastado coincide al céntimo con la suma de sus movimientos', async () => {
+    const names = ['Supermercado', 'Ocio', 'Transporte', 'Vivienda', 'Ropa'];
+    const ids = await Promise.all(names.map((n) => categoryOf(householdId, n)));
+    for (const id of ids) await putBudget(owner, id, { amountCents: 50000 });
+    const rows = Array.from({ length: 300 }, (_, n) => ({
+      id: newId(),
+      householdId,
+      kind: 'expense' as const,
+      categoryId: ids[n % ids.length]!,
+      amountCents: 1 + ((n * 7919) % 25000),
+      date: `2026-${n % 3 === 0 ? '09' : '10'}-${String(1 + (n % 28)).padStart(2, '0')}`,
+    }));
+    await ctx.db.insert(transactions).values(rows);
+    const budgetsNow = await periodBudgets('2026-10-01');
+    for (const id of ids) {
+      const expected = rows
+        .filter((r) => r.categoryId === id && r.date.startsWith('2026-10'))
+        .reduce((sum, r) => sum + r.amountCents, 0);
+      expect(budgetsNow.find((b) => b.categoryId === id)?.spentCents, id).toBe(expected);
+    }
+  });
+});
+
+describe('presupuestos en la exportación (RF-708)', () => {
+  it('lleva cada cambio con su importe y desde cuándo vale', async () => {
+    await ctx.db
+      .insert(budgets)
+      .values({ householdId, categoryId: groceries, validFrom: '2026-09-01', amountCents: 30000 });
+    await deleteBudget(owner, groceries);
+    const response = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/households/${householdId}/export`,
+      headers: { cookie: owner.cookie },
+    });
+    expect(householdExportSchema.parse(response.json()).budgets).toEqual([
+      { categoryId: groceries, validFrom: '2026-09-01', amountCents: 30000 },
+      { categoryId: groceries, validFrom: '2026-10-01', amountCents: null },
+    ]);
   });
 });

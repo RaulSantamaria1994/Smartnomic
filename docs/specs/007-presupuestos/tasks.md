@@ -53,14 +53,14 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Ver cómo va cada presupuesto en el mes (P2)
 
-- [ ] B009 [US2] Tests del servidor: `budgets` en el periodo con lo gastado por categoría
+- [x] B009 [US2] Tests del servidor: `budgets` en el periodo con lo gastado por categoría
       (gastos apuntados, editados de importe, fecha o categoría, borrados, de pagos
       recurrentes; sin ingresos ni huchas), día de inicio de mes 25, mes pasado con su
       presupuesto de entonces, archivadas fuera; comparación con la suma de los movimientos
       (CE-702)
-- [ ] B010 [US2] `budgets` en la ruta del periodo (una consulta SQL con el presupuesto vigente
+- [x] B010 [US2] `budgets` en la ruta del periodo (una consulta SQL con el presupuesto vigente
       y lo gastado) y en la exportación (RF-708)
-- [ ] B011 [US2] App: `BudgetRow`, `ProgressBar` con tonos «cerca» y «pasado», sección
+- [x] B011 [US2] App: `BudgetRow`, `ProgressBar` con tonos «cerca» y «pasado», sección
       «Presupuestos» en «Mes» con «Editar presupuestos» y la fila para empezar; se refresca
       al apuntar, editar o borrar
 

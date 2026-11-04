@@ -24,6 +24,8 @@ export const palette = {
   amber: '#C2410C',
   amberDeep: '#9A4A0A',
   amberSoft: '#FDF1E3',
+  /** Barra «cerca del límite»: decorativa, el texto de al lado dice el estado. */
+  amberBar: '#E39B17',
   red: '#B3261E',
   redDeep: '#A8231B',
   redSoft: '#FDECEA',
@@ -77,7 +79,12 @@ export const color = {
   },
   /** Puntos del calendario y avisos. */
   mark: { overdue: palette.red, pending: palette.amber, resolved: palette.stone },
-  progress: { track: palette.greenTrack, fill: palette.green900, over: palette.red },
+  progress: {
+    track: palette.greenTrack,
+    fill: palette.green900,
+    near: palette.amberBar,
+    over: palette.red,
+  },
   /** Fondo del aviso de deshacer, que flota sobre todo. */
   snackbar: palette.ink,
   /** Interruptor activado: pista y mando. */
