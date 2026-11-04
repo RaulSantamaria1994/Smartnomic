@@ -1,12 +1,12 @@
 import type { RecurringInput } from '@smartnomic/api';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { api } from '../../../src/api/client';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { RuleForm } from '../../../src/components/RuleForm';
-import { Screen } from '../../../src/components/Screen';
+import { goBack, Screen } from '../../../src/components/Screen';
 import { todayIn, useCategories, useMe, useRecurring } from '../../../src/hooks/data';
 import { useRefreshRecurring } from '../../../src/hooks/useRuleMutations';
 import { es } from '../../../src/i18n/es';
@@ -32,9 +32,9 @@ export default function EditRule() {
   const rule = rules.data.rules.find((r) => r.id === id);
   if (!rule) {
     return (
-      <Screen title={es.recurring.editTitle}>
+      <Screen title={es.recurring.editTitle} back>
         <Message text={es.recurring.notFound} />
-        <Button label={es.transaction.cancel} onPress={() => router.back()} />
+        <Button label={es.transaction.cancel} onPress={() => goBack()} />
       </Screen>
     );
   }
@@ -42,7 +42,7 @@ export default function EditRule() {
   async function save(input: RecurringInput) {
     await api.saveRule(household!.id, id, input);
     await refresh();
-    router.back();
+    goBack();
   }
 
   // Borrar pide una segunda pulsación (los movimientos ya apuntados se conservan).
@@ -53,7 +53,7 @@ export default function EditRule() {
     try {
       await api.deleteRule(household!.id, id);
       await refresh();
-      router.back();
+      goBack();
     } catch (e) {
       setError(e instanceof Error ? e.message : es.auth.errors.unknown);
     } finally {
@@ -62,7 +62,7 @@ export default function EditRule() {
   }
 
   return (
-    <Screen title={es.recurring.editTitle}>
+    <Screen title={es.recurring.editTitle} back>
       <RuleForm
         initial={rule}
         categories={categories.data.categories}
@@ -78,7 +78,6 @@ export default function EditRule() {
               onPress={remove}
               loading={deleting}
             />
-            <Button variant="link" label={es.transaction.cancel} onPress={() => router.back()} />
           </>
         }
       />

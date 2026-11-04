@@ -3,7 +3,6 @@ export * from './Amount';
 export * from './AppBar';
 export * from './Brand';
 export * from './CategoryIcon';
-export * from './Card';
 export * from './color';
 export * from './EmptyState';
 export * from './fonts';

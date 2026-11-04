@@ -6,7 +6,6 @@ import {
   type TransactionKind,
 } from '@smartnomic/domain';
 import { useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { api, queryKeys } from '../../../src/api/client';
@@ -20,7 +19,7 @@ import { useCan, useCategories, useMe } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { colors, spacing } from '../../../src/theme';
 import { CategoryIcon } from '../../../src/design/CategoryIcon';
-import { categoryPalette, typography } from '../../../src/design/tokens';
+import { categoryPalette, color as tokens, typography } from '../../../src/design/tokens';
 
 /** Colores para elegir: con contraste suficiente sobre blanco (constitución, art. VIII). */
 const PALETTE = categoryPalette;
@@ -172,7 +171,7 @@ export default function Categories() {
     );
 
   return (
-    <Screen title={es.categories.title}>
+    <Screen title={es.categories.title} back>
       {!canWrite && <Text style={styles.muted}>{es.categories.readOnly}</Text>}
       {feedback && <Message text={feedback.text} kind={feedback.kind} />}
 
@@ -258,30 +257,22 @@ export default function Categories() {
           <View style={styles.card}>{archived.map(row)}</View>
         </View>
       )}
-
-      <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   section: { gap: spacing.sm },
-  sectionTitle: { ...typography.heading, color: colors.text },
-  label: { ...typography.body, color: colors.text },
-  muted: { ...typography.body, color: colors.muted },
-  card: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  // Subtítulo pequeño en verde y listas con separadores, sin tarjetas (especificación 006).
+  sectionTitle: { ...typography.label, color: tokens.text.accent, paddingTop: spacing.sm },
+  label: { ...typography.small, color: colors.muted },
+  muted: { ...typography.caption, color: colors.muted },
+  card: { gap: spacing.sm + 4 },
   row: {
     gap: spacing.xs,
     paddingBottom: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderBottomWidth: 1,
+    borderColor: tokens.border.default,
   },
   rowMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44 },
   swatch: { width: 12, height: 12, borderRadius: 6 },
@@ -289,5 +280,5 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   colorDot: { width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: 'transparent' },
-  colorSelected: { borderColor: colors.text },
+  colorSelected: { borderColor: tokens.border.focus },
 });

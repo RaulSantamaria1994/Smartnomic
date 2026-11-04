@@ -1,5 +1,4 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { api } from '../../../src/api/client';
@@ -53,7 +52,7 @@ export default function HouseholdSettings() {
   }
 
   return (
-    <Screen title={es.householdSettings.title}>
+    <Screen title={es.householdSettings.title} back>
       {!canEdit && <Text style={styles.muted}>{es.householdSettings.onlyOwner}</Text>}
       <TextField
         label={es.householdSettings.name}
@@ -74,7 +73,6 @@ export default function HouseholdSettings() {
       <Text style={styles.muted}>{es.householdSettings.monthStartHint}</Text>
       {message && <Message text={message.text} kind={message.kind} />}
       {canEdit && <Button label={es.householdSettings.save} onPress={save} loading={saving} />}
-      <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
     </Screen>
   );
 }

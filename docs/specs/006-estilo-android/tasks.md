@@ -56,13 +56,13 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 1 — Pantallas
 
-- [ ] A011 [US1] Pestañas: «Mes» (sin saludo ni iniciales), «Calendario», «Pagos», «Hogar»
+- [x] A011 [US1] Pestañas: «Mes» (sin saludo ni iniciales), «Calendario», «Pagos», «Hogar»
       como en Figma
-- [ ] A012 [US1] Sin sesión: Entrar, Registro, Recuperar, Restablecer, Invitación
-- [ ] A013 [US1] Formularios y detalles: Apuntar, movimiento, pago recurrente (nuevo y
+- [x] A012 [US1] Sin sesión: Entrar, Registro, Recuperar, Restablecer, Invitación
+- [x] A013 [US1] Formularios y detalles: Apuntar, movimiento, pago recurrente (nuevo y
       detalle), vencimiento, Categorías, Miembros, Ajustes
-- [ ] A014 [US1] Huchas: lista, nueva, detalle, editar, apartar el mes
-- [ ] A015 [US1] Test `src/noAiTells.test.ts` (CE-603): sin Plus Jakarta, sin
+- [x] A014 [US1] Huchas: lista, nueva, detalle, editar, apartar el mes
+- [x] A015 [US1] Test `src/noAiTells.test.ts` (CE-603): sin Plus Jakarta, sin
       `StatusPill`, `Card` ni `categoryBackground`, sin «Volver»/«Cancelar» de navegación
       al pie de las pantallas
 

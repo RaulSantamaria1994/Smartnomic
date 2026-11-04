@@ -141,10 +141,13 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
         value={amount}
         onChangeText={setAmount}
         keyboardType="decimal-pad"
+        suffix="€"
         placeholder="0,00"
       />
 
-      <AppText variant="label">{es.transaction.category}</AppText>
+      <AppText variant="small" tone="muted">
+        {es.transaction.category}
+      </AppText>
       <CategoryPicker
         accessibilityLabel={es.transaction.category}
         categories={options}
@@ -152,7 +155,9 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
         onChange={setCategoryId}
       />
 
-      <AppText variant="label">{es.recurring.frequency}</AppText>
+      <AppText variant="small" tone="muted">
+        {es.recurring.frequency}
+      </AppText>
       <View style={styles.wrap} accessibilityRole="radiogroup">
         {(['monthly', 'weekly', 'yearly'] as const).map((f) => (
           <Chip
@@ -172,7 +177,9 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
 
       {frequency === 'weekly' ? (
         <>
-          <AppText variant="label">{es.recurring.weekday}</AppText>
+          <AppText variant="small" tone="muted">
+            {es.recurring.weekday}
+          </AppText>
           <View style={styles.wrap} accessibilityRole="radiogroup">
             {WEEKDAY_ORDER.map((d) => (
               <Chip
@@ -195,7 +202,9 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
       )}
       {frequency === 'yearly' && (
         <>
-          <AppText variant="label">{es.recurring.month}</AppText>
+          <AppText variant="small" tone="muted">
+            {es.recurring.month}
+          </AppText>
           <View style={styles.wrap} accessibilityRole="radiogroup">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <Chip
@@ -222,7 +231,9 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
         keyboardType="numbers-and-punctuation"
       />
 
-      <AppText variant="label">{es.recurring.remind}</AppText>
+      <AppText variant="small" tone="muted">
+        {es.recurring.remind}
+      </AppText>
       <View style={styles.wrap} accessibilityRole="radiogroup">
         {REMIND_DAYS_OPTIONS.map((d) => (
           <Chip
@@ -236,7 +247,7 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
 
       {initial && (
         <View style={styles.switchRow}>
-          <AppText variant="label">{es.recurring.active}</AppText>
+          <AppText variant="body">{es.recurring.active}</AppText>
           <Switch
             value={active}
             {...switchColors(active)}

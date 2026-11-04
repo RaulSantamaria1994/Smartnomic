@@ -501,7 +501,6 @@ export const es = {
   },
   home: {
     transactions: 'Movimientos',
-    greeting: (name: string) => `Hola, ${name}`,
     household: 'Tu hogar',
     roles: { owner: 'Propietario', editor: 'Editor', viewer: 'Lector' },
     comingSoon: 'Pronto podrás apuntar aquí tus ingresos y gastos.',

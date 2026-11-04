@@ -26,7 +26,7 @@ export function Section({
           {title}
         </AppText>
       )}
-      <View style={padded && styles.padded}>{children}</View>
+      <View style={[padded && styles.padded, padded && !title && styles.top]}>{children}</View>
     </View>
   );
 }
@@ -40,4 +40,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   padded: { paddingHorizontal: spacing.md, paddingBottom: spacing.md, gap: spacing.ms },
+  top: { paddingTop: spacing.md },
 });

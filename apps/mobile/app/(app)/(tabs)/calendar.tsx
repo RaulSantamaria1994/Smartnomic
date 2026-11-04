@@ -8,26 +8,20 @@ import type {
 import { monthOf, monthRange, shiftMonth, type DateString } from '@smartnomic/domain';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '../../../src/api/http';
 import { Button } from '../../../src/components/Button';
+import { Screen } from '../../../src/components/Screen';
 import { Message } from '../../../src/components/Message';
 import { MonthGrid } from '../../../src/components/MonthGrid';
 import {
   Amount,
+  AppText,
   CategoryIcon,
   EmptyState,
-  Icon,
   ListRow,
+  Section,
   StatusText,
   type StatusKind,
 } from '../../../src/design';
@@ -43,8 +37,7 @@ import {
   useRecurring,
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
-import { colors, spacing } from '../../../src/theme';
-import { color, radius, typography } from '../../../src/design/tokens';
+import { color, spacing } from '../../../src/design/tokens';
 
 /** Calendario de pagos programados (especificación 002, historias 1 y 2). */
 export default function Calendar() {
@@ -91,110 +84,112 @@ export default function Calendar() {
   const hasAny = shown ? shown.items.length + shown.savings.length > 0 : false;
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={calendar.isRefetching}
-            onRefresh={() => {
-              void calendar.refetch();
-              void rules.refetch();
-            }}
-          />
-        }
-      >
-        <View style={styles.topBar}>
-          {visible !== current && current && (
-            <Button variant="link" label={es.calendar.today} onPress={() => go(current)} />
-          )}
+    <Screen
+      title={formatMonthTitle(visible)}
+      prev={{
+        label: es.calendar.previous,
+        disabled: !bounds || visible <= bounds.min,
+        onPress: () => go(shiftMonth(visible, -1)),
+      }}
+      next={{
+        label: es.calendar.next,
+        disabled: !bounds || visible >= bounds.max,
+        onPress: () => go(shiftMonth(visible, 1)),
+      }}
+      bleed
+      fab={can('transactions.write')}
+      refreshControl={
+        <RefreshControl
+          refreshing={calendar.isRefetching}
+          onRefresh={() => {
+            void calendar.refetch();
+            void rules.refetch();
+          }}
+        />
+      }
+    >
+      {visible !== current && current && (
+        <View style={styles.today}>
+          <Button variant="link" label={es.calendar.today} onPress={() => go(current)} />
         </View>
-        <View style={styles.header}>
-          <Arrow
-            label={es.calendar.previous}
-            symbol="‹"
-            disabled={!bounds || visible <= bounds.min}
-            onPress={() => go(shiftMonth(visible, -1))}
-          />
-          <Text style={styles.title} accessibilityRole="header">
-            {formatMonthTitle(visible)}
-          </Text>
-          <Arrow
-            label={es.calendar.next}
-            symbol="›"
-            disabled={!bounds || visible >= bounds.max}
-            onPress={() => go(shiftMonth(visible, 1))}
-          />
+      )}
+
+      {(offline || (calendar.error && !shown)) && (
+        <View style={styles.notices}>
+          {offline && <Message text={es.month.offline} />}
+          {calendar.error && !offline && !shown && <Message text={calendar.error.message} />}
         </View>
+      )}
 
-        {offline && <Message text={es.month.offline} />}
-        {calendar.error && !offline && !shown && <Message text={calendar.error.message} />}
-
+      <Section separated padded>
         <View style={styles.totals}>
           <Total label={es.calendar.expenses} cents={shown?.totals.expenseCents} />
           <Total label={es.calendar.income} cents={shown?.totals.incomeCents} />
           <Total
             label={es.calendar.pending}
             cents={shown?.totals.pendingExpenseCents}
-            color={shown && shown.totals.pendingExpenseCents > 0 ? colors.error : colors.text}
+            danger={Boolean(shown && shown.totals.pendingExpenseCents > 0)}
           />
         </View>
+      </Section>
 
+      <Section separated>
         {shown ? (
-          <MonthGrid
-            month={visible}
-            items={[...shown.items, ...shown.savings]}
-            today={shown.today}
-            selected={day}
-            onSelect={setSelected}
-          />
+          <View style={styles.grid}>
+            <MonthGrid
+              month={visible}
+              items={[...shown.items, ...shown.savings]}
+              today={shown.today}
+              selected={day}
+              onSelect={setSelected}
+            />
+          </View>
         ) : (
           <ActivityIndicator accessibilityLabel={es.common.loading} />
         )}
+      </Section>
 
-        {shown && !hasAny && (
-          <EmptyState icon="calendar" title={es.calendar.empty} hint={es.calendar.emptyHint} />
-        )}
+      {shown && !hasAny && (
+        <EmptyState icon="calendar" title={es.calendar.empty} hint={es.calendar.emptyHint} />
+      )}
 
-        {shown && day && hasAny && (
-          <View style={styles.list}>
-            <Text style={styles.listTitle} accessibilityRole="header">
-              {capitalize(formatDay(day))}
-            </Text>
-            {dayItems.length + daySavings.length === 0 && (
-              <Text style={[styles.muted, styles.listNote]}>{es.calendar.noneThatDay}</Text>
-            )}
-            {dayItems.map((item) => (
-              <ItemRow
-                key={`${item.ruleId}-${item.dueDate}`}
-                item={item}
-                rule={ruleById.get(item.ruleId)}
-                categories={categoryById}
-                resolvedBy={item.resolvedBy ? memberName.get(item.resolvedBy) : undefined}
-                onPress={
-                  canResolve && (item.status === 'pending' || item.status === 'overdue')
-                    ? () => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)
-                    : undefined
-                }
-              />
-            ))}
-            {daySavings.map((item) => (
-              <SavingsRow
-                key={`${item.goalId}-${item.dueDate}`}
-                item={item}
-                name={goalById.get(item.goalId)?.name ?? '—'}
-                icon={goalById.get(item.goalId)?.icon}
-                onPress={
-                  canSave && (item.status === 'pending' || item.status === 'overdue')
-                    ? () => router.push(`/savings/${item.goalId}/due/${item.dueDate}`)
-                    : undefined
-                }
-              />
-            ))}
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+      {shown && day && hasAny && (
+        <Section title={capitalize(formatDay(day))}>
+          {dayItems.length + daySavings.length === 0 && (
+            <AppText variant="caption" tone="muted" style={styles.none}>
+              {es.calendar.noneThatDay}
+            </AppText>
+          )}
+          {dayItems.map((item) => (
+            <ItemRow
+              key={`${item.ruleId}-${item.dueDate}`}
+              item={item}
+              rule={ruleById.get(item.ruleId)}
+              categories={categoryById}
+              resolvedBy={item.resolvedBy ? memberName.get(item.resolvedBy) : undefined}
+              onPress={
+                canResolve && (item.status === 'pending' || item.status === 'overdue')
+                  ? () => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)
+                  : undefined
+              }
+            />
+          ))}
+          {daySavings.map((item) => (
+            <SavingsRow
+              key={`${item.goalId}-${item.dueDate}`}
+              item={item}
+              name={goalById.get(item.goalId)?.name ?? '—'}
+              icon={goalById.get(item.goalId)?.icon}
+              onPress={
+                canSave && (item.status === 'pending' || item.status === 'overdue')
+                  ? () => router.push(`/savings/${item.goalId}/due/${item.dueDate}`)
+                  : undefined
+              }
+            />
+          ))}
+        </Section>
+      )}
+    </Screen>
   );
 }
 
@@ -209,46 +204,23 @@ function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function Arrow({
-  label,
-  symbol,
-  disabled,
-  onPress,
-}: {
-  label: string;
-  symbol: string;
-  disabled: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled }}
-      style={({ pressed }) => [styles.arrow, (pressed || disabled) && { opacity: 0.3 }]}
-    >
-      <Icon name={symbol === '‹' ? 'back' : 'forward'} tint={color.text.link} />
-    </Pressable>
-  );
-}
-
 function Total({
   label,
   cents,
-  color = colors.text,
+  danger,
 }: {
   label: string;
   cents: number | undefined;
-  color?: string;
+  danger?: boolean;
 }) {
   return (
     <View style={styles.total}>
-      <Text style={styles.muted}>{label}</Text>
-      <Text style={[styles.totalValue, { color }]}>
+      <AppText variant="body" tone="muted">
+        {label}
+      </AppText>
+      <AppText variant="bodyStrong" tabular tone={danger ? 'danger' : 'primary'}>
         {cents === undefined ? '—' : formatMoney(cents)}
-      </Text>
+      </AppText>
     </View>
   );
 }
@@ -325,7 +297,7 @@ function SavingsRow({
     <ListRow
       title={title}
       detail={<StatusText kind={SAVINGS_PILL[item.status]} label={status} />}
-      leading={<CategoryIcon icon={icon} tone={color.text.accent} />}
+      leading={<CategoryIcon icon={icon} tone={color.text.muted} />}
       trailing={
         <Amount
           cents={item.amountCents}
@@ -342,53 +314,11 @@ function SavingsRow({
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, justifyContent: 'center', backgroundColor: colors.background },
-  content: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
-    width: '100%',
-    maxWidth: 640,
-    alignSelf: 'center',
-  },
-  topBar: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  arrow: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: color.border.default,
-    backgroundColor: color.bg.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: { ...typography.title, color: colors.text },
-  totals: { flexDirection: 'row', gap: spacing.sm },
-  total: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.sm,
-    gap: spacing.xs,
-  },
-  totalValue: { ...typography.bodyStrong },
-  muted: { ...typography.caption, color: colors.muted },
-  list: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingTop: spacing.sm,
-  },
-  listTitle: {
-    ...typography.heading,
-    color: colors.text,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xs,
-  },
-  listNote: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
+  center: { flex: 1, justifyContent: 'center', backgroundColor: color.bg.canvas },
+  today: { alignItems: 'flex-end', paddingHorizontal: spacing.sm },
+  notices: { padding: spacing.md, paddingBottom: 0, gap: spacing.ms },
+  totals: { gap: spacing.xs },
+  total: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md },
+  grid: { paddingHorizontal: spacing.sm, paddingBottom: spacing.sm },
+  none: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
 });

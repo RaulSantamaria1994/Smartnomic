@@ -116,6 +116,7 @@ export function SavingsForm({ initial, today, onSubmit }: Props) {
         value={amount}
         onChangeText={setAmount}
         keyboardType="decimal-pad"
+        suffix="€"
         placeholder="0,00"
       />
       <TextField
@@ -139,7 +140,9 @@ export function SavingsForm({ initial, today, onSubmit }: Props) {
           </AppText>
         </View>
       )}
-      <AppText variant="label">{es.savings.icon}</AppText>
+      <AppText variant="small" tone="muted">
+        {es.savings.icon}
+      </AppText>
       <IconPicker
         value={icon}
         onChange={setIcon}

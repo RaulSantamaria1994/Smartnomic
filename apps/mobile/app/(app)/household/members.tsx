@@ -15,7 +15,7 @@ import { es } from '../../../src/i18n/es';
 import { invitationLink } from '../../../src/invite-link';
 import { shareText } from '../../../src/share';
 import { colors, spacing } from '../../../src/theme';
-import { typography } from '../../../src/design/tokens';
+import { color, typography } from '../../../src/design/tokens';
 
 type Invitable = 'editor' | 'viewer';
 type Feedback = { text: string; kind: 'error' | 'success' } | null;
@@ -88,7 +88,7 @@ export default function Members() {
   const pending = invitations.data?.invitations ?? [];
 
   return (
-    <Screen title={es.household.title}>
+    <Screen title={es.household.title} back>
       <View style={styles.card}>
         {list.map((m) => (
           <MemberRow
@@ -224,7 +224,6 @@ export default function Members() {
         label={es.householdMenu.categories}
         onPress={() => router.push('/household/categories')}
       />
-      <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
     </Screen>
   );
 }
@@ -289,20 +288,16 @@ function MemberRow({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  // Listas con separadores y subtítulos en verde, sin tarjetas (especificación 006).
+  card: { borderTopWidth: 1, borderColor: color.border.default },
   row: {
-    padding: spacing.md,
+    paddingVertical: spacing.sm + 4,
     gap: spacing.xs,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderBottomWidth: 1,
+    borderColor: color.border.default,
   },
   section: { gap: spacing.sm },
-  sectionTitle: { ...typography.heading, color: colors.text },
+  sectionTitle: { ...typography.label, color: color.text.accent, paddingTop: spacing.sm },
   label: { ...typography.body, color: colors.text },
   code: { ...typography.label, letterSpacing: 1 },
   muted: { ...typography.caption, color: colors.muted },
@@ -310,10 +305,8 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md },
   invitation: {
     gap: spacing.xs,
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingVertical: spacing.sm + 4,
+    borderBottomWidth: 1,
+    borderColor: color.border.default,
   },
 });

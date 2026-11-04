@@ -1,5 +1,5 @@
 import { addDays, parseAmount } from '@smartnomic/domain';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { api } from '../../../../src/api/client';
@@ -7,7 +7,7 @@ import { ApiError } from '../../../../src/api/http';
 import { Button } from '../../../../src/components/Button';
 import { Chip } from '../../../../src/components/Chip';
 import { Message } from '../../../../src/components/Message';
-import { Screen } from '../../../../src/components/Screen';
+import { goBack, Screen } from '../../../../src/components/Screen';
 import { TextField } from '../../../../src/components/TextField';
 import {
   amountErrorMessage,
@@ -55,7 +55,7 @@ export default function Occurrence() {
     return (
       <Screen>
         <Message text={es.recurring.notFound} />
-        <Button label={es.transaction.cancel} onPress={() => router.back()} />
+        <Button label={es.transaction.cancel} onPress={() => goBack()} />
       </Screen>
     );
   }
@@ -93,7 +93,7 @@ export default function Occurrence() {
       }
     }
     await refresh();
-    router.back();
+    goBack();
   }
 
   function handle(e: unknown) {
@@ -108,7 +108,7 @@ export default function Occurrence() {
   }
 
   return (
-    <Screen title={rule.name}>
+    <Screen title={rule.name} back>
       <View style={styles.info}>
         {category && (
           <View style={styles.category}>
@@ -129,6 +129,7 @@ export default function Occurrence() {
         value={amountValue}
         onChangeText={setAmount}
         keyboardType="decimal-pad"
+        suffix="€"
       />
       <Text style={styles.label}>{es.recurring.paidOn}</Text>
       <View style={styles.row}>
@@ -163,7 +164,6 @@ export default function Occurrence() {
         loading={busy === 'skip'}
         disabled={busy !== null}
       />
-      <Button variant="link" label={es.transaction.cancel} onPress={() => router.back()} />
     </Screen>
   );
 }
@@ -178,6 +178,6 @@ const styles = StyleSheet.create({
   info: { gap: spacing.xs },
   due: { ...typography.heading, color: colors.text },
   muted: { ...typography.body, color: colors.muted },
-  label: { ...typography.bodyStrong, color: colors.text },
+  label: { ...typography.small, color: colors.muted },
   row: { flexDirection: 'row', gap: spacing.sm },
 });

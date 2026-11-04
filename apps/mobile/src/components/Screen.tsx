@@ -1,7 +1,13 @@
 import { router, useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
-import { useCallback, type ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { useCallback, type ReactElement, type ReactNode } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  type RefreshControlProps,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppBar, type AppBarStep } from '../design/AppBar';
 import { Brand } from '../design/Brand';
@@ -24,6 +30,7 @@ export function Screen({
   align = 'center',
   bleed,
   fab,
+  refreshControl,
   children,
 }: {
   /** Título de la barra superior (o, con `brand`, de la pantalla). */
@@ -42,6 +49,8 @@ export function Screen({
   bleed?: boolean;
   /** Deja sitio abajo para el botón flotante «+». */
   fab?: boolean;
+  /** Tirar hacia abajo para recargar. */
+  refreshControl?: ReactElement<RefreshControlProps>;
   children: ReactNode;
 }) {
   const bar = Boolean(title && !brand);
@@ -71,6 +80,7 @@ export function Screen({
             fab && styles.fab,
           ]}
           keyboardShouldPersistTaps="handled"
+          refreshControl={refreshControl}
         >
           {brand && <Brand />}
           {brand && title && (

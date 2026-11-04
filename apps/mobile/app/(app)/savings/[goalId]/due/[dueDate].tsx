@@ -1,12 +1,12 @@
 import { parseAmount } from '@smartnomic/domain';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { api } from '../../../../../src/api/client';
 import { ApiError } from '../../../../../src/api/http';
 import { Button } from '../../../../../src/components/Button';
 import { Message } from '../../../../../src/components/Message';
-import { Screen } from '../../../../../src/components/Screen';
+import { goBack, Screen } from '../../../../../src/components/Screen';
 import { TextField } from '../../../../../src/components/TextField';
 import { CategoryIcon } from '../../../../../src/design/CategoryIcon';
 import { AppText } from '../../../../../src/design/Text';
@@ -47,7 +47,7 @@ export default function SavingsDue() {
     return (
       <Screen>
         <Message text={es.savings.notFound} />
-        <Button label={es.transaction.cancel} onPress={() => router.back()} />
+        <Button label={es.transaction.cancel} onPress={() => goBack()} />
       </Screen>
     );
   }
@@ -85,14 +85,14 @@ export default function SavingsDue() {
       );
     }
     await refresh();
-    router.back();
+    goBack();
   }
 
   return (
-    <Screen title={es.savings.dueTitle(goal.name)}>
+    <Screen title={es.savings.dueTitle(goal.name)} back>
       <View style={styles.info}>
         <View style={styles.goal}>
-          <CategoryIcon icon={goal.icon} tone={color.text.accent} />
+          <CategoryIcon icon={goal.icon} tone={color.text.muted} />
           <AppText variant="bodyStrong" tone={overdue ? 'danger' : 'primary'}>
             {es.savings.dueOn(formatDueDate(dueDate, today))}
             {overdue ? ` · ${es.recurring.overdue}` : ''}
@@ -107,6 +107,7 @@ export default function SavingsDue() {
         value={amountValue}
         onChangeText={setAmount}
         keyboardType="decimal-pad"
+        suffix="€"
       />
       {error && <Message text={error} />}
       <Button
@@ -120,7 +121,6 @@ export default function SavingsDue() {
         loading={busy === 'skip'}
         onPress={() => void run('skip')}
       />
-      <Button variant="link" label={es.transaction.cancel} onPress={() => router.back()} />
     </Screen>
   );
 }
