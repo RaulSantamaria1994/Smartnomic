@@ -3,7 +3,7 @@
 **Rama de la funcionalidad**: `006-estilo-android`
 **Creada**: 2026-11-04
 **Plan**: [`plan.md`](plan.md)
-**Estado**: Aprobada
+**Estado**: Implementada
 **Propuesta visual**: [Figma «Smartnomic · Rediseño Android»](https://www.figma.com/design/usEbYElEcWOxla6P0M7owK)
 (seis pantallas, componentes, colores y la tabla de animaciones)
 **Entrada**: "Quiero mejorar el apartado visual de la aplicación. La idea es que no parezca

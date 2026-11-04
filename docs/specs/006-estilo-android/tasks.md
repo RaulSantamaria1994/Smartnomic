@@ -88,15 +88,15 @@ fallar antes de implementar.
 
 ## Fase 5: Cierre
 
-- [ ] A021 Capturas una al lado de la otra de las seis pantallas de Figma a 390 px
+- [x] A021 Capturas una al lado de la otra de las seis pantallas de Figma a 390 px
       (CE-601) para revisión del propietario
-- [ ] A022 [P] axe-core en todas las pantallas a 320 y 1280 px (CE-602)
-- [ ] A023 Pruebas de punta a punta (MVP, calendario, categorías, huchas) con los
+- [x] A022 [P] axe-core en todas las pantallas a 320 y 1280 px (CE-602)
+- [x] A023 Pruebas de punta a punta (MVP, calendario, categorías, huchas) con los
       selectores de la flecha atrás; «Mes» con 500 movimientos (CE-604)
-- [ ] A024 [P] Playwright con `reducedMotion: 'reduce'`: cada animación en su estado final
+- [x] A024 [P] Playwright con `reducedMotion: 'reduce'`: cada animación en su estado final
       al momento (CE-605)
-- [ ] A025 [P] `expo export --platform android` compila
-- [ ] A026 Actualizar `README.md` y `AGENTS.md` (estilo y animaciones), marcar tareas
+- [x] A025 [P] `expo export --platform android` compila
+- [x] A026 Actualizar `README.md` y `AGENTS.md` (estilo y animaciones), marcar tareas
 
 ---
 

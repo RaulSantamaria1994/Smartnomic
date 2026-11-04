@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated } from 'react-native';
 import { animate, DURATION, useReduceMotion } from '../design/motion';
 import { trackList, withoutKey, type Tracked } from './animatedList';
@@ -30,16 +30,22 @@ export function AnimatedList<T>({
   }, [items, reduce]);
   return (
     <>
-      {rows.map((row) => (
-        <FadeRow
-          key={row.key}
-          row={row}
-          reduce={reduce}
-          onGone={() => setRows((current) => withoutKey(current, row.key))}
-        >
-          {render(row.item)}
-        </FadeRow>
-      ))}
+      {rows.map((row) =>
+        // Las filas quietas se pintan tal cual: con cientos de movimientos, envolverlas todas
+        // retrasa la pantalla (CE-604).
+        row.state === 'stay' ? (
+          <Fragment key={row.key}>{render(row.item)}</Fragment>
+        ) : (
+          <FadeRow
+            key={row.key}
+            row={row}
+            reduce={reduce}
+            onGone={() => setRows((current) => withoutKey(current, row.key))}
+          >
+            {render(row.item)}
+          </FadeRow>
+        ),
+      )}
     </>
   );
 }

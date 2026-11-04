@@ -156,3 +156,24 @@ restablecer contraseña como Entrar.
 - Con `reducedMotion: 'reduce'` en Playwright, cada animación queda en su estado final al
   momento (CE-605).
 - `expo export --platform android` compila; APK de GitHub Actions para probar en un móvil.
+
+## Resultados
+
+- `pnpm check` en verde: 483 tests (tokens, contraste sobre blanco, duraciones, lista con
+  entradas y salidas, y `noAiTells.test.ts` para CE-603).
+- CE-601: las seis pantallas de Figma, una al lado de la otra con la app a 390 px. Diferencias
+  queridas: Entrar mantiene sus textos («Smartnomic» y «Entrar», no el «Entrar en Smartnomic»
+  de la maqueta) y su formulario centrado; el borde de los campos es `#757575` (3:1).
+- CE-602: axe-core sin problemas en 21 pantallas (con y sin sesión) a 320, 390 y 1280 px, sin
+  scroll horizontal.
+- CE-604: pruebas de punta a punta del MVP (5 historias), calendario (2), categorías y huchas
+  (4) en verde contra la web servida por el servidor; se adaptaron los selectores de
+  «Cancelar» a la flecha atrás, la hucha del detalle (ya sin tarjeta) y las fechas al mes en
+  curso. «Mes» con 500 movimientos: 886 ms de recargar a ver el total (antes 893 ms); envolver
+  cada fila en una vista animada lo subía a 970 ms, así que las filas quietas se pintan tal cual.
+- CE-605: con movimiento normal, las ocho animaciones (y la salida de una fila borrada) se ven a
+  medio camino; con `reducedMotion: 'reduce'`, ninguna.
+- Descubierto al probar: la pestaña elegida se vuelve a pintar entera al activarse, así que el
+  valor de su animación vive en la barra y no en la pestaña.
+- `expo export --platform android` compila. Falta probarlo en un móvil (APK de GitHub Actions)
+  con TalkBack y «Quitar animaciones».
