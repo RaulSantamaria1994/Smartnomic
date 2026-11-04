@@ -21,6 +21,8 @@ export const ACTIONS = [
   'categories.write',
   /** Crear, editar y cerrar huchas; aportar, sacar y saltar meses (especificación 005). */
   'savings.write',
+  /** Poner, cambiar y quitar presupuestos de categorías (especificación 007). */
+  'budgets.write',
   /** Exportar todos los datos del hogar. */
   'data.export',
   /** Activar o desactivar los propios avisos. */
@@ -42,6 +44,7 @@ const EDITOR: readonly Action[] = [
   'occurrences.resolve',
   'categories.write',
   'savings.write',
+  'budgets.write',
 ];
 
 // El propietario no puede salir: antes tiene que pasar la propiedad a otro miembro.

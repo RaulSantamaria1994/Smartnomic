@@ -5,10 +5,10 @@ import { color, radius } from './tokens';
 
 /**
  * Barra de progreso lineal de Material, de 4 px (especificación 006). `value` va de 0 a 1;
- * si pasa de 1 se pinta llena y en rojo. Al aparecer se rellena desde cero y, si cambia,
+ * si pasa de 1 se pinta llena y en rojo; `tone` la pinta en ámbar («cerca») o en rojo. Al aparecer se rellena desde cero y, si cambia,
  * va del valor anterior al nuevo (animación 5). Decorativa: el texto de al lado dice la cifra.
  */
-export function ProgressBar({ value }: { value: number }) {
+export function ProgressBar({ value, tone }: { value: number; tone?: 'near' | 'over' }) {
   const reduce = useReduceMotion();
   const target = Math.min(1, Math.max(0, value));
   const fill = useRef(new Animated.Value(0)).current;
@@ -20,7 +20,12 @@ export function ProgressBar({ value }: { value: number }) {
   return (
     <View style={styles.track} accessible={false} aria-hidden>
       <Animated.View
-        style={[styles.fill, value > 1 && styles.over, { transform: [{ scaleX: fill }] }]}
+        style={[
+          styles.fill,
+          tone === 'near' && styles.near,
+          (value > 1 || tone === 'over') && styles.over,
+          { transform: [{ scaleX: fill }] },
+        ]}
       />
     </View>
   );
@@ -39,5 +44,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.progress.fill,
     transformOrigin: 'left',
   },
+  near: { backgroundColor: color.progress.near },
   over: { backgroundColor: color.progress.over },
 });

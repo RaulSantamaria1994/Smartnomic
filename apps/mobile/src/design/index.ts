@@ -1,6 +1,7 @@
 // Sistema de diseño: estilo Android estándar (especificación 006).
 export * from './Amount';
 export * from './AppBar';
+export * from './BudgetRow';
 export * from './Brand';
 export * from './CategoryIcon';
 export * from './color';

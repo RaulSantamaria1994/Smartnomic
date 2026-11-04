@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { CATEGORY_ICONS, EMOJI_TO_CATEGORY_ICON } from '@smartnomic/domain';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { categories, savingsEntries, savingsGoals } from '../src/db/schema';
+import { budgets, categories, savingsEntries, savingsGoals } from '../src/db/schema';
 import { me, newId, signUp, useTestServer } from './helpers';
 
 const ctx = useTestServer();
@@ -149,6 +149,58 @@ describe('0006_savings (especificación 005)', () => {
       ctx.db
         .insert(savingsEntries)
         .values(entry(a, goalId, { kind: 'withdrawal', dueDate: '2026-12-01' })),
+    ).rejects.toThrow();
+  });
+});
+
+describe('0007_budgets (especificación 007)', () => {
+  async function setup() {
+    const a = (await me(ctx.app, await signUp(ctx.app))).household.id;
+    const b = (await me(ctx.app, await signUp(ctx.app))).household.id;
+    const ofKind = async (householdId: string, kind: 'income' | 'expense') =>
+      (
+        await ctx.db
+          .select({ id: categories.id })
+          .from(categories)
+          .where(and(eq(categories.householdId, householdId), eq(categories.kind, kind)))
+      )[0]!.id;
+    return { a, b, expense: await ofKind(a, 'expense'), income: await ofKind(a, 'income') };
+  }
+
+  const budget = (
+    householdId: string,
+    categoryId: string,
+    extra: Record<string, unknown> = {},
+  ) => ({
+    id: newId(),
+    householdId,
+    categoryId,
+    validFrom: '2026-11-01',
+    amountCents: 40000,
+    ...extra,
+  });
+
+  it('un presupuesto no puede apuntar a la categoría de otro hogar', async () => {
+    const { b, expense } = await setup();
+    await expect(ctx.db.insert(budgets).values(budget(b, expense))).rejects.toThrow();
+  });
+
+  it('solo hay presupuestos de categorías de gasto', async () => {
+    const { a, income } = await setup();
+    await expect(ctx.db.insert(budgets).values(budget(a, income))).rejects.toThrow();
+  });
+
+  it('una sola fila por categoría y periodo; sin importe vale, cero o negativo no', async () => {
+    const { a, expense } = await setup();
+    await ctx.db.insert(budgets).values(budget(a, expense));
+    await expect(ctx.db.insert(budgets).values(budget(a, expense))).rejects.toThrow();
+    await ctx.db
+      .insert(budgets)
+      .values(budget(a, expense, { validFrom: '2026-12-01', amountCents: null }));
+    await expect(
+      ctx.db
+        .insert(budgets)
+        .values(budget(a, expense, { validFrom: '2027-01-01', amountCents: 0 })),
     ).rejects.toThrow();
   });
 });

@@ -405,3 +405,35 @@ export const savingsEntries = pgTable(
     index('savings_entries_goal_idx').on(table.goalId),
   ],
 );
+
+export const budgets = pgTable(
+  'budgets',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    householdId: uuid('household_id')
+      .notNull()
+      .references(() => households.id, { onDelete: 'cascade' }),
+    categoryId: uuid('category_id').notNull(),
+    /** Siempre `expense`: con la clave compuesta, solo hay presupuestos de gasto. */
+    kind: transactionKind('kind').notNull().default('expense'),
+    /** Inicio del periodo desde el que vale (especificación 007, RF-702). */
+    validFrom: date('valid_from', { mode: 'string' }).notNull(),
+    /** `null`: sin presupuesto desde ese periodo. */
+    amountCents: bigint('amount_cents', { mode: 'number' }),
+    memberId: uuid('member_id').references(() => members.id, { onDelete: 'set null' }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    // Un presupuesto nunca apunta a la categoría de otro hogar ni a una de ingresos.
+    foreignKey({
+      name: 'budgets_category_fk',
+      columns: [table.categoryId, table.householdId, table.kind],
+      foreignColumns: [categories.id, categories.householdId, categories.kind],
+    }).onDelete('cascade'),
+    check('budgets_kind_check', sql`${table.kind} = 'expense'`),
+    check('budgets_amount_check', sql`${table.amountCents} IS NULL OR ${table.amountCents} > 0`),
+    unique('budgets_category_period_unique').on(table.categoryId, table.validFrom),
+    index('budgets_household_idx').on(table.householdId),
+  ],
+);

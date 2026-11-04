@@ -50,6 +50,13 @@
       "when": 1793348594982,
       "tag": "0006_savings",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793801529358,
+      "tag": "0007_budgets",
+      "breakpoints": true
     }
   ]
 }

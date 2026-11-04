@@ -1,5 +1,6 @@
 import { CATEGORY_ICONS, TRANSACTION_KINDS } from '@smartnomic/domain';
 import { z } from 'zod';
+import { periodBudgetSchema } from './budgets';
 import { centsSchema, dateSchema, uuidV7Schema } from './common';
 
 export const transactionKindSchema = z.enum(TRANSACTION_KINDS);
@@ -99,6 +100,8 @@ export const periodResponseSchema = z.object({
   summary: summarySchema,
   /** Del más reciente al más antiguo. */
   transactions: z.array(transactionSchema),
+  /** Presupuestos que valen en el periodo, con lo gastado (especificación 007). */
+  budgets: z.array(periodBudgetSchema).default([]),
 });
 
 export type PeriodResponse = z.infer<typeof periodResponseSchema>;

@@ -121,6 +121,11 @@ export default function Account() {
           onPress={() => router.push('/household/categories')}
         />
         <MenuRow
+          icon="budget"
+          label={es.householdMenu.budgets}
+          onPress={() => router.push('/budgets')}
+        />
+        <MenuRow
           icon="savings"
           label={es.householdMenu.savings}
           onPress={() => router.push('/savings')}

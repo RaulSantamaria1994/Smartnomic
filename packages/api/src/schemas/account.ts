@@ -4,6 +4,7 @@ import { recurringRuleSchema, resolvedOccurrenceSchema } from './recurring';
 import { roleSchema } from './common';
 import { savingsEntryRecordSchema, savingsGoalRecordSchema } from './savings';
 import { categorySchema, transactionSchema } from './transactions';
+import { budgetRecordSchema } from './budgets';
 
 /**
  * Respuesta de `GET /api/households/:householdId/export`: todos los datos del hogar en un
@@ -24,6 +25,8 @@ export const householdExportSchema = z.object({
   occurrences: z.array(resolvedOccurrenceSchema),
   savingsGoals: z.array(savingsGoalRecordSchema).default([]),
   savingsEntries: z.array(savingsEntryRecordSchema).default([]),
+  /** Cambios de presupuesto (especificación 007). */
+  budgets: z.array(budgetRecordSchema).default([]),
 });
 
 export type HouseholdExport = z.infer<typeof householdExportSchema>;

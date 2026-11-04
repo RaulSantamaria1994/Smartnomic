@@ -1,5 +1,6 @@
 import type {
   Category,
+  PeriodBudget,
   RecurringRule,
   SavingsGoalDto,
   Transaction,
@@ -10,6 +11,7 @@ import {
   addDays,
   compareDates,
   daysBetween,
+  sortBudgets,
   periodOf,
   shiftPeriod,
   type DateString,
@@ -28,8 +30,10 @@ import { ReminderBanners } from '../../../src/components/ReminderBanners';
 import {
   Amount,
   AppText,
+  BudgetRow,
   CategoryIcon,
   EmptyState,
+  Icon,
   ListRow,
   SavingsRow,
   Section,
@@ -169,6 +173,8 @@ export default function Month() {
           />
         </Section>
 
+        <BudgetSection budgets={data?.budgets} categories={byId} canWrite={can('budgets.write')} />
+
         <Upcoming
           items={upcoming.data?.occurrences}
           savings={upcoming.data?.savings}
@@ -225,6 +231,62 @@ export default function Month() {
         </Section>
       </MonthSlide>
     </Screen>
+  );
+}
+
+/**
+ * Presupuestos del periodo (especificación 007, historia 2): de más a menos gastado. Sin
+ * ninguno, quien puede ponerlos ve una fila para empezar; quien no, nada.
+ */
+function BudgetSection({
+  budgets,
+  categories,
+  canWrite,
+}: {
+  budgets: PeriodBudget[] | undefined;
+  categories: Map<string, Category>;
+  canWrite: boolean;
+}) {
+  if (!budgets) return null;
+  if (budgets.length === 0) {
+    if (!canWrite) return null;
+    return (
+      <Section title={es.budgets.title} separated>
+        <ListRow
+          title={es.budgets.start}
+          detail={es.budgets.startHint}
+          onPress={() => router.push('/budgets')}
+          accessibilityLabel={es.budgets.start}
+          leading={<Icon name="budget" tint={color.text.muted} />}
+        />
+      </Section>
+    );
+  }
+  const rows = sortBudgets(
+    budgets.map((b) => ({ ...b, name: categories.get(b.categoryId)?.name ?? '—' })),
+  );
+  return (
+    <Section title={es.budgets.title} separated>
+      {rows.map((b) => {
+        const category = categories.get(b.categoryId);
+        return (
+          <BudgetRow
+            key={b.categoryId}
+            name={b.name}
+            icon={category?.icon}
+            tone={category?.color}
+            amountCents={b.amountCents}
+            spentCents={b.spentCents}
+            onPress={canWrite ? () => router.push('/budgets') : undefined}
+          />
+        );
+      })}
+      {canWrite && (
+        <View style={styles.more}>
+          <Button variant="link" label={es.budgets.edit} onPress={() => router.push('/budgets')} />
+        </View>
+      )}
+    </Section>
   );
 }
 

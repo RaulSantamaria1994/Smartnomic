@@ -27,6 +27,7 @@ const NAMES = {
   share: 'share-variant-outline',
   tag: 'tag-outline',
   savings: 'piggy-bank-outline',
+  budget: 'wallet-outline',
   user: 'account-outline',
   wifiOff: 'wifi-off',
 } as const;
