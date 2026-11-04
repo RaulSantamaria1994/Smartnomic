@@ -3,7 +3,7 @@
 **Rama de la funcionalidad**: `007-presupuestos`
 **Creada**: 2026-11-04
 **Plan**: [`plan.md`](plan.md)
-**Estado**: Aprobada
+**Estado**: Implementada
 **Entrada**: "Vamos con los presupuestos por categoría." (Pendiente del MVP: «Presupuestos,
 gráficas, búsqueda y exportación a CSV con filtros quedan para más adelante».)
 

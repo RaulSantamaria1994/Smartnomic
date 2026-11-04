@@ -70,14 +70,15 @@ fallar antes de implementar.
 
 ## Fase 4: Cierre
 
-- [ ] B012 Batería de ataques ampliada a `/budgets` (otro hogar, IDOR, lector, importes
+- [x] B012 Batería de ataques ampliada a `/budgets` (otro hogar, IDOR, lector, importes
       absurdos)
-- [ ] B013 Prueba de punta a punta: poner, cambiar y quitar; llegar al 80 % y pasarse; mes
+- [x] B013 Prueba de punta a punta: poner, cambiar y quitar; llegar al 80 % y pasarse; mes
       pasado; las anteriores siguen pasando; «Mes» con 500 movimientos y 15 presupuestos
       (CE-703)
-- [ ] B014 [P] axe-core en «Mes» y «Presupuestos» a 320 y 1280 px (CE-704)
-- [ ] B015 [P] `expo export --platform android` compila
-- [ ] B016 Actualizar `README.md` y `AGENTS.md`, marcar tareas y abrir el PR
+- [x] B014 [P] axe-core en «Mes» y «Presupuestos» a 320 y 1280 px (CE-704)
+- [x] B015 [P] `expo export --platform android` compila
+- [x] B016 Actualizar `README.md` y `AGENTS.md` y marcar tareas (el PR, cuando lo pida el
+      propietario)
 
 ---
 

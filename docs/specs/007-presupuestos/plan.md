@@ -142,3 +142,22 @@ apps/mobile/
   pasado con su presupuesto de entonces; CE-702 con cientos de gastos; «Mes» con 500
   movimientos y 15 presupuestos (CE-703).
 - axe-core en «Mes» y «Presupuestos» a 320 y 1280 px; `expo export --platform android`.
+
+## Resultados
+
+- `pnpm check` en verde: 525 tests (dominio, esquemas, migración `0007` y 22 de servidor para
+  presupuestos: permisos, otro hogar, categorías de ingresos y archivadas, versiones por
+  periodo, día de inicio 25, gastos editados y borrados, pagos recurrentes y huchas).
+- CE-702: 300 movimientos en cinco categorías y dos meses; lo gastado coincide al céntimo.
+- Batería de ataques ampliada (otro hogar, IDOR con ids de categoría ajenos, lector, importes
+  absurdos): sin accesos, filtraciones ni errores 500; los logs no llevan importes.
+- Punta a punta a 390 y 320 px: poner (tres pasos desde «Mes», CE-701), gastar hasta el 85 % y
+  pasarse, cambiar el importe, ver octubre con su presupuesto de entonces y quitarlo. Las pruebas
+  anteriores (MVP, calendario, categorías, huchas y animaciones) siguen pasando.
+- CE-703: «Mes» con 500 movimientos y 15 presupuestos, 922 ms de recargar a ver el total; la
+  ruta del periodo, 14 ms de mediana.
+- CE-704: axe-core sin problemas en 22 pantallas, «Presupuestos» incluida, a 320, 390 y
+  1280 px.
+- La barra «cerca del límite» usa un ámbar propio (`#E39B17`): el de los textos se confundía con
+  el rojo. Es decorativa; el texto de al lado dice el estado.
+- `expo export --platform android` compila.

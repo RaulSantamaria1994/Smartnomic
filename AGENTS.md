@@ -46,7 +46,10 @@ Funcionalidades terminadas: **`001-mvp-hogar`** (falta probarla en Android con e
 y T099), **`002-calendario`**, **`003-diseno-visual`**, **`004-iconos-categorias`** y
 **`005-hucha`** (huchas: lo ahorrado, la cuota y las pendientes se calculan en
 `packages/domain/src/savings.ts`, nunca se guardan) y **`006-estilo-android`** (estilo
-Android estándar y ocho animaciones pequeñas; sustituye al estilo «Calma» de la 003). El
+Android estándar y ocho animaciones pequeñas; sustituye al estilo «Calma» de la 003) y
+**`007-presupuestos`** (presupuesto mensual por categoría de gasto: la tabla `budgets` guarda
+los cambios con el periodo desde el que valen; lo gastado se suma en SQL en la ruta del
+periodo, con `budgetsBetween` de `apps/server/src/routes/budgets.ts`, y nunca se guarda). El
 aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo
