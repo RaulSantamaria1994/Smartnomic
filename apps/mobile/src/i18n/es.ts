@@ -3,7 +3,6 @@ import type { CategoryIconId } from '@smartnomic/domain';
 // Textos de la interfaz (constitución, art. VIII.5).
 export const es = {
   appName: 'Smartnomic',
-  brand: { tagline: 'La economía de tu hogar, en calma.' },
   common: {
     loading: 'Cargando…',
     retry: 'Reintentar',
@@ -84,6 +83,7 @@ export const es = {
   summary: {
     /** Especificación 005: lo apartado en huchas, ya descontado de lo que queda. */
     setAside: (amount: string) => `Apartado para objetivos: ${amount}`,
+    setAsideLabel: 'Apartado para objetivos',
     leftThisMonth: 'Te quedan este mes',
     balance: 'Balance del periodo',
     spentShare: (percent: number) => `Has gastado el ${percent} % de lo que ha entrado`,
@@ -501,7 +501,6 @@ export const es = {
   },
   home: {
     transactions: 'Movimientos',
-    greeting: (name: string) => `Hola, ${name}`,
     household: 'Tu hogar',
     roles: { owner: 'Propietario', editor: 'Editor', viewer: 'Lector' },
     comingSoon: 'Pronto podrás apuntar aquí tus ingresos y gastos.',

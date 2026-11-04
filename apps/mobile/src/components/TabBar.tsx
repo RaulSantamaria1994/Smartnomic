@@ -1,11 +1,13 @@
-import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/build/layouts/Tabs';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { Icon, type IconName } from '../design/Icon';
+import { animate, DURATION, useReduceMotion } from '../design/motion';
 import { AppText } from '../design/Text';
-import { color, layout, radius, shadow, spacing } from '../design/tokens';
+import { color, layout, spacing } from '../design/tokens';
 import { useCan } from '../hooks/data';
 import { es } from '../i18n/es';
+import { Fab } from './Fab';
 
 /** Altura de la barra sin el margen inferior del sistema. */
 export const TAB_BAR_HEIGHT = 64;
@@ -18,39 +20,53 @@ const TABS: Record<string, { icon: IconName; label: string }> = {
 };
 
 /**
- * Barra inferior (especificación 003, RF-208): Mes, Calendario, «+», Pagos y Hogar. El
- * «+» no es una pestaña: abre «Apuntar» encima y no se muestra a quien solo puede leer.
+ * Barra inferior de cuatro pestañas (Mes, Calendario, Pagos y Hogar) con el botón flotante
+ * «+» encima, a la derecha (especificación 006, RF-605). El «+» no se muestra a quien solo
+ * puede leer.
  */
 export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
   const canWrite = useCan()('transactions.write');
   const routes = state.routes.filter((route) => TABS[route.name]);
+  const reduce = useReduceMotion();
+  // El valor vive en la barra: la pestaña elegida se vuelve a pintar al activarse y perdería
+  // su animación si la guardara ella.
+  const scales = useRef(new Map<string, Animated.Value>()).current;
+  const scaleOf = (key: string) => {
+    if (!scales.has(key)) scales.set(key, new Animated.Value(1));
+    return scales.get(key)!;
+  };
+  const focusedKey = state.routes[state.index]?.key;
+  const firstFocus = useRef(true);
+  useEffect(() => {
+    if (firstFocus.current || !focusedKey) {
+      firstFocus.current = false;
+      return;
+    }
+    const scale = scaleOf(focusedKey);
+    scale.stopAnimation();
+    scale.setValue(1);
+    const half = DURATION.base / 2;
+    Animated.sequence([
+      animate(scale, 1.15, half, reduce),
+      animate(scale, 1, half, reduce),
+    ]).start();
+    // Solo cuando cambia la pestaña activa.
+  }, [focusedKey]);
   const tab = (route: (typeof routes)[number]) => {
     const index = state.routes.indexOf(route);
     const focused = state.index === index;
     const { icon, label } = TABS[route.name]!;
-    const onPress = () => {
-      if (!focused) navigateToTab(route.key);
-    };
     return (
-      <Pressable
+      <TabButton
         key={route.key}
-        onPress={onPress}
-        accessibilityRole="tab"
-        accessibilityLabel={label}
-        accessibilityState={{ selected: focused }}
-        aria-selected={focused}
-        style={styles.tab}
-      >
-        <Icon name={icon} tint={focused ? color.text.accent : color.text.muted} />
-        <AppText
-          variant="small"
-          tone={focused ? 'accent' : 'muted'}
-          numberOfLines={1}
-          style={styles.label}
-        >
-          {label}
-        </AppText>
-      </Pressable>
+        icon={icon}
+        label={label}
+        focused={focused}
+        scale={scaleOf(route.key)}
+        onPress={() => {
+          if (!focused) navigateToTab(route.key);
+        }}
+      />
     );
   };
 
@@ -61,23 +77,53 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
       style={[styles.bar, { paddingBottom: insets.bottom }]}
     >
       <View style={styles.row} accessibilityRole="tablist">
-        {routes.slice(0, 2).map(tab)}
-        {canWrite && <View style={styles.slot} />}
-        {routes.slice(2).map(tab)}
+        {routes.map(tab)}
       </View>
       {canWrite && (
-        <View style={styles.addLayer} pointerEvents="box-none">
-          <Pressable
-            onPress={() => router.push('/new')}
-            accessibilityRole="button"
-            accessibilityLabel={es.tabs.add}
-            style={({ pressed }) => [styles.add, pressed && styles.pressed]}
-          >
-            <Icon name="plus" size={26} tint={color.text.onAccent} />
-          </Pressable>
+        <View style={styles.fabLayer} pointerEvents="box-none">
+          <Fab />
         </View>
       )}
     </View>
+  );
+}
+
+/** Una pestaña; al elegirla, su icono crece un poco y vuelve (especificación 006, animación 1). */
+function TabButton({
+  icon,
+  label,
+  focused,
+  scale,
+  onPress,
+}: {
+  icon: IconName;
+  label: string;
+  focused: boolean;
+  scale: Animated.Value;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: focused }}
+      aria-selected={focused}
+      android_ripple={{ color: color.bg.accentSoft, borderless: true }}
+      style={styles.tab}
+    >
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <Icon name={icon} tint={focused ? color.text.accent : color.text.muted} />
+      </Animated.View>
+      <AppText
+        variant="tab"
+        tone={focused ? 'accent' : 'muted'}
+        numberOfLines={1}
+        style={styles.label}
+      >
+        {label}
+      </AppText>
+    </Pressable>
   );
 }
 
@@ -106,26 +152,15 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
   },
   label: { maxWidth: '100%' },
-  slot: { flex: 1 },
-  addLayer: {
+  // El botón flotante va justo encima de la barra, alineado con el contenido.
+  fabLayer: {
     position: 'absolute',
-    top: 0,
+    bottom: '100%',
     left: 0,
     right: 0,
-    height: TAB_BAR_HEIGHT,
-    alignItems: 'center',
+    height: 88,
+    width: '100%',
+    maxWidth: layout.maxWidth,
+    alignSelf: 'center',
   },
-  add: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.pill,
-    backgroundColor: color.bg.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -spacing.lg,
-    borderWidth: 4,
-    borderColor: color.bg.canvas,
-    ...shadow.raised,
-  },
-  pressed: { opacity: 0.85 },
 });

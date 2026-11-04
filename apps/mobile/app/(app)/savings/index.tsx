@@ -4,10 +4,9 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
-import { Card } from '../../../src/design/Card';
+import { Section } from '../../../src/design/Section';
 import { EmptyState } from '../../../src/design/EmptyState';
-import { SavingsCard } from '../../../src/design/SavingsCard';
-import { AppText } from '../../../src/design/Text';
+import { SavingsRow } from '../../../src/design/SavingsRow';
 import { spacing } from '../../../src/design/tokens';
 import { useCan, useMe, useSavings } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
@@ -38,43 +37,41 @@ export default function SavingsList() {
   ) : null;
 
   return (
-    <Screen title={es.savings.title} align="top">
-      {savings.error && <Message text={savings.error.message} />}
+    <Screen title={es.savings.title} back bleed>
+      {savings.error && (
+        <View style={styles.pad}>
+          <Message text={savings.error.message} />
+        </View>
+      )}
       {goals.length === 0 ? (
-        <Card>
-          <EmptyState
-            icon="savings"
-            title={es.savings.empty}
-            hint={es.savings.emptyHint}
-            {...(create && { action: create })}
-          />
-        </Card>
+        <EmptyState
+          icon="savings"
+          title={es.savings.empty}
+          hint={es.savings.emptyHint}
+          {...(create && { action: create })}
+        />
       ) : (
         <>
-          {create}
+          {create && <View style={styles.pad}>{create}</View>}
           {sections
             .filter(([, list]) => list.length > 0)
             .map(([title, list]) => (
-              <View key={title} style={styles.section}>
-                <AppText variant="heading" accessibilityRole="header">
-                  {title}
-                </AppText>
+              <Section key={title} title={title}>
                 {list.map((goal) => (
-                  <SavingsCard
+                  <SavingsRow
                     key={goal.id}
                     goal={goal}
                     onPress={() => router.push(`/savings/${goal.id}`)}
                   />
                 ))}
-              </View>
+              </Section>
             ))}
         </>
       )}
-      <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  section: { gap: spacing.sm },
+  pad: { padding: spacing.md },
 });

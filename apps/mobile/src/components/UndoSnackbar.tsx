@@ -6,7 +6,7 @@ import { api, queryKeys } from '../api/client';
 import { es } from '../i18n/es';
 import { useUndo } from '../state/undo';
 import { TAB_BAR_HEIGHT } from './TabBar';
-import { color, layout, radius, shadow, spacing, typography } from '../design/tokens';
+import { color, layout, radius, shadow, size, spacing, typography } from '../design/tokens';
 
 const UNDO_WINDOW_MS = 6000;
 
@@ -42,7 +42,8 @@ export function UndoSnackbar() {
 
   return (
     <View
-      style={[styles.bar, { bottom: insets.bottom + TAB_BAR_HEIGHT + spacing.sm }]}
+      // Por encima del botón flotante «+», que va sobre la barra de pestañas.
+      style={[styles.bar, { bottom: insets.bottom + TAB_BAR_HEIGHT + size.fab + spacing.md * 2 }]}
       accessibilityLiveRegion="polite"
     >
       <Text style={styles.text}>{es.month.deleted}</Text>
@@ -60,8 +61,8 @@ const styles = StyleSheet.create({
     right: spacing.md,
     maxWidth: layout.maxFormWidth,
     alignSelf: 'center',
-    backgroundColor: color.text.primary,
-    borderRadius: radius.lg,
+    backgroundColor: color.snackbar,
+    borderRadius: radius.control,
     paddingLeft: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
@@ -70,5 +71,5 @@ const styles = StyleSheet.create({
   },
   text: { ...typography.body, color: color.text.onAccent },
   action: { padding: spacing.md, minHeight: 48, justifyContent: 'center' },
-  actionText: { ...typography.bodyStrong, color: color.progress.fill },
+  actionText: { ...typography.bodyStrong, color: color.text.onDarkAction },
 });

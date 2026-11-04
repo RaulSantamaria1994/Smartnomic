@@ -1,11 +1,11 @@
 import type { SavingsGoalInput } from '@smartnomic/api';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator } from 'react-native';
 import { api } from '../../../../src/api/client';
 import { Button } from '../../../../src/components/Button';
 import { Message } from '../../../../src/components/Message';
 import { SavingsForm } from '../../../../src/components/SavingsForm';
-import { Screen } from '../../../../src/components/Screen';
+import { goBack, Screen } from '../../../../src/components/Screen';
 import { todayIn, useMe, useSavings } from '../../../../src/hooks/data';
 import { useRefreshSavings } from '../../../../src/hooks/useRuleMutations';
 import { es } from '../../../../src/i18n/es';
@@ -30,7 +30,7 @@ export default function EditSavingsGoal() {
     return (
       <Screen>
         <Message text={es.savings.notFound} />
-        <Button label={es.settings.back} onPress={() => router.back()} />
+        <Button label={es.settings.back} onPress={() => goBack()} />
       </Screen>
     );
   }
@@ -38,13 +38,12 @@ export default function EditSavingsGoal() {
   async function save(input: SavingsGoalInput) {
     await api.saveSavingsGoal(household!.id, goal!.id, input);
     await refresh();
-    router.back();
+    goBack();
   }
 
   return (
-    <Screen title={es.savings.editTitle}>
+    <Screen title={es.savings.editTitle} back>
       <SavingsForm initial={goal} today={todayIn(household.timezone)} onSubmit={save} />
-      <Button variant="link" label={es.transaction.cancel} onPress={() => router.back()} />
     </Screen>
   );
 }

@@ -1,11 +1,9 @@
 import type { TransactionInput } from '@smartnomic/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
 import { useRef } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { api, queryKeys } from '../../src/api/client';
-import { Button } from '../../src/components/Button';
-import { Screen } from '../../src/components/Screen';
+import { goBack, Screen } from '../../src/components/Screen';
 import { TransactionForm } from '../../src/components/TransactionForm';
 import { todayIn, useCategories, useMe } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
@@ -33,18 +31,17 @@ export default function NewTransaction() {
   async function save(input: TransactionInput) {
     await api.saveTransaction(household!.id, id, input);
     await queryClient.invalidateQueries({ queryKey: queryKeys.periods(household!.id) });
-    router.back();
+    goBack();
   }
 
   return (
-    <Screen title={es.transaction.newTitle}>
+    <Screen title={es.transaction.newTitle} back>
       <TransactionForm
         initial={{ kind: 'expense', date: today }}
         categories={categories.data.categories}
         today={today}
         onSubmit={save}
       />
-      <Button variant="link" label={es.transaction.cancel} onPress={() => router.back()} />
     </Screen>
   );
 }

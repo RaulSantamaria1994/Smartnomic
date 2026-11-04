@@ -2,7 +2,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState, type ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { persister } from '../src/cache/cache';
@@ -40,7 +39,6 @@ export default function RootLayout() {
 
   return withCache(
     <SafeAreaProvider>
-      <StatusBar style="dark" />
       <Stack
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg.canvas } }}
       />

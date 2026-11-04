@@ -100,61 +100,52 @@ function Day({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ selected: isSelected }}
-      style={({ pressed }) => [
-        styles.cell,
-        styles.day,
-        isToday && styles.today,
-        isSelected && styles.selected,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.cell, styles.day, pressed && styles.pressed]}
     >
-      <Text style={[styles.number, isSelected && styles.selectedText]}>{parseDate(date).day}</Text>
+      <View style={[styles.circle, isToday && styles.today, isSelected && styles.selected]}>
+        <Text
+          style={[styles.number, isToday && styles.todayText, isSelected && styles.selectedText]}
+        >
+          {parseDate(date).day}
+        </Text>
+      </View>
       <View style={styles.markRow}>
-        {markColor && (
-          <View
-            style={[styles.mark, { backgroundColor: isSelected ? color.text.onAccent : markColor }]}
-          />
-        )}
-        {count > 1 && (
-          <Text style={[styles.count, isSelected && styles.selectedText]}>{count}</Text>
-        )}
+        {markColor && <View style={[styles.mark, { backgroundColor: markColor }]} />}
+        {count > 1 && <Text style={styles.count}>{count}</Text>}
       </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  grid: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.xs,
-    gap: 2,
-  },
+  grid: { paddingVertical: spacing.xs, gap: 2 },
   week: { flexDirection: 'row', gap: 2 },
   weekday: {
-    ...typography.label,
+    ...typography.small,
     flex: 1,
     textAlign: 'center',
     color: colors.muted,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.sm,
   },
   cell: { flex: 1, minHeight: 48, minWidth: 0 },
-  day: {
+  day: { alignItems: 'center', justifyContent: 'center', paddingVertical: 2 },
+  // Hoy, con un aro; el día elegido, relleno (como el calendario de Android).
+  circle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'transparent',
-    paddingVertical: 2,
   },
   today: { borderColor: color.border.focus },
   selected: { backgroundColor: color.bg.accent, borderColor: color.bg.accent },
   pressed: { opacity: 0.7 },
   number: { ...typography.body, color: colors.text },
+  todayText: { ...typography.bodyStrong, color: color.text.accent },
   selectedText: { color: colors.onPrimary },
-  markRow: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 18 },
-  mark: { width: 8, height: 8, borderRadius: 4 },
-  count: { ...typography.label, color: colors.muted },
+  markRow: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 10 },
+  mark: { width: 5, height: 5, borderRadius: 3 },
+  count: { ...typography.small, color: colors.muted },
 });

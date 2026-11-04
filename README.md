@@ -8,8 +8,9 @@ dinero y reciba recordatorios antes de cada pago. Funciona en Android y en el na
 - Forma de trabajar (personas y agentes): [`AGENTS.md`](AGENTS.md)
 
 **Estado:** el MVP (`docs/specs/001-mvp-hogar`) está completo y desplegado en Railway, y el
-calendario de pagos programados (`docs/specs/002-calendario`), el diseño visual «Calma»
-(`docs/specs/003-diseno-visual`), los iconos de categoría (`docs/specs/004-iconos-categorias`)
+calendario de pagos programados (`docs/specs/002-calendario`), el diseño visual
+(`docs/specs/003-diseno-visual`, sustituido por el estilo Android de
+`docs/specs/006-estilo-android`), los iconos de categoría (`docs/specs/004-iconos-categorias`)
 y las huchas para objetivos de ahorro (`docs/specs/005-hucha`) también están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
@@ -182,10 +183,20 @@ Al terminar, EAS da un enlace y un QR para descargar el APK en el móvil.
 
 ## Diseño
 
-El aspecto de la app («Calma»: verde pino, fondo arena, Plus Jakarta Sans) sale de los tokens
-y componentes de `apps/mobile/src/design/`. Las pantallas no usan colores ni tamaños de letra
-sueltos: ESLint lo impide fuera de esa carpeta. Los tests de `color.test.ts` comprueban el
-contraste WCAG de los tokens.
+El aspecto de la app es el de una app Android normal (especificación 006): barra superior
+verde, fondo blanco, listas con separadores, esquinas de 4 px y la fuente del sistema. Sale
+de los tokens y componentes de `apps/mobile/src/design/` y `src/components/` (`Screen` con
+`AppBar`, `Section`, `ListRow`, `StatusText`, `ProgressBar`, `Chip`, `Fab`…). Las pantallas no
+usan colores, tamaños, pesos ni familias de letra sueltos: ESLint lo impide fuera de esa
+carpeta. `tokens.test.ts` y `color.test.ts` comprueban los radios, la fuente y el contraste
+WCAG; `noAiTells.test.ts` impide que vuelvan las tarjetas, las pastillas de estado, los
+fondos detrás de los iconos y los «Volver»/«Cancelar» al pie (se vuelve con la flecha de la
+barra). La propuesta está en Figma, enlazada desde la especificación.
+
+Hay ocho animaciones pequeñas (150–300 ms, `Animated` de React Native) listadas en
+`docs/specs/006-estilo-android/plan.md`. Todas usan `animate` y `useReduceMotion` de
+`src/design/motion.ts`: con «Quitar animaciones» o «reducir movimiento» duran 0. No añadas
+animaciones fuera de esa lista sin pasar por una especificación.
 
 La app no usa emoji (`noEmoji.test.ts` lo comprueba). Las categorías guardan un identificador
 del catálogo de `packages/domain/src/categoryIcons.ts`, y la app lo dibuja con Material

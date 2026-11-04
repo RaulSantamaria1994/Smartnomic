@@ -1,12 +1,12 @@
 import type { TransactionInput } from '@smartnomic/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { api, queryKeys } from '../../../src/api/client';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
-import { Screen } from '../../../src/components/Screen';
+import { goBack, Screen } from '../../../src/components/Screen';
 import { TransactionForm } from '../../../src/components/TransactionForm';
 import { todayIn, useCategories, useMe } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
@@ -50,9 +50,9 @@ export default function EditTransaction() {
   }
   if (!transaction) {
     return (
-      <Screen title={es.transaction.editTitle}>
+      <Screen title={es.transaction.editTitle} back>
         <Message text={es.transaction.notFound} />
-        <Button label={es.common.retry} onPress={() => router.back()} />
+        <Button label={es.common.retry} onPress={() => goBack()} />
       </Screen>
     );
   }
@@ -63,7 +63,7 @@ export default function EditTransaction() {
   async function save(input: TransactionInput) {
     await api.saveTransaction(household!.id, id, input);
     await refresh();
-    router.back();
+    goBack();
   }
 
   async function remove() {
@@ -73,7 +73,7 @@ export default function EditTransaction() {
       await api.deleteTransaction(household!.id, id);
       await refresh();
       offerUndo(household!.id, id);
-      router.back();
+      goBack();
     } catch (e) {
       setError(e instanceof Error ? e.message : es.auth.errors.unknown);
     } finally {
@@ -82,7 +82,7 @@ export default function EditTransaction() {
   }
 
   return (
-    <Screen title={es.transaction.editTitle}>
+    <Screen title={es.transaction.editTitle} back>
       <TransactionForm
         initial={transaction}
         categories={categories.data.categories}

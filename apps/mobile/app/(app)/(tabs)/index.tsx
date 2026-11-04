@@ -10,45 +10,37 @@ import {
   addDays,
   compareDates,
   daysBetween,
-  parseDate,
   periodOf,
   shiftPeriod,
   type DateString,
 } from '@smartnomic/domain';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '../../../src/api/http';
 import { Button } from '../../../src/components/Button';
+import { AnimatedList } from '../../../src/components/AnimatedList';
+import { MonthSlide } from '../../../src/components/MonthSlide';
+import { Screen } from '../../../src/components/Screen';
 import { Message } from '../../../src/components/Message';
 import { ReminderBanners } from '../../../src/components/ReminderBanners';
 import {
   Amount,
   AppText,
-  Card,
   CategoryIcon,
   EmptyState,
-  Icon,
   ListRow,
-  SavingsCard,
-  StatusPill,
-  SummaryCard,
-  type IconName,
-  type PillKind,
+  SavingsRow,
+  Section,
+  SummaryBlock,
+  type StatusKind,
 } from '../../../src/design';
-import { color, layout, radius, size, spacing } from '../../../src/design/tokens';
+import { color, spacing } from '../../../src/design/tokens';
 import {
   formatDay,
   formatMoney,
-  formatMonthShort,
+  formatDayMonth,
   formatPeriod,
   formatRelativeDue,
 } from '../../../src/format';
@@ -81,6 +73,7 @@ export default function Month() {
   const household = me.data?.household;
   const [start, setStart] = useState<DateString | null>(null);
   const [shown, setShown] = useState(PAGE_SIZE);
+  const [direction, setDirection] = useState<1 | -1>(1);
   const thisPeriod = household
     ? currentPeriodStart(household.timezone, household.monthStartDay)
     : undefined;
@@ -112,7 +105,8 @@ export default function Month() {
 
   const today = todayIn(household.timezone);
   const current = periodOf(periodStart, household.monthStartDay);
-  const move = (n: number) => {
+  const move = (n: 1 | -1) => {
+    setDirection(n);
     setStart(shiftPeriod(current, n, household.monthStartDay).start);
     setShown(PAGE_SIZE);
   };
@@ -128,66 +122,52 @@ export default function Month() {
       : null;
   const offline = period.error instanceof ApiError && period.error.code === 'network';
   const data = period.data;
-  const userName = me.data.user.name;
+  const visibleTransactions = data ? data.transactions.slice(0, shown) : [];
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={period.isRefetching}
-            onRefresh={() => {
-              void period.refetch();
-              void categories.refetch();
-              void upcoming.refetch();
-              void rules.refetch();
-              void members.refetch();
-              void savings.refetch();
-            }}
+    <Screen
+      title={formatPeriod(current, household.monthStartDay)}
+      subtitle={household.name}
+      prev={{ label: es.month.previous, onPress: () => move(-1) }}
+      next={{ label: es.month.next, onPress: () => move(1) }}
+      bleed
+      fab={canWrite}
+      refreshControl={
+        <RefreshControl
+          refreshing={period.isRefetching}
+          onRefresh={() => {
+            void period.refetch();
+            void categories.refetch();
+            void upcoming.refetch();
+            void rules.refetch();
+            void members.refetch();
+            void savings.refetch();
+          }}
+        />
+      }
+    >
+      {(offline || upcoming.data) && (
+        <View style={styles.notices}>
+          {offline && <Message text={es.month.offline} />}
+          <ReminderBanners
+            occurrences={upcoming.data?.occurrences}
+            today={upcoming.data?.today}
+            hasRules={(rules.data?.rules.length ?? 0) > 0}
+            remindersEnabled={me.data.member.remindersEnabled}
           />
-        }
-      >
-        <View style={styles.topBar}>
-          <View style={styles.avatar} accessible={false} aria-hidden>
-            <AppText variant="label" tone="accent">
-              {initials(userName)}
-            </AppText>
-          </View>
-          <View style={styles.greeting}>
-            <AppText variant="caption" tone="muted" numberOfLines={1}>
-              {household.name}
-            </AppText>
-            <AppText variant="heading" numberOfLines={1}>
-              {es.home.greeting(userName.split(' ')[0] ?? userName)}
-            </AppText>
-          </View>
         </View>
+      )}
 
-        <View style={styles.periodBar}>
-          <RoundButton icon="back" label={es.month.previous} onPress={() => move(-1)} />
-          <AppText variant="title" accessibilityRole="header">
-            {formatPeriod(current, household.monthStartDay)}
-          </AppText>
-          <RoundButton icon="forward" label={es.month.next} onPress={() => move(1)} />
-        </View>
-
-        {offline && <Message text={es.month.offline} />}
-
-        <ReminderBanners
-          occurrences={upcoming.data?.occurrences}
-          today={upcoming.data?.today}
-          hasRules={(rules.data?.rules.length ?? 0) > 0}
-          remindersEnabled={me.data.member.remindersEnabled}
-        />
-
-        <SummaryCard
-          incomeCents={data?.summary.incomeCents}
-          expenseCents={data?.summary.expenseCents}
-          balanceCents={data?.summary.balanceCents}
-          setAsideCents={data?.summary.setAsideCents}
-          current={periodStart === thisPeriod}
-        />
+      <MonthSlide month={periodStart} direction={direction}>
+        <Section separated>
+          <SummaryBlock
+            incomeCents={data?.summary.incomeCents}
+            expenseCents={data?.summary.expenseCents}
+            balanceCents={data?.summary.balanceCents}
+            setAsideCents={data?.summary.setAsideCents}
+            current={periodStart === thisPeriod}
+          />
+        </Section>
 
         <Upcoming
           items={upcoming.data?.occurrences}
@@ -202,37 +182,38 @@ export default function Month() {
 
         <SavingsSection goals={savings.data?.goals} canWrite={can('savings.write')} />
 
-        <View style={styles.section}>
-          <AppText variant="heading" accessibilityRole="header">
-            {es.home.transactions}
-          </AppText>
+        <Section title={es.home.transactions}>
           {period.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
-          {period.error && !offline && !data && <Message text={period.error.message} />}
-
-          {data && data.transactions.length === 0 && (
-            <Card>
-              <EmptyState
-                icon="tag"
-                title={es.month.empty}
-                {...(canWrite && { hint: es.month.emptyHint })}
-              />
-            </Card>
+          {period.error && !offline && !data && (
+            <View style={styles.notices}>
+              <Message text={period.error.message} />
+            </View>
           )}
 
-          {data && data.transactions.length > 0 && (
-            <Card padded={false}>
-              {data.transactions.slice(0, shown).map((t, index) => (
+          {data && data.transactions.length === 0 && (
+            <EmptyState
+              icon="tag"
+              title={es.month.empty}
+              {...(canWrite && { hint: es.month.emptyHint })}
+            />
+          )}
+
+          {data && (
+            <AnimatedList
+              // Otro mes es otra lista: entra deslizando entera, sin fundir fila a fila.
+              key={periodStart}
+              items={visibleTransactions}
+              keyOf={(t) => t.id}
+              render={(t) => (
                 <TransactionRow
-                  key={t.id}
-                  first={index === 0}
                   transaction={t}
                   today={today}
                   category={byId.get(t.categoryId)}
                   author={authorOf(t)}
                   onPress={canWrite ? () => router.push(`/transaction/${t.id}`) : undefined}
                 />
-              ))}
-            </Card>
+              )}
+            />
           )}
           {data && data.transactions.length > shown && (
             <Button
@@ -241,9 +222,9 @@ export default function Month() {
               onPress={() => setShown((n) => n + PAGE_SIZE)}
             />
           )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </Section>
+      </MonthSlide>
+    </Screen>
   );
 }
 
@@ -259,68 +240,38 @@ function SavingsSection({
   const open = goals.filter((g) => g.plan.status !== 'closed');
   if (open.length === 0 && !canWrite) return null;
   return (
-    <View style={styles.section}>
-      <AppText variant="heading" accessibilityRole="header">
-        {es.savings.title}
-      </AppText>
+    <Section title={es.savings.title} separated>
       {open.length === 0 ? (
-        <Card padded={false}>
-          <ListRow
-            first
-            title={es.savings.startOne}
-            detail={es.savings.emptyHint}
-            onPress={() => router.push('/savings/new')}
-            accessibilityLabel={es.savings.startOne}
-            leading={<CategoryIcon icon="savings" tone={color.text.accent} />}
-          />
-        </Card>
+        <ListRow
+          title={es.savings.startOne}
+          detail={es.savings.emptyHint}
+          onPress={() => router.push('/savings/new')}
+          accessibilityLabel={es.savings.startOne}
+          leading={<CategoryIcon icon="savings" tone={color.text.muted} />}
+        />
       ) : (
         <>
           {open.slice(0, 3).map((goal) => (
-            <SavingsCard
+            <SavingsRow
               key={goal.id}
               goal={goal}
               onPress={() => router.push(`/savings/${goal.id}`)}
             />
           ))}
-          <Button
-            variant="link"
-            label={es.savings.seeAll}
-            onPress={() => router.push('/savings')}
-          />
+          <View style={styles.more}>
+            <Button
+              variant="link"
+              label={es.savings.seeAll}
+              onPress={() => router.push('/savings')}
+            />
+          </View>
         </>
       )}
-    </View>
+    </Section>
   );
 }
 
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '·';
-}
-
-function RoundButton({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: IconName;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
-    >
-      <Icon name={icon} tint={color.text.link} />
-    </Pressable>
-  );
-}
-
-/** Una tarjeta de «Próximos pagos»: un vencimiento o una aportación a una hucha. */
+/** Una fila de «Próximos pagos»: un vencimiento o una aportación a una hucha. */
 interface UpcomingEntry {
   key: string;
   dueDate: DateString;
@@ -334,7 +285,7 @@ interface UpcomingEntry {
 }
 
 /**
- * «Próximos pagos»: atrasados y de los próximos 30 días (RF-023), en tarjetas, junto con
+ * «Próximos pagos»: atrasados y de los próximos 30 días (RF-023), en una lista, junto con
  * las aportaciones pendientes de las huchas (especificación 005, RF-503).
  */
 function Upcoming({
@@ -392,7 +343,7 @@ function Upcoming({
           amountCents: item.quotaCents,
           income: false,
           icon: goal.icon,
-          tone: color.text.accent,
+          tone: color.text.muted,
           onPress: canSave
             ? () => router.push(`/savings/${item.goalId}/due/${item.dueDate}`)
             : undefined,
@@ -401,68 +352,44 @@ function Upcoming({
     }),
   ].sort((a, b) => compareDates(a.dueDate, b.dueDate));
   return (
-    <View style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <AppText variant="heading" accessibilityRole="header">
-          {es.recurring.upcomingTitle}
-        </AppText>
-      </View>
+    <Section title={es.recurring.upcomingTitle} separated={entries.length === 0}>
       {rules.length === 0 && entries.length === 0 && (
-        <Card>
-          <EmptyState icon="recurring" title={es.recurring.empty} />
-        </Card>
+        <EmptyState icon="recurring" title={es.recurring.empty} />
       )}
       {rules.length > 0 && entries.length === 0 && (
-        <AppText variant="caption" tone="muted">
+        <AppText variant="caption" tone="muted" style={styles.none}>
           {es.recurring.noUpcoming}
         </AppText>
       )}
-      {entries.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.cards}
-        >
-          {entries.map((entry) => (
-            <UpcomingCard key={entry.key} entry={entry} today={today} />
-          ))}
-        </ScrollView>
-      )}
-    </View>
+      {entries.map((entry) => (
+        <UpcomingRow key={entry.key} entry={entry} today={today} />
+      ))}
+    </Section>
   );
 }
 
-function UpcomingCard({ entry, today }: { entry: UpcomingEntry; today: string }) {
+function UpcomingRow({ entry, today }: { entry: UpcomingEntry; today: string }) {
   const soon = !entry.overdue && compareDates(entry.dueDate, addDays(today, SOON_DAYS)) <= 0;
-  const kind: PillKind = entry.overdue ? 'overdue' : soon ? 'soon' : 'pending';
+  const kind: StatusKind = entry.overdue ? 'overdue' : soon ? 'soon' : 'pending';
   const when = formatRelativeDue(entry.dueDate, today);
-  const pill = entry.overdue ? es.recurring.overdue : when;
-  const status = color.status[kind];
+  const date = formatDayMonth(entry.dueDate);
+  const status = entry.overdue ? es.recurring.overdue : when;
   return (
-    <Pressable
+    <ListRow
+      title={entry.name}
+      detail={
+        <AppText variant="caption" tone="muted" numberOfLines={1}>
+          {status === date ? '' : `${date} · `}
+          <AppText variant="caption" style={{ color: color.status[kind] }}>
+            {status}
+          </AppText>
+        </AppText>
+      }
+      leading={<CategoryIcon icon={entry.icon} tone={entry.tone} />}
+      trailing={<Amount cents={entry.amountCents} kind={entry.income ? 'income' : undefined} />}
       onPress={entry.onPress}
-      disabled={!entry.onPress}
-      accessibilityRole={entry.onPress ? 'button' : 'text'}
       accessibilityLabel={`${entry.name}, ${formatMoney(entry.amountCents)}, ${when}${entry.overdue ? `, ${es.recurring.overdue}` : ''}`}
-      style={({ pressed }) => [styles.upcomingCard, pressed && styles.pressed]}
-    >
-      <View style={styles.cardTop}>
-        <View style={[styles.dateBadge, { backgroundColor: status.bg }]}>
-          <AppText variant="heading" style={{ color: status.fg }}>
-            {parseDate(entry.dueDate).day}
-          </AppText>
-          <AppText variant="small" style={{ color: status.fg }}>
-            {formatMonthShort(entry.dueDate)}
-          </AppText>
-        </View>
-        <CategoryIcon icon={entry.icon} tone={entry.tone} />
-      </View>
-      <AppText variant="bodyStrong" numberOfLines={1}>
-        {entry.name}
-      </AppText>
-      <Amount cents={entry.amountCents} kind={entry.income ? 'income' : undefined} />
-      <StatusPill kind={kind} label={pill} />
-    </Pressable>
+    />
   );
 }
 
@@ -480,14 +407,12 @@ function TransactionRow({
   category,
   author,
   onPress,
-  first,
 }: {
   transaction: Transaction;
   today: DateString;
   category: Category | undefined;
   author: string | null;
   onPress: (() => void) | undefined;
-  first: boolean;
 }) {
   const name = category?.name ?? '—';
   const detail = [
@@ -499,7 +424,6 @@ function TransactionRow({
     .join(' · ');
   return (
     <ListRow
-      first={first}
       title={name}
       detail={detail}
       leading={<CategoryIcon icon={category?.icon} tone={category?.color} />}
@@ -511,7 +435,6 @@ function TransactionRow({
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: color.bg.canvas },
   center: {
     flex: 1,
     justifyContent: 'center',
@@ -520,53 +443,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     backgroundColor: color.bg.canvas,
   },
-  content: {
-    padding: spacing.ml,
-    paddingBottom: spacing.xl,
-    gap: spacing.ml,
-    width: '100%',
-    maxWidth: layout.maxWidth,
-    alignSelf: 'center',
-  },
-  topBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
-  avatar: {
-    width: size.avatar,
-    height: size.avatar,
-    borderRadius: radius.pill,
-    backgroundColor: color.bg.accentTint,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  greeting: { flex: 1, minWidth: 0 },
-  iconButton: {
-    width: size.touch,
-    height: size.touch,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: color.border.default,
-    backgroundColor: color.bg.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  periodBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  section: { gap: spacing.ms },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cards: { gap: spacing.ms, paddingRight: spacing.md },
-  upcomingCard: {
-    width: 168,
-    backgroundColor: color.bg.surface,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: color.border.default,
-    padding: spacing.ms,
-    gap: spacing.sm,
-  },
-  cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  dateBadge: {
-    width: 48,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.md,
-    alignItems: 'center',
-  },
-  pressed: { opacity: 0.8 },
+  notices: { padding: spacing.md, paddingBottom: 0, gap: spacing.ms },
+  none: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
+  more: { alignItems: 'flex-start', paddingLeft: spacing.xl + spacing.md },
 });

@@ -14,6 +14,7 @@ import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { colors, spacing } from '../../src/theme';
 import { typography } from '../../src/design/tokens';
+import { switchColors } from '../../src/components/switchColors';
 
 /**
  * Unirse a un hogar con un enlace o un código (T082, RF-005, RF-008). Sin sesión, manda a
@@ -149,6 +150,7 @@ function Preview({ code }: { code: string }) {
                 <Text style={styles.label}>{es.invitation.confirmLoseData}</Text>
                 <Switch
                   value={confirmLoseData}
+                  {...switchColors(confirmLoseData)}
                   onValueChange={setConfirmLoseData}
                   accessibilityLabel={es.invitation.confirmLoseData}
                 />

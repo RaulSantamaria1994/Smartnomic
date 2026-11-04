@@ -7,7 +7,7 @@ import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
-import { useMembers, useMe } from '../../../src/hooks/data';
+import { useCan, useMembers, useMe } from '../../../src/hooks/data';
 import { exportHousehold } from '../../../src/export/export-household';
 import { clearCache } from '../../../src/cache/query-client';
 import { syncReminders } from '../../../src/reminders/reminders';
@@ -15,8 +15,9 @@ import { authClient } from '../../../src/session/auth-client';
 import { es } from '../../../src/i18n/es';
 import { remindersSupported } from '../../../src/reminders/reminders';
 import { signOut } from '../../../src/session/sign-out';
-import { AppText, Card, Icon, ListRow, type IconName } from '../../../src/design';
-import { color, radius, spacing } from '../../../src/design/tokens';
+import { AppText, Icon, ListRow, Section, type IconName } from '../../../src/design';
+import { color, spacing } from '../../../src/design/tokens';
+import { switchColors } from '../../../src/components/switchColors';
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -31,6 +32,7 @@ export default function Account() {
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [saving, setSaving] = useState(false);
   const members = useMembers(me.data?.household.id);
+  const can = useCan();
   const [exporting, setExporting] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -101,10 +103,9 @@ export default function Account() {
   }
 
   return (
-    <Screen title={es.tabs.household} align="top">
-      <Card padded={false}>
+    <Screen title={es.tabs.household} bleed fab={can('transactions.write')}>
+      <Section>
         <MenuRow
-          first
           icon="household"
           label={es.householdMenu.members}
           onPress={() => router.push('/household/members')}
@@ -124,27 +125,24 @@ export default function Account() {
           label={es.householdMenu.savings}
           onPress={() => router.push('/savings')}
         />
-      </Card>
+      </Section>
 
-      <AppText variant="heading" accessibilityRole="header">
-        {es.settings.reminders}
-      </AppText>
-      <Card style={styles.card}>
+      <Section title={es.settings.reminders} padded separated>
         {!remindersSupported && (
           <AppText variant="caption" tone="muted">
             {es.settings.webNote}
           </AppText>
         )}
         <View style={styles.switchRow}>
-          <AppText variant="bodyStrong" style={styles.flex}>
+          <AppText variant="body" style={styles.flex}>
             {es.settings.enabled}
           </AppText>
           <Switch
             value={member.remindersEnabled}
+            {...switchColors(member.remindersEnabled)}
             onValueChange={(value) => void update({ remindersEnabled: value })}
             accessibilityLabel={es.settings.enabled}
             disabled={saving}
-            trackColor={{ true: color.text.link, false: color.border.strong }}
           />
         </View>
         <TextField
@@ -156,12 +154,9 @@ export default function Account() {
         />
         <Button variant="secondary" label={es.settings.save} onPress={saveTime} loading={saving} />
         {message && <Message text={message.text} kind={message.kind} />}
-      </Card>
+      </Section>
 
-      <AppText variant="heading" accessibilityRole="header">
-        {es.account.exportTitle}
-      </AppText>
-      <Card style={styles.card}>
+      <Section title={es.account.exportTitle} padded separated>
         <AppText variant="caption" tone="muted">
           {es.account.exportHint}
         </AppText>
@@ -171,12 +166,9 @@ export default function Account() {
           onPress={() => void exportData()}
           loading={exporting}
         />
-      </Card>
+      </Section>
 
-      <AppText variant="heading" accessibilityRole="header">
-        {es.account.title}
-      </AppText>
-      <Card style={styles.card}>
+      <Section title={es.account.title} padded>
         <Button
           variant="secondary"
           label={es.auth.signOut}
@@ -223,47 +215,23 @@ export default function Account() {
             />
           </>
         )}
-      </Card>
+      </Section>
     </Screen>
   );
 }
 
-function MenuRow({
-  icon,
-  label,
-  onPress,
-  first,
-}: {
-  icon: IconName;
-  label: string;
-  onPress: () => void;
-  first?: boolean;
-}) {
+function MenuRow({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
   return (
     <ListRow
-      first={first}
       title={label}
       onPress={onPress}
       accessibilityLabel={label}
-      leading={
-        <View style={styles.menuIcon}>
-          <Icon name={icon} tint={color.text.accent} />
-        </View>
-      }
+      leading={<Icon name={icon} tint={color.text.muted} />}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  card: { gap: spacing.ms },
   flex: { flex: 1 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: color.bg.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });

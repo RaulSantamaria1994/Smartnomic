@@ -2,9 +2,9 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { AppText } from './Text';
-import { color, radius, spacing } from './tokens';
+import { color, spacing } from './tokens';
 
-/** Estado vacío amable: icono, texto y, si hay, una acción. */
+/** Estado vacío: icono gris, texto y, si hay, una acción. */
 export function EmptyState({
   icon,
   title,
@@ -18,10 +18,8 @@ export function EmptyState({
 }) {
   return (
     <View style={styles.box}>
-      <View style={styles.badge}>
-        <Icon name={icon} tint={color.text.accent} />
-      </View>
-      <AppText variant="bodyStrong" align="center">
+      <Icon name={icon} size={32} tint={color.text.muted} />
+      <AppText variant="body" align="center">
         {title}
       </AppText>
       {hint && (
@@ -40,13 +38,5 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
-  },
-  badge: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.lg,
-    backgroundColor: color.bg.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

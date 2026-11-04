@@ -1,11 +1,9 @@
 import type { SavingsGoalInput } from '@smartnomic/api';
-import { router } from 'expo-router';
 import { useRef } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { api } from '../../../src/api/client';
-import { Button } from '../../../src/components/Button';
 import { SavingsForm } from '../../../src/components/SavingsForm';
-import { Screen } from '../../../src/components/Screen';
+import { goBack, Screen } from '../../../src/components/Screen';
 import { todayIn, useMe } from '../../../src/hooks/data';
 import { useRefreshSavings } from '../../../src/hooks/useRuleMutations';
 import { es } from '../../../src/i18n/es';
@@ -31,13 +29,12 @@ export default function NewSavingsGoal() {
   async function save(input: SavingsGoalInput) {
     await api.saveSavingsGoal(household!.id, id, input);
     await refresh();
-    router.back();
+    goBack();
   }
 
   return (
-    <Screen title={es.savings.newTitle}>
+    <Screen title={es.savings.newTitle} back>
       <SavingsForm today={todayIn(household.timezone)} onSubmit={save} />
-      <Button variant="link" label={es.transaction.cancel} onPress={() => router.back()} />
     </Screen>
   );
 }

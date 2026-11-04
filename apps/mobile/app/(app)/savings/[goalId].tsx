@@ -2,20 +2,23 @@ import type { SavingsEntryDto } from '@smartnomic/api';
 import { parseAmount } from '@smartnomic/domain';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Animated, StyleSheet, View } from 'react-native';
 import { api } from '../../../src/api/client';
 import { ApiError } from '../../../src/api/http';
+import { AnimatedList } from '../../../src/components/AnimatedList';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
-import { Screen } from '../../../src/components/Screen';
+import { goBack, Screen } from '../../../src/components/Screen';
 import { SegmentedControl } from '../../../src/components/SegmentedControl';
 import { TextField } from '../../../src/components/TextField';
 import { Amount } from '../../../src/design/Amount';
-import { Card } from '../../../src/design/Card';
-import { ListRow } from '../../../src/design/ListRow';
-import { SavingsCard } from '../../../src/design/SavingsCard';
+import { CategoryIcon } from '../../../src/design/CategoryIcon';
+import { ProgressBar } from '../../../src/design/ProgressBar';
+import { savingsStatus } from '../../../src/design/SavingsRow';
+import { Section } from '../../../src/design/Section';
 import { AppText } from '../../../src/design/Text';
-import { spacing } from '../../../src/design/tokens';
+import { color, spacing } from '../../../src/design/tokens';
+import { useBounce } from '../../../src/design/useBounce';
 import {
   amountErrorMessage,
   formatDayMonth,
@@ -48,6 +51,11 @@ export default function SavingsDetail() {
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+  // El icono da un bote la primera vez que se ve conseguida (animación 8).
+  const bounce = useBounce(
+    `detalle-${goalId}`,
+    savings.data?.goals.find((g) => g.id === goalId)?.plan.status === 'achieved',
+  );
 
   if (!household || !savings.data) {
     return (
@@ -61,7 +69,7 @@ export default function SavingsDetail() {
     return (
       <Screen>
         <Message text={es.savings.notFound} />
-        <Button label={es.settings.back} onPress={() => router.back()} />
+        <Button label={es.settings.back} onPress={() => goBack()} />
       </Screen>
     );
   }
@@ -127,7 +135,7 @@ export default function SavingsDetail() {
     try {
       await api.deleteSavingsGoal(household!.id, goal!.id);
       await refresh();
-      router.back();
+      goBack();
     } catch (e) {
       fail(e);
     }
@@ -144,12 +152,48 @@ export default function SavingsDetail() {
     }
   }
 
+  const status = savingsStatus(goal);
+  const quota =
+    goal.plan.status === 'active' && goal.plan.quotaCents > 0
+      ? es.savings.quota(formatMoney(goal.plan.quotaCents), goal.contributionDay)
+      : null;
+
   return (
-    <Screen title={goal.name} align="top">
-      <SavingsCard goal={goal} />
+    <Screen title={goal.name} back bleed>
+      <Section padded separated>
+        <View style={styles.progress}>
+          <AppText variant="caption" tone="muted">
+            {es.savings.until(formatShortDate(goal.deadline))} ·{' '}
+            <AppText variant="caption" style={{ color: color.status[status.kind] }}>
+              {status.label}
+            </AppText>
+          </AppText>
+          <AppText variant="title" tabular>
+            {es.savings.progress(formatMoney(goal.plan.savedCents), formatMoney(goal.targetCents))}{' '}
+            ({goal.plan.percent} %)
+          </AppText>
+          <ProgressBar value={goal.plan.percent / 100} />
+          {quota && (
+            <AppText variant="caption" tone="muted">
+              {quota}
+            </AppText>
+          )}
+        </View>
+        {goal.closedAt && (
+          <AppText variant="body" tone="muted">
+            {es.savings.closedTitle(formatShortDate(goal.closedAt.slice(0, 10)))}
+          </AppText>
+        )}
+        {canWrite && open && goal.plan.nextDueDate && (
+          <Button
+            label={es.savings.payDue(formatDueDate(goal.plan.nextDueDate, today))}
+            onPress={() => router.push(`/savings/${goal.id}/due/${goal.plan.nextDueDate}`)}
+          />
+        )}
+      </Section>
 
       {canWrite && open && confirmClose && (
-        <Card style={styles.form}>
+        <Section padded separated>
           <AppText variant="bodyStrong">
             {goal.plan.savedCents > 0
               ? es.savings.closeConfirm(formatMoney(goal.plan.savedCents))
@@ -166,22 +210,27 @@ export default function SavingsDetail() {
             label={es.transaction.cancel}
             onPress={() => setConfirmClose(false)}
           />
-        </Card>
+        </Section>
       )}
 
       {goal.plan.status === 'achieved' && (
-        <Card style={styles.form}>
-          <AppText variant="title" tone="accent" accessibilityRole="header">
-            {es.savings.achievedTitle}
-          </AppText>
+        <Section padded separated>
+          <View style={styles.achieved}>
+            <Animated.View style={{ transform: [{ translateY: bounce }] }}>
+              <CategoryIcon icon={goal.icon} tone={color.text.accent} size="lg" />
+            </Animated.View>
+            <AppText variant="title" tone="accent" accessibilityRole="header">
+              {es.savings.achievedTitle}
+            </AppText>
+          </View>
           <AppText variant="body">{es.savings.achievedHint}</AppText>
           {canWrite && !confirmClose && (
             <Button label={es.savings.closeAndUse} onPress={() => setConfirmClose(true)} />
           )}
-        </Card>
+        </Section>
       )}
       {goal.plan.status === 'expired' && (
-        <Card style={styles.form}>
+        <Section padded separated>
           <Message text={es.savings.expiredTitle(formatShortDate(goal.deadline))} />
           <AppText variant="body">{es.savings.expiredHint}</AppText>
           {canWrite && (
@@ -190,23 +239,11 @@ export default function SavingsDetail() {
               onPress={() => router.push(`/savings/${goal.id}/edit`)}
             />
           )}
-        </Card>
-      )}
-      {goal.closedAt && (
-        <AppText variant="body" tone="muted">
-          {es.savings.closedTitle(formatShortDate(goal.closedAt.slice(0, 10)))}
-        </AppText>
-      )}
-
-      {canWrite && open && goal.plan.nextDueDate && (
-        <Button
-          label={es.savings.payDue(formatDueDate(goal.plan.nextDueDate, today))}
-          onPress={() => router.push(`/savings/${goal.id}/due/${goal.plan.nextDueDate}`)}
-        />
+        </Section>
       )}
 
       {canWrite && open && (
-        <Card style={styles.form}>
+        <Section padded separated>
           <SegmentedControl
             accessibilityLabel={es.savings.entryKind}
             value={kind}
@@ -221,6 +258,7 @@ export default function SavingsDetail() {
             value={amount}
             onChangeText={setAmount}
             keyboardType="decimal-pad"
+            suffix="€"
             placeholder="0,00"
           />
           <TextField
@@ -234,72 +272,59 @@ export default function SavingsDetail() {
             loading={busy}
             onPress={() => void save()}
           />
-        </Card>
+          {message && <Message text={message.text} kind={message.kind} />}
+        </Section>
       )}
-
-      {message && <Message text={message.text} kind={message.kind} />}
-
-      <View style={styles.section}>
-        <AppText variant="heading" accessibilityRole="header">
-          {es.savings.history}
-        </AppText>
-        {entries.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
-        {entries.data && list.length === 0 && (
-          <AppText variant="body" tone="muted">
-            {es.savings.noHistory}
-          </AppText>
-        )}
-        {list.length > 0 && (
-          <Card padded={false}>
-            {list.map((entry, index) => (
-              <EntryRow
-                key={entry.id}
-                entry={entry}
-                first={index === 0}
-                onUndo={canWrite && open && index === 0 ? () => void undo(entry) : undefined}
-              />
-            ))}
-          </Card>
-        )}
-      </View>
-
-      {canWrite && open && (
-        <View style={styles.section}>
-          {!confirmClose && (
-            <>
-              <Button
-                variant="secondary"
-                label={es.savings.edit}
-                onPress={() => router.push(`/savings/${goal.id}/edit`)}
-              />
-              {entries.data && list.length === 0 ? (
-                <Button variant="danger" label={es.savings.remove} onPress={() => void remove()} />
-              ) : (
-                <Button
-                  variant="secondary"
-                  label={es.savings.close}
-                  onPress={() => setConfirmClose(true)}
-                />
-              )}
-            </>
-          )}
+      {message && !(canWrite && open) && (
+        <View style={styles.pad}>
+          <Message text={message.text} kind={message.kind} />
         </View>
       )}
 
-      <Button variant="link" label={es.settings.back} onPress={() => router.back()} />
+      <Section title={es.savings.history}>
+        {entries.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
+        {entries.data && list.length === 0 && (
+          <AppText variant="body" tone="muted" style={styles.none}>
+            {es.savings.noHistory}
+          </AppText>
+        )}
+        <AnimatedList
+          items={list}
+          keyOf={(entry) => entry.id}
+          render={(entry) => (
+            <EntryRow
+              entry={entry}
+              onUndo={
+                canWrite && open && entry.id === list[0]?.id ? () => void undo(entry) : undefined
+              }
+            />
+          )}
+        />
+      </Section>
+
+      {canWrite && open && !confirmClose && (
+        <View style={styles.pad}>
+          <Button
+            variant="secondary"
+            label={es.savings.edit}
+            onPress={() => router.push(`/savings/${goal.id}/edit`)}
+          />
+          {entries.data && list.length === 0 ? (
+            <Button variant="danger" label={es.savings.remove} onPress={() => void remove()} />
+          ) : (
+            <Button
+              variant="secondary"
+              label={es.savings.close}
+              onPress={() => setConfirmClose(true)}
+            />
+          )}
+        </View>
+      )}
     </Screen>
   );
 }
 
-function EntryRow({
-  entry,
-  first,
-  onUndo,
-}: {
-  entry: SavingsEntryDto;
-  first: boolean;
-  onUndo: (() => void) | undefined;
-}) {
+function EntryRow({ entry, onUndo }: { entry: SavingsEntryDto; onUndo: (() => void) | undefined }) {
   const title = es.savings.kinds[entry.kind];
   const detail = [
     formatShortDate(entry.date),
@@ -309,37 +334,53 @@ function EntryRow({
     .filter(Boolean)
     .join(' · ');
   return (
-    <View>
-      <ListRow
-        first={first}
-        title={title}
-        detail={detail}
-        trailing={
-          entry.kind === 'skip' ? undefined : (
-            <Amount
-              cents={entry.amountCents}
-              kind={entry.kind === 'deposit' ? 'income' : 'expense'}
-            />
-          )
-        }
+    <View style={styles.entry}>
+      <View
+        style={styles.entryText}
+        accessible
         accessibilityLabel={`${title}, ${entry.kind === 'skip' ? '' : `${formatMoney(entry.amountCents)}, `}${detail}`}
-      />
-      {onUndo && (
-        <View style={styles.undo}>
+      >
+        <AppText variant="body">{title}</AppText>
+        <AppText variant="caption" tone="muted">
+          {detail}
+        </AppText>
+      </View>
+      <View style={styles.entrySide}>
+        {entry.kind !== 'skip' && (
+          <Amount
+            cents={entry.amountCents}
+            kind={entry.kind === 'deposit' ? 'income' : 'expense'}
+          />
+        )}
+        {onUndo && (
           <Button
             variant="link"
             label={es.savings.undo}
             accessibilityLabel={es.savings.undoLabel(title)}
             onPress={onUndo}
           />
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  form: { gap: spacing.ms },
-  section: { gap: spacing.sm },
-  undo: { alignItems: 'flex-end', paddingHorizontal: spacing.md },
+  progress: { gap: spacing.xs + 2 },
+  achieved: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
+  pad: { padding: spacing.md, gap: spacing.ms },
+  none: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
+  entry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.xs,
+    minHeight: 64,
+    borderBottomWidth: 1,
+    borderColor: color.border.default,
+  },
+  entryText: { flex: 1, gap: spacing.xxs, minWidth: 0, paddingVertical: spacing.sm },
+  entrySide: { alignItems: 'flex-end', paddingRight: spacing.sm },
 });
