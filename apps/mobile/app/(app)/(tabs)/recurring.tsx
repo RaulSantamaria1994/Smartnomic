@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
+import { AnimatedList } from '../../../src/components/AnimatedList';
 import { Screen } from '../../../src/components/Screen';
 import { describeSchedule } from '../../../src/format';
 import { useCan, useCategories, useMe, useRecurring } from '../../../src/hooks/data';
@@ -31,14 +32,15 @@ export default function RecurringList() {
         <EmptyState icon="recurring" title={es.recurring.empty} />
       )}
       {rules.data && rules.data.rules.length > 0 && (
-        <>
-          {rules.data.rules.map((rule) => {
+        <AnimatedList
+          items={rules.data.rules}
+          keyOf={(rule) => rule.id}
+          render={(rule) => {
             const category = byId.get(rule.categoryId);
             const schedule =
               describeSchedule(rule) + (rule.active ? '' : ` · ${es.recurring.inactive}`);
             return (
               <ListRow
-                key={rule.id}
                 title={rule.name}
                 detail={schedule}
                 strike={!rule.active}
@@ -53,8 +55,8 @@ export default function RecurringList() {
                 onPress={canWrite ? () => router.push(`/recurring/${rule.id}`) : undefined}
               />
             );
-          })}
-        </>
+          }}
+        />
       )}
       {canWrite && (
         <View style={styles.block}>

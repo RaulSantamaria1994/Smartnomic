@@ -12,6 +12,7 @@ import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '../../../src/api/http';
 import { Button } from '../../../src/components/Button';
+import { MonthSlide } from '../../../src/components/MonthSlide';
 import { Screen } from '../../../src/components/Screen';
 import { Message } from '../../../src/components/Message';
 import { MonthGrid } from '../../../src/components/MonthGrid';
@@ -46,6 +47,7 @@ export default function Calendar() {
   const current = household ? monthOf(todayIn(household.timezone)) : undefined;
   const [month, setMonth] = useState<string | null>(null);
   const [selected, setSelected] = useState<DateString | null>(null);
+  const [direction, setDirection] = useState<1 | -1>(1);
   const visible = month ?? current;
   const calendar = useCalendar(household?.id, visible);
   const rules = useRecurring(household?.id);
@@ -89,12 +91,18 @@ export default function Calendar() {
       prev={{
         label: es.calendar.previous,
         disabled: !bounds || visible <= bounds.min,
-        onPress: () => go(shiftMonth(visible, -1)),
+        onPress: () => {
+          setDirection(-1);
+          go(shiftMonth(visible, -1));
+        },
       }}
       next={{
         label: es.calendar.next,
         disabled: !bounds || visible >= bounds.max,
-        onPress: () => go(shiftMonth(visible, 1)),
+        onPress: () => {
+          setDirection(1);
+          go(shiftMonth(visible, 1));
+        },
       }}
       bleed
       fab={can('transactions.write')}
@@ -121,74 +129,76 @@ export default function Calendar() {
         </View>
       )}
 
-      <Section separated padded>
-        <View style={styles.totals}>
-          <Total label={es.calendar.expenses} cents={shown?.totals.expenseCents} />
-          <Total label={es.calendar.income} cents={shown?.totals.incomeCents} />
-          <Total
-            label={es.calendar.pending}
-            cents={shown?.totals.pendingExpenseCents}
-            danger={Boolean(shown && shown.totals.pendingExpenseCents > 0)}
-          />
-        </View>
-      </Section>
-
-      <Section separated>
-        {shown ? (
-          <View style={styles.grid}>
-            <MonthGrid
-              month={visible}
-              items={[...shown.items, ...shown.savings]}
-              today={shown.today}
-              selected={day}
-              onSelect={setSelected}
+      <MonthSlide month={visible} direction={direction}>
+        <Section separated padded>
+          <View style={styles.totals}>
+            <Total label={es.calendar.expenses} cents={shown?.totals.expenseCents} />
+            <Total label={es.calendar.income} cents={shown?.totals.incomeCents} />
+            <Total
+              label={es.calendar.pending}
+              cents={shown?.totals.pendingExpenseCents}
+              danger={Boolean(shown && shown.totals.pendingExpenseCents > 0)}
             />
           </View>
-        ) : (
-          <ActivityIndicator accessibilityLabel={es.common.loading} />
-        )}
-      </Section>
-
-      {shown && !hasAny && (
-        <EmptyState icon="calendar" title={es.calendar.empty} hint={es.calendar.emptyHint} />
-      )}
-
-      {shown && day && hasAny && (
-        <Section title={capitalize(formatDay(day))}>
-          {dayItems.length + daySavings.length === 0 && (
-            <AppText variant="caption" tone="muted" style={styles.none}>
-              {es.calendar.noneThatDay}
-            </AppText>
-          )}
-          {dayItems.map((item) => (
-            <ItemRow
-              key={`${item.ruleId}-${item.dueDate}`}
-              item={item}
-              rule={ruleById.get(item.ruleId)}
-              categories={categoryById}
-              resolvedBy={item.resolvedBy ? memberName.get(item.resolvedBy) : undefined}
-              onPress={
-                canResolve && (item.status === 'pending' || item.status === 'overdue')
-                  ? () => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)
-                  : undefined
-              }
-            />
-          ))}
-          {daySavings.map((item) => (
-            <SavingsRow
-              key={`${item.goalId}-${item.dueDate}`}
-              item={item}
-              name={goalById.get(item.goalId)?.name ?? '—'}
-              icon={goalById.get(item.goalId)?.icon}
-              onPress={
-                canSave && (item.status === 'pending' || item.status === 'overdue')
-                  ? () => router.push(`/savings/${item.goalId}/due/${item.dueDate}`)
-                  : undefined
-              }
-            />
-          ))}
         </Section>
-      )}
+
+        <Section separated>
+          {shown ? (
+            <View style={styles.grid}>
+              <MonthGrid
+                month={visible}
+                items={[...shown.items, ...shown.savings]}
+                today={shown.today}
+                selected={day}
+                onSelect={setSelected}
+              />
+            </View>
+          ) : (
+            <ActivityIndicator accessibilityLabel={es.common.loading} />
+          )}
+        </Section>
+
+        {shown && !hasAny && (
+          <EmptyState icon="calendar" title={es.calendar.empty} hint={es.calendar.emptyHint} />
+        )}
+
+        {shown && day && hasAny && (
+          <Section title={capitalize(formatDay(day))}>
+            {dayItems.length + daySavings.length === 0 && (
+              <AppText variant="caption" tone="muted" style={styles.none}>
+                {es.calendar.noneThatDay}
+              </AppText>
+            )}
+            {dayItems.map((item) => (
+              <ItemRow
+                key={`${item.ruleId}-${item.dueDate}`}
+                item={item}
+                rule={ruleById.get(item.ruleId)}
+                categories={categoryById}
+                resolvedBy={item.resolvedBy ? memberName.get(item.resolvedBy) : undefined}
+                onPress={
+                  canResolve && (item.status === 'pending' || item.status === 'overdue')
+                    ? () => router.push(`/occurrence/${item.ruleId}/${item.dueDate}`)
+                    : undefined
+                }
+              />
+            ))}
+            {daySavings.map((item) => (
+              <SavingsRow
+                key={`${item.goalId}-${item.dueDate}`}
+                item={item}
+                name={goalById.get(item.goalId)?.name ?? '—'}
+                icon={goalById.get(item.goalId)?.icon}
+                onPress={
+                  canSave && (item.status === 'pending' || item.status === 'overdue')
+                    ? () => router.push(`/savings/${item.goalId}/due/${item.dueDate}`)
+                    : undefined
+                }
+              />
+            ))}
+          </Section>
+        )}
+      </MonthSlide>
     </Screen>
   );
 }

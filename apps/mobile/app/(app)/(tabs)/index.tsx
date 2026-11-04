@@ -20,6 +20,8 @@ import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '../../../src/api/http';
 import { Button } from '../../../src/components/Button';
+import { AnimatedList } from '../../../src/components/AnimatedList';
+import { MonthSlide } from '../../../src/components/MonthSlide';
 import { Screen } from '../../../src/components/Screen';
 import { Message } from '../../../src/components/Message';
 import { ReminderBanners } from '../../../src/components/ReminderBanners';
@@ -71,6 +73,7 @@ export default function Month() {
   const household = me.data?.household;
   const [start, setStart] = useState<DateString | null>(null);
   const [shown, setShown] = useState(PAGE_SIZE);
+  const [direction, setDirection] = useState<1 | -1>(1);
   const thisPeriod = household
     ? currentPeriodStart(household.timezone, household.monthStartDay)
     : undefined;
@@ -102,7 +105,8 @@ export default function Month() {
 
   const today = todayIn(household.timezone);
   const current = periodOf(periodStart, household.monthStartDay);
-  const move = (n: number) => {
+  const move = (n: 1 | -1) => {
+    setDirection(n);
     setStart(shiftPeriod(current, n, household.monthStartDay).start);
     setShown(PAGE_SIZE);
   };
@@ -118,6 +122,7 @@ export default function Month() {
       : null;
   const offline = period.error instanceof ApiError && period.error.code === 'network';
   const data = period.data;
+  const visibleTransactions = data ? data.transactions.slice(0, shown) : [];
 
   return (
     <Screen
@@ -153,66 +158,72 @@ export default function Month() {
         </View>
       )}
 
-      <Section separated>
-        <SummaryBlock
-          incomeCents={data?.summary.incomeCents}
-          expenseCents={data?.summary.expenseCents}
-          balanceCents={data?.summary.balanceCents}
-          setAsideCents={data?.summary.setAsideCents}
-          current={periodStart === thisPeriod}
+      <MonthSlide month={periodStart} direction={direction}>
+        <Section separated>
+          <SummaryBlock
+            incomeCents={data?.summary.incomeCents}
+            expenseCents={data?.summary.expenseCents}
+            balanceCents={data?.summary.balanceCents}
+            setAsideCents={data?.summary.setAsideCents}
+            current={periodStart === thisPeriod}
+          />
+        </Section>
+
+        <Upcoming
+          items={upcoming.data?.occurrences}
+          savings={upcoming.data?.savings}
+          goals={savings.data?.goals}
+          canSave={can('savings.write')}
+          today={upcoming.data?.today}
+          rules={rules.data?.rules}
+          categories={byId}
+          canResolve={can('occurrences.resolve')}
         />
-      </Section>
 
-      <Upcoming
-        items={upcoming.data?.occurrences}
-        savings={upcoming.data?.savings}
-        goals={savings.data?.goals}
-        canSave={can('savings.write')}
-        today={upcoming.data?.today}
-        rules={rules.data?.rules}
-        categories={byId}
-        canResolve={can('occurrences.resolve')}
-      />
+        <SavingsSection goals={savings.data?.goals} canWrite={can('savings.write')} />
 
-      <SavingsSection goals={savings.data?.goals} canWrite={can('savings.write')} />
+        <Section title={es.home.transactions}>
+          {period.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
+          {period.error && !offline && !data && (
+            <View style={styles.notices}>
+              <Message text={period.error.message} />
+            </View>
+          )}
 
-      <Section title={es.home.transactions}>
-        {period.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
-        {period.error && !offline && !data && (
-          <View style={styles.notices}>
-            <Message text={period.error.message} />
-          </View>
-        )}
+          {data && data.transactions.length === 0 && (
+            <EmptyState
+              icon="tag"
+              title={es.month.empty}
+              {...(canWrite && { hint: es.month.emptyHint })}
+            />
+          )}
 
-        {data && data.transactions.length === 0 && (
-          <EmptyState
-            icon="tag"
-            title={es.month.empty}
-            {...(canWrite && { hint: es.month.emptyHint })}
-          />
-        )}
-
-        {data &&
-          data.transactions
-            .slice(0, shown)
-            .map((t) => (
-              <TransactionRow
-                key={t.id}
-                transaction={t}
-                today={today}
-                category={byId.get(t.categoryId)}
-                author={authorOf(t)}
-                onPress={canWrite ? () => router.push(`/transaction/${t.id}`) : undefined}
-              />
-            ))}
-        {data && data.transactions.length > shown && (
-          <Button
-            variant="link"
-            label={es.month.showMore(data.transactions.length - shown)}
-            onPress={() => setShown((n) => n + PAGE_SIZE)}
-          />
-        )}
-      </Section>
+          {data && (
+            <AnimatedList
+              // Otro mes es otra lista: entra deslizando entera, sin fundir fila a fila.
+              key={periodStart}
+              items={visibleTransactions}
+              keyOf={(t) => t.id}
+              render={(t) => (
+                <TransactionRow
+                  transaction={t}
+                  today={today}
+                  category={byId.get(t.categoryId)}
+                  author={authorOf(t)}
+                  onPress={canWrite ? () => router.push(`/transaction/${t.id}`) : undefined}
+                />
+              )}
+            />
+          )}
+          {data && data.transactions.length > shown && (
+            <Button
+              variant="link"
+              label={es.month.showMore(data.transactions.length - shown)}
+              onPress={() => setShown((n) => n + PAGE_SIZE)}
+            />
+          )}
+        </Section>
+      </MonthSlide>
     </Screen>
   );
 }

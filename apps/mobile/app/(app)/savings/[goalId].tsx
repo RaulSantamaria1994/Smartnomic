@@ -2,20 +2,23 @@ import type { SavingsEntryDto } from '@smartnomic/api';
 import { parseAmount } from '@smartnomic/domain';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Animated, StyleSheet, View } from 'react-native';
 import { api } from '../../../src/api/client';
 import { ApiError } from '../../../src/api/http';
+import { AnimatedList } from '../../../src/components/AnimatedList';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { goBack, Screen } from '../../../src/components/Screen';
 import { SegmentedControl } from '../../../src/components/SegmentedControl';
 import { TextField } from '../../../src/components/TextField';
 import { Amount } from '../../../src/design/Amount';
+import { CategoryIcon } from '../../../src/design/CategoryIcon';
 import { ProgressBar } from '../../../src/design/ProgressBar';
 import { savingsStatus } from '../../../src/design/SavingsRow';
 import { Section } from '../../../src/design/Section';
 import { AppText } from '../../../src/design/Text';
 import { color, spacing } from '../../../src/design/tokens';
+import { useBounce } from '../../../src/design/useBounce';
 import {
   amountErrorMessage,
   formatDayMonth,
@@ -48,6 +51,11 @@ export default function SavingsDetail() {
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+  // El icono da un bote la primera vez que se ve conseguida (animación 8).
+  const bounce = useBounce(
+    `detalle-${goalId}`,
+    savings.data?.goals.find((g) => g.id === goalId)?.plan.status === 'achieved',
+  );
 
   if (!household || !savings.data) {
     return (
@@ -207,9 +215,14 @@ export default function SavingsDetail() {
 
       {goal.plan.status === 'achieved' && (
         <Section padded separated>
-          <AppText variant="title" tone="accent" accessibilityRole="header">
-            {es.savings.achievedTitle}
-          </AppText>
+          <View style={styles.achieved}>
+            <Animated.View style={{ transform: [{ translateY: bounce }] }}>
+              <CategoryIcon icon={goal.icon} tone={color.text.accent} size="lg" />
+            </Animated.View>
+            <AppText variant="title" tone="accent" accessibilityRole="header">
+              {es.savings.achievedTitle}
+            </AppText>
+          </View>
           <AppText variant="body">{es.savings.achievedHint}</AppText>
           {canWrite && !confirmClose && (
             <Button label={es.savings.closeAndUse} onPress={() => setConfirmClose(true)} />
@@ -275,13 +288,18 @@ export default function SavingsDetail() {
             {es.savings.noHistory}
           </AppText>
         )}
-        {list.map((entry, index) => (
-          <EntryRow
-            key={entry.id}
-            entry={entry}
-            onUndo={canWrite && open && index === 0 ? () => void undo(entry) : undefined}
-          />
-        ))}
+        <AnimatedList
+          items={list}
+          keyOf={(entry) => entry.id}
+          render={(entry) => (
+            <EntryRow
+              entry={entry}
+              onUndo={
+                canWrite && open && entry.id === list[0]?.id ? () => void undo(entry) : undefined
+              }
+            />
+          )}
+        />
       </Section>
 
       {canWrite && open && !confirmClose && (
@@ -349,6 +367,7 @@ function EntryRow({ entry, onUndo }: { entry: SavingsEntryDto; onUndo: (() => vo
 
 const styles = StyleSheet.create({
   progress: { gap: spacing.xs + 2 },
+  achieved: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
   pad: { padding: spacing.md, gap: spacing.ms },
   none: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
   entry: {

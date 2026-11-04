@@ -1,5 +1,5 @@
 import type { SavingsGoalDto } from '@smartnomic/api';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { formatMoney, formatShortDate } from '../format';
 import { es } from '../i18n/es';
 import { CategoryIcon } from './CategoryIcon';
@@ -8,6 +8,7 @@ import { ProgressBar } from './ProgressBar';
 import { type StatusKind } from './StatusText';
 import { AppText } from './Text';
 import { color, spacing } from './tokens';
+import { useBounce } from './useBounce';
 
 /** Estado de una hucha en texto de color (RF-204, RF-604). */
 export function savingsStatus(goal: SavingsGoalDto): { kind: StatusKind; label: string } {
@@ -32,6 +33,8 @@ export function savingsStatus(goal: SavingsGoalDto): { kind: StatusKind; label: 
 export function SavingsRow({ goal, onPress }: { goal: SavingsGoalDto; onPress?: () => void }) {
   const { plan } = goal;
   const status = savingsStatus(goal);
+  // Al conseguirla, su icono da un bote una vez (animación 8).
+  const bounce = useBounce(goal.id, plan.status === 'achieved');
   const progress = es.savings.progress(formatMoney(plan.savedCents), formatMoney(goal.targetCents));
   const quota =
     plan.status === 'active' && plan.quotaCents > 0
@@ -52,7 +55,9 @@ export function SavingsRow({ goal, onPress }: { goal: SavingsGoalDto; onPress?: 
       android_ripple={onPress ? { color: color.bg.sunken } : undefined}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
-      <CategoryIcon icon={goal.icon} tone={color.text.muted} />
+      <Animated.View style={{ transform: [{ translateY: bounce }] }}>
+        <CategoryIcon icon={goal.icon} tone={color.text.muted} />
+      </Animated.View>
       <View style={styles.text}>
         <AppText variant="body" numberOfLines={2}>
           {goal.name}

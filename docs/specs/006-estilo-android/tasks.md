@@ -72,14 +72,14 @@ fallar antes de implementar.
 
 ## Fase 4: Historia 2 — Animaciones pequeñas (P2)
 
-- [ ] A016 [P] [US2] Tests de `src/design/motion.test.ts` (duración 0 con reducir
+- [x] A016 [P] [US2] Tests de `src/design/timing.test.ts` (duración 0 con reducir
       movimiento) y `src/components/animatedList.test.ts` (entradas, salidas, primera carga
       sin animar, la misma clave que vuelve)
-- [ ] A017 [US2] `motion.ts` (`useReduceMotion`, `duration`, `useNativeDriver` por
-      plataforma) y `animatedList.ts`
-- [ ] A018 [P] [US2] Animaciones 1 (pestaña), 2 (botón «+»), 3 (logo) y 4 (marca del chip)
-- [ ] A019 [P] [US2] Animaciones 5 (barras de progreso) y 8 (hucha conseguida)
-- [ ] A020 [US2] Animación 6 (`MonthSlide` en «Mes» y «Calendario») y 7 (`AnimatedList`
+- [x] A017 [US2] `timing.ts` (`duration`) y `motion.ts` (`useReduceMotion`, `animate`,
+      `useNativeDriver` por plataforma) y `animatedList.ts`
+- [x] A018 [P] [US2] Animaciones 1 (pestaña), 2 (botón «+»), 3 (logo) y 4 (marca del chip)
+- [x] A019 [P] [US2] Animaciones 5 (barras de progreso) y 8 (hucha conseguida)
+- [x] A020 [US2] Animación 6 (`MonthSlide` en «Mes» y «Calendario») y 7 (`AnimatedList`
       en movimientos, pagos e historial de la hucha)
 
 **Punto de control**: RF-607 y RF-608.

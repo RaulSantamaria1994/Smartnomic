@@ -145,7 +145,7 @@ con «Quitar animaciones» activado no se mueve nada y todo funciona igual.
   datos ni su API.
 - **RF-610**: La app DEBE seguir cumpliendo WCAG 2.1 AA: contraste 4,5:1 en texto y 3:1 en
   iconos y bordes de campos, objetivos táctiles de 44 px y nombres para el lector de
-  pantalla (la flecha atrás se anuncia «Volver»; el botón flotante, «Apuntar»).
+  pantalla (la flecha atrás se anuncia «Volver»; el botón flotante, «Apuntar un movimiento»).
 
 ## Criterios de éxito _(obligatorio)_
 
