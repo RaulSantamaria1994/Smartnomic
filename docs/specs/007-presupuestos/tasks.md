@@ -20,15 +20,15 @@ fallar antes de implementar.
 
 **Objetivo**: cálculos, esquemas y tabla listos, sin rutas ni pantallas.
 
-- [ ] B001 [P] Tests de `packages/domain/src/budgets.test.ts`: lo que queda y lo que se ha
+- [x] B001 [P] Tests de `packages/domain/src/budgets.test.ts`: lo que queda y lo que se ha
       pasado, nivel normal / cerca (desde el 80 %) / pasado, presupuesto sin gastos y gastos
       justo en el límite, orden de más a menos gastado (y por nombre a igualdad)
-- [ ] B002 Implementar `packages/domain/src/budgets.ts` y exportarlo
-- [ ] B003 [P] Acción `budgets.write` (propietario y editor) en `permissions.ts` y su test
-- [ ] B004 [P] Esquemas en `packages/api`: entrada `{ amountCents }` con límites, presupuesto
+- [x] B002 Implementar `packages/domain/src/budgets.ts` y exportarlo
+- [x] B003 [P] Acción `budgets.write` (propietario y editor) en `permissions.ts` y su test
+- [x] B004 [P] Esquemas en `packages/api`: entrada `{ amountCents }` con límites, presupuesto
       del periodo `{ categoryId, amountCents, spentCents }`, `budgets` en el periodo y en la
       exportación con valor por defecto `[]`, con tests
-- [ ] B005 Tabla `budgets` en `apps/server/src/db/schema.ts` y migración `0007` con
+- [x] B005 Tabla `budgets` en `apps/server/src/db/schema.ts` y migración `0007` con
       `pnpm db:generate` (clave compuesta a la categoría, único por categoría y periodo,
       importe positivo o nulo), con su test de migración
 

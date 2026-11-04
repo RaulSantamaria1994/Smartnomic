@@ -65,6 +65,7 @@ export function registerPeriodRoutes(
           setAsideCents: await setAsideBetween(db, household.id, period.start, period.end),
         },
         transactions: rows.map(toTransaction),
+        budgets: [],
       };
     },
   );

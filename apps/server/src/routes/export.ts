@@ -118,6 +118,7 @@ export function registerExportRoutes(
           dueDate: e.dueDate,
           createdAt: e.createdAt.toISOString(),
         })),
+        budgets: [],
       };
       const day = exportedAt.toISOString().slice(0, 10);
       return reply

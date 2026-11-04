@@ -11,6 +11,7 @@ const expected: Record<Role, Action[]> = {
     'occurrences.resolve',
     'categories.write',
     'savings.write',
+    'budgets.write',
     'data.export',
     'reminders.manageOwn',
     'household.leave',
@@ -32,6 +33,12 @@ describe('can', () => {
     expect(can('owner', 'savings.write')).toBe(true);
     expect(can('editor', 'savings.write')).toBe(true);
     expect(can('viewer', 'savings.write')).toBe(false);
+  });
+
+  it('propietario y editor ponen presupuestos; el lector solo los ve (especificación 007)', () => {
+    expect(can('owner', 'budgets.write')).toBe(true);
+    expect(can('editor', 'budgets.write')).toBe(true);
+    expect(can('viewer', 'budgets.write')).toBe(false);
   });
 
   it('el propietario no puede salir del hogar sin pasar antes la propiedad', () => {

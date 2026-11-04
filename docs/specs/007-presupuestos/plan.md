@@ -56,7 +56,8 @@ budgets
   member_id     uuid  null            -- quién lo cambió (se conserva si sale del hogar)
   created_at, updated_at  timestamptz
   unique (category_id, valid_from)
-  foreign key (category_id, household_id) → categories(id, household_id)
+  kind          transaction_kind not null default 'expense'  -- check kind = 'expense'
+  foreign key (category_id, household_id, kind) → categories(id, household_id, kind)
   check (amount_cents is null or amount_cents > 0)
 ```
 
@@ -74,8 +75,8 @@ budgets
 - `GET /api/households/:id/periods/:start` añade
   `budgets: [{ categoryId, amountCents, spentCents }]` (por defecto `[]`), solo de categorías
   de gasto no archivadas con presupuesto en ese periodo.
-- `PUT /api/households/:id/budgets/:categoryId` con `{ amountCents }` (céntimos > 0 y como
-  mucho 1.000.000.000): vale desde el periodo en curso. `403` sin `budgets.write`; `404` si la
+- `PUT /api/households/:id/budgets/:categoryId` con `{ amountCents }` (céntimos > 0 con el máximo
+  de siempre, `MAX_CENTS`): vale desde el periodo en curso. `403` sin `budgets.write`; `404` si la
   categoría no es del hogar; `409` si es de ingresos o está archivada.
 - `DELETE /api/households/:id/budgets/:categoryId`: sin presupuesto desde el periodo en curso
   (idempotente).
