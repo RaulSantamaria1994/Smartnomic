@@ -15,6 +15,8 @@ import {
   memberSchema,
   meResponseSchema,
   periodResponseSchema,
+  searchResponseSchema,
+  type SearchFilters,
   recurringListSchema,
   savingsEntriesResponseSchema,
   savingsEntrySchema,
@@ -38,6 +40,7 @@ import { z } from 'zod';
 import { API_URL } from '../config';
 import { sessionCredentials, sessionHeaders } from '../session/auth-client';
 import { createHttpClient } from './http';
+import { searchQueryString } from './searchQuery';
 
 const request = createHttpClient({
   baseUrl: API_URL,
@@ -54,6 +57,11 @@ export const api = {
     request(`${household(householdId)}/categories`, { schema: categoriesResponseSchema }),
   period: (householdId: string, start: string) =>
     request(`${household(householdId)}/periods/${start}`, { schema: periodResponseSchema }),
+  /** Una página de la búsqueda de movimientos con filtros (especificación 009). */
+  searchTransactions: (householdId: string, filters: SearchFilters, cursor?: string) =>
+    request(`${household(householdId)}/transactions/search${searchQueryString(filters, cursor)}`, {
+      schema: searchResponseSchema,
+    }),
   /** Gráficas de los 6 meses que terminan en el que empieza en `start` (especificación 008). */
   charts: (householdId: string, start: string) =>
     request(`${household(householdId)}/charts/${start}`, { schema: chartsResponseSchema }),

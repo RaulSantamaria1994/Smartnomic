@@ -10,4 +10,5 @@ export * from './schemas/households';
 export * from './schemas/members';
 export * from './schemas/recurring';
 export * from './schemas/savings';
+export * from './schemas/search';
 export * from './schemas/transactions';

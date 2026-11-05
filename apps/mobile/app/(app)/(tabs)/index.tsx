@@ -25,6 +25,7 @@ import { Button } from '../../../src/components/Button';
 import { AnimatedList } from '../../../src/components/AnimatedList';
 import { MonthSlide } from '../../../src/components/MonthSlide';
 import { Screen } from '../../../src/components/Screen';
+import { TransactionRow } from '../../../src/components/TransactionRow';
 import { Message } from '../../../src/components/Message';
 import { ReminderBanners } from '../../../src/components/ReminderBanners';
 import {
@@ -134,6 +135,7 @@ export default function Month() {
       subtitle={household.name}
       prev={{ label: es.month.previous, onPress: () => move(-1) }}
       next={{ label: es.month.next, onPress: () => move(1) }}
+      action={{ icon: 'search', label: es.search.title, onPress: () => router.push('/search') }}
       bleed
       fab={canWrite}
       refreshControl={
@@ -213,7 +215,7 @@ export default function Month() {
               render={(t) => (
                 <TransactionRow
                   transaction={t}
-                  today={today}
+                  when={dayLabel(t.date, today)}
                   category={byId.get(t.categoryId)}
                   author={authorOf(t)}
                   onPress={canWrite ? () => router.push(`/transaction/${t.id}`) : undefined}
@@ -461,39 +463,6 @@ function dayLabel(date: DateString, today: DateString): string {
   if (days === 0) return es.recurring.today;
   if (days === -1) return es.recurring.yesterday;
   return formatDay(date);
-}
-
-function TransactionRow({
-  transaction,
-  today,
-  category,
-  author,
-  onPress,
-}: {
-  transaction: Transaction;
-  today: DateString;
-  category: Category | undefined;
-  author: string | null;
-  onPress: (() => void) | undefined;
-}) {
-  const name = category?.name ?? '—';
-  const detail = [
-    dayLabel(transaction.date, today),
-    transaction.note,
-    author && es.household.byMember(author),
-  ]
-    .filter(Boolean)
-    .join(' · ');
-  return (
-    <ListRow
-      title={name}
-      detail={detail}
-      leading={<CategoryIcon icon={category?.icon} tone={category?.color} />}
-      trailing={<Amount cents={transaction.amountCents} kind={transaction.kind} />}
-      onPress={onPress}
-      accessibilityLabel={`${name}, ${formatMoney(transaction.amountCents)}, ${detail}`}
-    />
-  );
 }
 
 const styles = StyleSheet.create({

@@ -1,5 +1,6 @@
+import type { SearchFilters } from '@smartnomic/api';
 import { can, civilDateIn, periodOf, type Action, type DateString } from '@smartnomic/domain';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api, queryKeys } from '../api/client';
 
 export function useMe() {
@@ -28,6 +29,21 @@ export function useCharts(householdId: string | undefined, start: DateString | u
     queryKey: queryKeys.charts(householdId ?? '', start ?? ''),
     queryFn: () => api.charts(householdId!, start!),
     enabled: Boolean(householdId && start),
+  });
+}
+
+/**
+ * Búsqueda de movimientos (especificación 009): páginas de 100 con cursor. Mientras llegan
+ * los resultados de unos filtros nuevos se siguen viendo los anteriores.
+ */
+export function useSearch(householdId: string | undefined, filters: SearchFilters) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.search(householdId ?? '', filters),
+    queryFn: ({ pageParam }) => api.searchTransactions(householdId!, filters, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    enabled: Boolean(householdId),
+    placeholderData: keepPreviousData,
   });
 }
 

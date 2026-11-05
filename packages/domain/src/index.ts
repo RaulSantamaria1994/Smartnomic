@@ -15,5 +15,6 @@ export * from './recurrence';
 export * from './reminders';
 export * from './result';
 export * from './savings';
+export * from './search';
 export * from './summary';
 export * from './upcoming';

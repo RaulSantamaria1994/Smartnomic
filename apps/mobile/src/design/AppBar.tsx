@@ -5,6 +5,13 @@ import { Icon, type IconName } from './Icon';
 import { AppText } from './Text';
 import { color, layout, size, spacing } from './tokens';
 
+/** Botón de icono a la derecha de la barra (la lupa de «Mes», especificación 009). */
+export interface AppBarAction {
+  icon: IconName;
+  label: string;
+  onPress: () => void;
+}
+
 export interface AppBarStep {
   label: string;
   onPress: () => void;
@@ -22,12 +29,14 @@ export function AppBar({
   onBack,
   prev,
   next,
+  action,
 }: {
   title: string;
   subtitle?: string;
   onBack?: () => void;
   prev?: AppBarStep;
   next?: AppBarStep;
+  action?: AppBarAction;
 }) {
   const insets = useSafeAreaInsets();
   const centered = Boolean(prev || next);
@@ -58,6 +67,7 @@ export function AppBar({
           )}
         </View>
         {centered && <BarButton icon="forward" {...stepProps(next)} />}
+        {action && <BarButton icon={action.icon} label={action.label} onPress={action.onPress} />}
       </View>
     </View>
   );
@@ -103,14 +113,16 @@ const styles = StyleSheet.create({
     minHeight: size.appBar,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    // Sin hueco entre botones: cada uno ya mide 48 px con su margen, y así el título del mes
+    // cabe junto a las flechas y la lupa (especificación 009).
     paddingHorizontal: spacing.xs,
     width: '100%',
     maxWidth: layout.maxWidth,
     alignSelf: 'center',
   },
   title: { flex: 1, minWidth: 0, paddingHorizontal: spacing.sm },
-  centered: { alignItems: 'center' },
+  // Entre las flechas el título ya tiene aire a los lados: sin margen cabe el mes entero.
+  centered: { alignItems: 'center', paddingHorizontal: 0 },
   button: {
     width: size.touch + 4,
     height: size.touch + 4,

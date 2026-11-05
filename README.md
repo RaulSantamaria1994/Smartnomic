@@ -12,8 +12,8 @@ calendario de pagos programados (`docs/specs/002-calendario`), el diseño visual
 (`docs/specs/003-diseno-visual`, sustituido por el estilo Android de
 `docs/specs/006-estilo-android`), los iconos de categoría (`docs/specs/004-iconos-categorias`),
 las huchas para objetivos de ahorro (`docs/specs/005-hucha`), los presupuestos por categoría
-(`docs/specs/007-presupuestos`) y la pestaña de gráficas (`docs/specs/008-graficas`) también
-están terminados.
+(`docs/specs/007-presupuestos`), la pestaña de gráficas (`docs/specs/008-graficas`) y la
+búsqueda de movimientos (`docs/specs/009-busqueda`) también están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 

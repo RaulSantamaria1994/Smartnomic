@@ -1,3 +1,5 @@
+import type { SearchFilters } from '@smartnomic/api';
+
 /** Claves de la caché de consultas: lo que cuelga de una clave se invalida con ella. */
 export const queryKeys = {
   me: ['me'] as const,
@@ -11,6 +13,9 @@ export const queryKeys = {
    * Bajo `periods`: todo lo que refresca los meses (apuntar, editar, borrar, pagar, huchas)
    * refresca también las gráficas.
    */
+  /** Bajo `periods`, como las gráficas: editar o borrar un movimiento la refresca. */
+  search: (householdId: string, filters: SearchFilters) =>
+    ['periods', householdId, 'search', filters] as const,
   charts: (householdId: string, start: string) =>
     ['periods', householdId, 'charts', start] as const,
   recurring: (householdId: string) => ['recurring', householdId] as const,
@@ -25,3 +30,12 @@ export const queryKeys = {
       ? ['upcoming', householdId]
       : ['upcoming', householdId, days]) as readonly unknown[],
 };
+
+/**
+ * ¿Se guarda esta consulta en la caché de Android para verla sin conexión? La búsqueda no:
+ * sus combinaciones de filtros no tienen fin y no hay búsqueda sin conexión (especificación
+ * 009).
+ */
+export function persistable(queryKey: readonly unknown[]): boolean {
+  return !(queryKey[0] === 'periods' && queryKey[2] === 'search');
+}
