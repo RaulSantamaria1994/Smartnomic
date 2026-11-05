@@ -57,13 +57,13 @@ fallar antes de implementar.
 
 ## Fase 3: Cierre
 
-- [ ] X010 Batería de ataques ampliada a `/transactions/export` (otro hogar, ids ajenos, sin
+- [x] X010 Batería de ataques ampliada a `/transactions/export` (otro hogar, ids ajenos, sin
       sesión, lector, filtros absurdos, fórmulas y CSV roto en notas)
-- [ ] X011 Prueba de punta a punta: buscar, exportar, descargar en el navegador y leer el
+- [x] X011 Prueba de punta a punta: buscar, exportar, descargar en el navegador y leer el
       archivo; las anteriores siguen pasando; CE-1003 con 5.000 movimientos
-- [ ] X012 [P] axe-core en la búsqueda con el botón a 320 y 1280 px (CE-1005)
-- [ ] X013 [P] `expo export --platform android` compila
-- [ ] X014 Actualizar `README.md` y `AGENTS.md` y marcar tareas (el PR, cuando lo pida el
+- [x] X012 [P] axe-core en la búsqueda con el botón a 320 y 1280 px (CE-1005)
+- [x] X013 [P] `expo export --platform android` compila
+- [x] X014 Actualizar `README.md` y `AGENTS.md` y marcar tareas (el PR, cuando lo pida el
       propietario)
 
 ---

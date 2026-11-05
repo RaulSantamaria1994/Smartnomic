@@ -119,3 +119,27 @@ author }`) y devuelve el texto; los títulos y «Gasto»/«Ingreso»/«Antiguo m
   compara con la búsqueda.
 - Punta a punta: buscar, exportar, descargar en el navegador y leer el archivo; CE-1003 con
   5.000 movimientos; axe-core a 320 y 1280 px; `expo export --platform android`.
+
+## Resultados
+
+- `pnpm check` en verde: 608 tests (formato CSV, esquemas y 9 de servidor: acceso, otro hogar,
+  lector, cursor y filtros no válidos, nombre del archivo, columnas, antiguo miembro, borrados,
+  categorías archivadas, notas difíciles y contraste con la búsqueda). Los tests de la búsqueda
+  siguen pasando tras sacar sus filtros a `transaction-filters.ts`.
+- CE-1001: 300 movimientos y cuatro combinaciones de filtros: el archivo tiene los mismos
+  movimientos y en el mismo orden que la búsqueda (recorriendo sus páginas), y la suma de la
+  columna de importes es ingresos menos gastos al céntimo.
+- CE-1002: 12 notas con `;`, comillas, saltos de línea, `=SUMA(…)`, `+34…`, `-…`, `@…`,
+  `=HIPERVINCULO(…)` y tabulador: mismas filas y seis columnas, el texto intacto y ninguna
+  celda empieza por una fórmula.
+- CE-1003: 5.000 movimientos: la ruta tarda 56 ms de mediana; del toque al archivo descargado,
+  161 ms (255 KB).
+- CE-1004: un toque desde la búsqueda.
+- CE-1005: axe-core sin problemas en 29 pantallas a 320 y 1280 px, la búsqueda con el botón.
+- Batería de ataques ampliada (otro hogar, IDOR con ids de categoría, sin sesión, lector,
+  fórmulas como `=cmd|' /C calc'!A0` y notas que intentan romper el CSV, filtros absurdos, otros
+  métodos): sin accesos, filtraciones ni errores 500; los logs no llevan el contenido.
+- Punta a punta a 320 y 390 px: filtrar, exportar y leer el archivo descargado; sin resultados
+  no hay botón; sin conexión se explica y el botón vuelve a estar disponible; la exportación
+  completa de «Hogar» sigue funcionando. Las anteriores siguen pasando.
+- `expo export --platform android` compila.
