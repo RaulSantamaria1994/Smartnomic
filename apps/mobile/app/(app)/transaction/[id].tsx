@@ -4,6 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { api, queryKeys } from '../../../src/api/client';
+import { findCachedTransaction } from '../../../src/api/cachedTransaction';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { goBack, Screen } from '../../../src/components/Screen';
@@ -11,22 +12,19 @@ import { TransactionForm } from '../../../src/components/TransactionForm';
 import { todayIn, useCategories, useMe } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { useUndo } from '../../../src/state/undo';
-import type { PeriodResponse, Transaction } from '@smartnomic/api';
+import type { Transaction } from '@smartnomic/api';
 
-/** Busca el movimiento en los periodos ya cargados. */
+/** Busca el movimiento en lo ya cargado (meses y búsqueda). */
 function useCachedTransaction(
   householdId: string | undefined,
   id: string,
 ): Transaction | undefined {
   const queryClient = useQueryClient();
   if (!householdId) return undefined;
-  for (const [, data] of queryClient.getQueriesData<PeriodResponse>({
-    queryKey: queryKeys.periods(householdId),
-  })) {
-    const found = data?.transactions.find((t) => t.id === id);
-    if (found) return found;
-  }
-  return undefined;
+  return findCachedTransaction(
+    queryClient.getQueriesData({ queryKey: queryKeys.periods(householdId) }),
+    id,
+  );
 }
 
 /** Editar o borrar un movimiento (T051). */
