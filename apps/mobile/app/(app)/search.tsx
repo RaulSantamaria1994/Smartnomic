@@ -169,11 +169,7 @@ export default function Search() {
             <AppText variant="small" tone="muted">
               {es.search.categories}
             </AppText>
-            <View
-              style={styles.chips}
-              accessibilityRole="list"
-              accessibilityLabel={es.search.categories}
-            >
+            <View style={styles.chips} role="group" aria-label={es.search.categories}>
               {active.map((c) => chip(c))}
             </View>
             {archived.length > 0 && (
@@ -181,11 +177,7 @@ export default function Search() {
                 <AppText variant="small" tone="muted">
                   {es.search.archived}
                 </AppText>
-                <View
-                  style={styles.chips}
-                  accessibilityRole="list"
-                  accessibilityLabel={es.search.archived}
-                >
+                <View style={styles.chips} role="group" aria-label={es.search.archived}>
                   {archived.map((c) => chip(c, es.search.archivedName(c.name)))}
                 </View>
               </>

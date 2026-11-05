@@ -54,7 +54,13 @@ periodo, con `budgetsBetween` de `apps/server/src/routes/budgets.ts`, y nunca se
 `GET /api/households/:id/charts/:start` en `apps/server/src/routes/charts.ts`, suma en SQL los 6
 periodos que terminan en `:start`; la ventana y los porcentajes salen de
 `packages/domain/src/charts.ts`, y la caché de las gráficas cuelga de `periods` en
-`apps/mobile/src/api/queryKeys.ts` para refrescarse con los meses). El
+`apps/mobile/src/api/queryKeys.ts` para refrescarse con los meses) y **`009-busqueda`**
+(búsqueda de movimientos por tipo, categorías, importe y fechas: `GET
+/api/households/:id/transactions/search` en `apps/server/src/routes/search.ts`, paginada por
+clave con cursor y con el número y los totales sumados en SQL; la búsqueda cuelga también de
+`periods` pero no se guarda en la caché de Android, ver `persistable`). Todo lo que cuelga de
+`periods` no son solo meses: para encontrar un movimiento cargado se usa
+`findCachedTransaction`. El
 aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo

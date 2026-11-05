@@ -66,14 +66,14 @@ fallar antes de implementar.
 
 ## Fase 4: Cierre
 
-- [ ] S012 Batería de ataques ampliada a `/transactions/search` (otro hogar, ids ajenos, sin
+- [x] S012 Batería de ataques ampliada a `/transactions/search` (otro hogar, ids ajenos, sin
       sesión, valores absurdos, cursores manipulados, inyección)
-- [ ] S013 Prueba de punta a punta: lupa, cada filtro, «Mostrar más», abrir, editar y volver;
+- [x] S013 Prueba de punta a punta: lupa, cada filtro, «Mostrar más», abrir, editar y volver;
       las anteriores siguen pasando; CE-902 con 5.000 movimientos
-- [ ] S014 [P] axe-core en la búsqueda (con y sin resultados, con errores en los campos) a
+- [x] S014 [P] axe-core en la búsqueda (con y sin resultados, con errores en los campos) a
       320 y 1280 px (CE-904)
-- [ ] S015 [P] `expo export --platform android` compila
-- [ ] S016 Actualizar `README.md` y `AGENTS.md` y marcar tareas (el PR, cuando lo pida el
+- [x] S015 [P] `expo export --platform android` compila
+- [x] S016 Actualizar `README.md` y `AGENTS.md` y marcar tareas (el PR, cuando lo pida el
       propietario)
 
 ---

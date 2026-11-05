@@ -3,7 +3,7 @@
 **Rama de la funcionalidad**: `009-busqueda`
 **Creada**: 2026-11-05
 **Plan**: [`plan.md`](plan.md)
-**Estado**: Aprobada
+**Estado**: Implementada
 **Entrada**: "Vamos a hacer la implementación de la búsqueda de movimientos." (Pendiente del MVP:
 «Presupuestos, gráficas, búsqueda y exportación a CSV con filtros quedan para más adelante».)
 

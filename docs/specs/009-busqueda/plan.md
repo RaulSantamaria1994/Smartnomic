@@ -151,3 +151,35 @@ apps/mobile/
 - Punta a punta: lupa, filtros, «Mostrar más», abrir un resultado, editarlo y volver; las
   anteriores siguen pasando. CE-902 con 5.000 movimientos; axe-core a 320 y 1280 px;
   `expo export --platform android`.
+
+## Resultados
+
+- `pnpm check` en verde: 588 tests (dominio de los rangos, esquemas de filtros y respuesta,
+  consulta de la URL, claves de la caché y 12 de servidor: acceso, otro hogar, lector, ids de
+  categoría ajenos, cada filtro y combinaciones, extremos incluidos, borrados, páginas con un
+  movimiento nuevo entre medias, valores y cursores no válidos). Los logs no guardan la
+  consulta de la URL (test en `logging.test.ts`).
+- CE-901: 400 movimientos y seis combinaciones de filtros, recorriendo todas las páginas: los
+  resultados, el número y los totales coinciden con un filtrado a mano.
+- CE-902: 5.000 movimientos: la ruta tarda entre 8 y 16 ms de mediana; de cambiar un filtro a
+  ver el número y los totales nuevos, entre 82 y 149 ms; recargar la pantalla, 568 ms.
+- CE-903: dos toques desde «Mes» (lupa y la categoría).
+- CE-904: axe-core sin problemas en 29 pantallas a 320 y 1280 px, la búsqueda con resultados,
+  con errores en los campos y sin resultados. Encontró que los grupos de categorías tenían rol
+  de lista con casillas dentro; ahora son un grupo.
+- Batería de ataques ampliada (otro hogar, IDOR con ids de categoría, sin sesión, lector,
+  filtros y cursores absurdos o manipulados, inyección): sin accesos, filtraciones ni errores 500. Un parámetro desconocido (`kind[]`) se ignora como cualquier otro.
+- Punta a punta a 320 y 390 px: lupa, tipo, categorías, importes y fechas con sus errores,
+  abrir un resultado, editarlo y volver con los filtros intactos y los totales al día, sin
+  resultados y «Quitar filtros». Las anteriores siguen pasando.
+- Cambios sobre el plan:
+  - La barra de arriba pierde el hueco entre botones y el margen del título centrado: con la
+    lupa, todos los meses caben desde 360 px; a 320 px el título se acorta con «…».
+  - Los lectores ven los resultados pero no los abren, como en «Mes» (la pantalla del
+    movimiento solo sirve para editar).
+  - Los campos de fecha se llaman «Fecha desde» y «Fecha hasta», para no confundirlos con los
+    de importe en el lector de pantalla; los negativos tienen su propio mensaje.
+  - `TextField` admite `error` (en rojo debajo, `aria-invalid` y leído con el campo).
+- Al hacerla se encontró que abrir un movimiento tras ver «Gráficas» dejaba la pantalla en
+  blanco; se arregló aparte (PR #27, `findCachedTransaction`).
+- `expo export --platform android` compila.
