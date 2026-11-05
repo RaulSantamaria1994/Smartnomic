@@ -2,6 +2,7 @@ import {
   budgetRecordSchema,
   type BudgetInput,
   calendarResponseSchema,
+  chartsResponseSchema,
   categoriesResponseSchema,
   categorySchema,
   householdExportSchema,
@@ -53,6 +54,9 @@ export const api = {
     request(`${household(householdId)}/categories`, { schema: categoriesResponseSchema }),
   period: (householdId: string, start: string) =>
     request(`${household(householdId)}/periods/${start}`, { schema: periodResponseSchema }),
+  /** Gráficas de los 6 meses que terminan en el que empieza en `start` (especificación 008). */
+  charts: (householdId: string, start: string) =>
+    request(`${household(householdId)}/charts/${start}`, { schema: chartsResponseSchema }),
   saveTransaction: (householdId: string, id: string, input: TransactionInput) =>
     request(`${household(householdId)}/transactions/${id}`, {
       method: 'PUT',
@@ -210,23 +214,4 @@ export const api = {
 };
 
 /** Claves de la caché de TanStack Query. */
-export const queryKeys = {
-  me: ['me'] as const,
-  categories: (householdId: string) => ['categories', householdId] as const,
-  periods: (householdId: string) => ['periods', householdId] as const,
-  /** Todos los meses del calendario, para invalidarlos juntos. */
-  calendars: (householdId: string) => ['calendar', householdId] as const,
-  calendar: (householdId: string, month: string) => ['calendar', householdId, month] as const,
-  period: (householdId: string, start: string) => ['periods', householdId, start] as const,
-  recurring: (householdId: string) => ['recurring', householdId] as const,
-  savings: (householdId: string) => ['savings', householdId] as const,
-  /** Bajo `savings`: al refrescar las huchas se refresca también su historial. */
-  savingsEntries: (householdId: string, goalId: string) =>
-    ['savings', householdId, goalId, 'entries'] as const,
-  members: (householdId: string) => ['members', householdId] as const,
-  invitations: (householdId: string) => ['invitations', householdId] as const,
-  upcoming: (householdId: string, days?: number) =>
-    (days === undefined
-      ? ['upcoming', householdId]
-      : ['upcoming', householdId, days]) as readonly unknown[],
-};
+export { queryKeys } from './queryKeys';

@@ -42,14 +42,14 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Ver en qué se va el dinero del mes (P1) 🎯
 
-- [ ] G006 [US1] App: `api.charts`, `queryKeys.charts` bajo `periods` (test de que invalidar
+- [x] G006 [US1] App: `api.charts`, `queryKeys.charts` bajo `periods` (test de que invalidar
       `periods` la incluye) y `useCharts`
-- [ ] G007 [US1] `ChartBar` en `src/design/` (8 px, tonos, animación de relleno con «reducir
+- [x] G007 [US1] `ChartBar` en `src/design/` (8 px, tonos, animación de relleno con «reducir
       movimiento», decorativa), icono `chart` y tono de ingresos con su prueba de contraste en
       `color.test.ts`
-- [ ] G008 [US1] Pestaña `charts` entre «Mes» y «Calendario» en `_layout.tsx` y `TabBar.tsx`;
+- [x] G008 [US1] Pestaña `charts` entre «Mes» y «Calendario» en `_layout.tsx` y `TabBar.tsx`;
       comprobar las cinco pestañas a 320 px con texto grande
-- [ ] G009 [US1] `app/(app)/(tabs)/charts.tsx`: `AppBar` con flechas de mes y `MonthSlide`,
+- [x] G009 [US1] `app/(app)/(tabs)/charts.tsx`: `AppBar` con flechas de mes y `MonthSlide`,
       chips de las cuatro gráficas y «Por categoría» (total, filas con icono, nombre, importe,
       porcentaje y barra; mes sin gastos con `EmptyState`); textos en `es.ts`
 

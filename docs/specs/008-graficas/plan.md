@@ -133,10 +133,11 @@ apps/mobile/
   («Marzo: ingresos 1.800,00 €, gastos 1.650,00 €, diferencia +150,00 €»); las barras son
   decorativas (`aria-hidden`) como la de progreso. Ingresos y gastos se distinguen también
   por la etiqueta de texto de cada barra, no solo por el color.
-- **Colores**: gastos en el verde de la marca (`progress.fill`), ingresos en un tono que
-  contraste 3:1 con el fondo y con el verde (se elige en la tarea con la prueba de contraste
-  de `color.test.ts`), huchas en el verde. Animación: la de la barra de progreso (se rellena
-  al aparecer), sin animación con «reducir movimiento».
+- **Colores** (`color.chart`): en «Ingresos y gastos», cada barra con el color de sus
+  importes en el resto de la app: ingresos en el verde de ingresos y gastos en gris oscuro;
+  el resto de gráficas, en el verde de la app. Todos contrastan 3:1 con el fondo
+  (`color.test.ts`). Animación: la de la barra de progreso (se rellena al aparecer), sin
+  animación con «reducir movimiento».
 - **Refresco**: `queryKeys.charts(h, start)` = `['periods', h, 'charts', start]`. Todo lo que
   ya invalida `queryKeys.periods(h)` (apuntar, editar, borrar, deshacer, pagos recurrentes,
   huchas) refresca también las gráficas, sin tocar esos sitios.
@@ -154,9 +155,9 @@ apps/mobile/
 
 ## Riesgos
 
-- **Cinco pestañas a 320 px**: cada una tiene 64 px; «Calendario» puede no caber con texto
-  grande. Se prueba en la tarea de la barra; si no cabe, el texto se parte o se reduce el
-  hueco entre icono y texto, sin quitar textos.
+- **Cinco pestañas a 320 px**: cada una tiene 64 px y «Calendario» mide unos 62 px, así que
+  las pestañas no llevan margen lateral. Con el texto del sistema más grande, los nombres
+  largos se acortan con «…» (su nombre completo sigue llegando al lector de pantalla).
 - **Archivar una categoría con gastos**: sigue saliendo en «Por categoría» con su nombre; es lo
   esperado para que el total cuadre.
 

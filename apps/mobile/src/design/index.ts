@@ -4,6 +4,8 @@ export * from './AppBar';
 export * from './BudgetRow';
 export * from './Brand';
 export * from './CategoryIcon';
+export * from './ChartBar';
+export * from './ChartRow';
 export * from './color';
 export * from './EmptyState';
 export * from './fonts';

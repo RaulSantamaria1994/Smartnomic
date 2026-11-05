@@ -331,6 +331,25 @@ export const es = {
     start: 'Ponerle un límite a una categoría',
     startHint: 'Por ejemplo, lo que quieres gastar al mes en el supermercado.',
   },
+  /** Pestaña «Gráficas» (especificación 008). */
+  charts: {
+    title: 'Gráficas',
+    chooser: 'Gráfica',
+    kinds: {
+      category: 'Por categoría',
+      flow: 'Ingresos y gastos',
+      trend: 'Evolución',
+      savings: 'Huchas',
+    },
+    percent: (n: number) => `${n}\u00A0%`,
+    totalSpent: 'Gastado en el mes',
+    noExpenses: 'Este mes no hay gastos.',
+    noExpensesHint: 'Cuando apuntes alguno, verás aquí en qué se va el dinero.',
+    unknownCategory: 'Categoría',
+    categoryRow: (name: string, amount: string, percent: string) =>
+      `${name}: ${amount}, ${percent} del gasto del mes`,
+    error: 'No se han podido cargar las gráficas.',
+  },
   /** Huchas para objetivos de ahorro (especificación 005). */
   savings: {
     title: 'Huchas',
@@ -513,6 +532,7 @@ export const es = {
   },
   tabs: {
     month: 'Mes',
+    charts: 'Gráficas',
     calendar: 'Calendario',
     recurring: 'Pagos',
     household: 'Hogar',
