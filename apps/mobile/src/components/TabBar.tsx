@@ -12,14 +12,16 @@ export const TAB_BAR_HEIGHT = 64;
 
 const TABS: Record<string, { icon: IconName; label: string }> = {
   index: { icon: 'home', label: es.tabs.month },
+  charts: { icon: 'chart', label: es.tabs.charts },
   calendar: { icon: 'calendar', label: es.tabs.calendar },
   recurring: { icon: 'recurring', label: es.tabs.recurring },
   account: { icon: 'household', label: es.tabs.household },
 };
 
 /**
- * Barra inferior de cuatro pestañas: Mes, Calendario, Pagos y Hogar (especificación 006,
- * RF-605). El botón flotante «+» va aparte, en `FabLayer`.
+ * Barra inferior de cinco pestañas: Mes, Gráficas, Calendario, Pagos y Hogar
+ * (especificaciones 006, RF-605, y 008, RF-801). El botón flotante «+» va aparte, en
+ * `FabLayer`.
  */
 export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
   const routes = state.routes.filter((route) => TABS[route.name]);
@@ -131,11 +133,10 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: layout.maxWidth,
     alignSelf: 'center',
-    paddingHorizontal: spacing.xs,
   },
+  // Sin márgenes laterales: con cinco pestañas a 320 px, «Calendario» cabe justo (64 px).
   tab: {
     minWidth: 0,
-    paddingHorizontal: spacing.xxs,
     flex: 1,
     minHeight: 48,
     alignItems: 'center',

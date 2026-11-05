@@ -4,6 +4,7 @@ export * from './health';
 export * from './schemas/account';
 export * from './schemas/budgets';
 export * from './schemas/calendar';
+export * from './schemas/charts';
 export * from './schemas/common';
 export * from './schemas/households';
 export * from './schemas/members';

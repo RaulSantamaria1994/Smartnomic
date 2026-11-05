@@ -75,3 +75,16 @@ describe('iconTone sobre blanco (especificación 006)', () => {
     }
   });
 });
+
+describe('barras de las gráficas (especificación 008)', () => {
+  it('cada tono contrasta 3:1 con el fondo (WCAG 1.4.11)', () => {
+    for (const [name, tone] of Object.entries({
+      fill: color.chart.fill,
+      income: color.chart.income,
+      expense: color.chart.expense,
+    })) {
+      expect(contrastRatio(tone, color.bg.surface), name).toBeGreaterThanOrEqual(3);
+      expect(contrastRatio(tone, color.chart.track), name).toBeGreaterThanOrEqual(3);
+    }
+  });
+});

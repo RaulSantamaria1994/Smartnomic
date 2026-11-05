@@ -331,6 +331,39 @@ export const es = {
     start: 'Ponerle un límite a una categoría',
     startHint: 'Por ejemplo, lo que quieres gastar al mes en el supermercado.',
   },
+  /** Pestaña «Gráficas» (especificación 008). */
+  charts: {
+    title: 'Gráficas',
+    chooser: 'Gráfica',
+    kinds: {
+      category: 'Por categoría',
+      flow: 'Ingresos y gastos',
+      trend: 'Evolución',
+      savings: 'Huchas',
+    },
+    percent: (n: number) => `${n}\u00A0%`,
+    totalSpent: 'Gastado en el mes',
+    noExpenses: 'Este mes no hay gastos.',
+    noExpensesHint: 'Cuando apuntes alguno, verás aquí en qué se va el dinero.',
+    unknownCategory: 'Categoría',
+    categoryRow: (name: string, amount: string, percent: string) =>
+      `${name}: ${amount}, ${percent} del gasto del mes`,
+    error: 'No se han podido cargar las gráficas.',
+    income: (amount: string) => `Ingresos ${amount}`,
+    expenses: (amount: string) => `Gastos ${amount}`,
+    trendHint: 'Muestra su evolución mes a mes',
+    trendChooser: 'Categoría',
+    trendRow: (month: string, category: string, amount: string) =>
+      `${month}: ${category}, ${amount}`,
+    noCategories: 'No hay categorías de gasto en uso.',
+    savedByMonth: 'Apartado al final de cada mes',
+    savedByGoal: 'Por hucha, al final del mes',
+    savedRow: (month: string, amount: string) => `${month}: apartado en huchas ${amount}`,
+    goalRow: (name: string, amount: string) => `${name}: ${amount}`,
+    noSaved: 'Al final de este mes no había nada en las huchas.',
+    flowRow: (month: string, income: string, expense: string, difference: string) =>
+      `${month}: ingresos ${income}, gastos ${expense}, diferencia ${difference}`,
+  },
   /** Huchas para objetivos de ahorro (especificación 005). */
   savings: {
     title: 'Huchas',
@@ -513,6 +546,7 @@ export const es = {
   },
   tabs: {
     month: 'Mes',
+    charts: 'Gráficas',
     calendar: 'Calendario',
     recurring: 'Pagos',
     household: 'Hogar',

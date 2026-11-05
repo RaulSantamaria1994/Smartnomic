@@ -24,6 +24,7 @@ export default function TabsLayout() {
         screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: color.bg.canvas } }}
       >
         <Tabs.Screen name="index" />
+        <Tabs.Screen name="charts" />
         <Tabs.Screen name="calendar" />
         <Tabs.Screen name="recurring" />
         <Tabs.Screen name="account" />

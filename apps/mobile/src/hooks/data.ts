@@ -22,6 +22,15 @@ export function usePeriod(householdId: string | undefined, start: DateString | u
   });
 }
 
+/** Datos de las gráficas de los 6 meses que terminan en `start` (especificación 008). */
+export function useCharts(householdId: string | undefined, start: DateString | undefined) {
+  return useQuery({
+    queryKey: queryKeys.charts(householdId ?? '', start ?? ''),
+    queryFn: () => api.charts(householdId!, start!),
+    enabled: Boolean(householdId && start),
+  });
+}
+
 /** Fecha de hoy en la zona horaria del hogar (RF-019). */
 export function todayIn(timeZone: string): DateString {
   return civilDateIn(new Date(), timeZone);

@@ -49,7 +49,12 @@ y T099), **`002-calendario`**, **`003-diseno-visual`**, **`004-iconos-categorias
 Android estándar y ocho animaciones pequeñas; sustituye al estilo «Calma» de la 003) y
 **`007-presupuestos`** (presupuesto mensual por categoría de gasto: la tabla `budgets` guarda
 los cambios con el periodo desde el que valen; lo gastado se suma en SQL en la ruta del
-periodo, con `budgetsBetween` de `apps/server/src/routes/budgets.ts`, y nunca se guarda). El
+periodo, con `budgetsBetween` de `apps/server/src/routes/budgets.ts`, y nunca se guarda) y
+**`008-graficas`** (pestaña «Gráficas» con cuatro gráficas de barras; una sola ruta,
+`GET /api/households/:id/charts/:start` en `apps/server/src/routes/charts.ts`, suma en SQL los 6
+periodos que terminan en `:start`; la ventana y los porcentajes salen de
+`packages/domain/src/charts.ts`, y la caché de las gráficas cuelga de `periods` en
+`apps/mobile/src/api/queryKeys.ts` para refrescarse con los meses). El
 aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo

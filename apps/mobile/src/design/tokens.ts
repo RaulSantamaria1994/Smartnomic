@@ -85,6 +85,17 @@ export const color = {
     near: palette.amberBar,
     over: palette.red,
   },
+  /**
+   * Barras de las gráficas (especificación 008). Ingresos y gastos llevan el color de sus
+   * importes (verde de ingresos y gris oscuro); el resto, el verde de la app. Decorativas:
+   * cada barra va con su etiqueta y su importe en texto.
+   */
+  chart: {
+    track: palette.grey50,
+    fill: palette.green900,
+    income: palette.income,
+    expense: palette.grey700,
+  },
   /** Fondo del aviso de deshacer, que flota sobre todo. */
   snackbar: palette.ink,
   /** Interruptor activado: pista y mando. */
