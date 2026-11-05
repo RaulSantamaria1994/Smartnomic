@@ -23,6 +23,7 @@ import { registerRecurringRoutes } from './routes/recurring';
 import { registerBudgetRoutes } from './routes/budgets';
 import { registerChartRoutes } from './routes/charts';
 import { registerSearchRoutes } from './routes/search';
+import { registerCsvExportRoutes } from './routes/export-csv';
 import { registerSavingsRoutes } from './routes/savings';
 import { registerTransactionRoutes } from './routes/transactions';
 
@@ -105,6 +106,7 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     registerPeriodRoutes(app, { db, access });
     registerChartRoutes(app, { db, access });
     registerSearchRoutes(app, { db, access });
+    registerCsvExportRoutes(app, { db, access, now });
     registerExportRoutes(app, { db, access, now });
     registerAccountRoutes(app, {
       db,

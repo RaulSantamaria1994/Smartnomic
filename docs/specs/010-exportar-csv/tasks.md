@@ -20,23 +20,23 @@ fallar antes de implementar.
 
 **Objetivo**: el archivo correcto sale del servidor, sin pantallas.
 
-- [ ] X001 [P] Tests de `packages/domain/src/csv.ts`: BOM, títulos, `\r\n`, fecha dd/mm/aaaa,
+- [x] X001 [P] Tests de `packages/domain/src/csv.ts`: BOM, títulos, `\r\n`, fecha dd/mm/aaaa,
       «Gasto»/«Ingreso», importe con signo y coma decimal (céntimos sueltos, miles sin
       separador, el máximo), nota vacía, comillas cuando hay `;`, `"`, `\r` o `\n`, apóstrofo
       delante de `=`, `+`, `-`, `@`, tabulador y retorno de carro en los textos, y el importe
       negativo sin apóstrofo
-- [ ] X002 Implementar `packages/domain/src/csv.ts` y exportarlo
-- [ ] X003 [P] Esquemas en `packages/api`: filtros de la exportación (los de la búsqueda sin
+- [x] X002 Implementar `packages/domain/src/csv.ts` y exportarlo
+- [x] X003 [P] Esquemas en `packages/api`: filtros de la exportación (los de la búsqueda sin
       `cursor`) y respuesta `{ fileName, csv }`, con sus tests
-- [ ] X004 Sacar `filtersOf` de `routes/search.ts` a `routes/transaction-filters.ts` sin cambiar
+- [x] X004 Sacar `filtersOf` de `routes/search.ts` a `routes/transaction-filters.ts` sin cambiar
       la búsqueda (sus tests siguen pasando)
-- [ ] X005 Tests en `apps/server/test/export-csv.test.ts`: sin sesión 401; otro hogar 403;
+- [x] X005 Tests en `apps/server/test/export-csv.test.ts`: sin sesión 401; otro hogar 403;
       lector puede; cursor no se acepta (400); filtros no válidos 400; nombre del archivo con
       la fecha del hogar; títulos y columnas; categoría y autor (también antiguo miembro);
       borrados fuera; mismo orden y mismos movimientos que la búsqueda con varias
       combinaciones; suma de importes = ingresos − gastos de la búsqueda (CE-1001); notas
       difíciles se leen con las mismas filas y columnas y sin fórmulas (CE-1002)
-- [ ] X006 Ruta `GET /api/households/:id/transactions/export` en
+- [x] X006 Ruta `GET /api/households/:id/transactions/export` en
       `apps/server/src/routes/export-csv.ts` y registrarla en `server.ts`
 
 **Punto de control**: RF-1002 a RF-1005, CE-1001 y CE-1002 en el servidor.
