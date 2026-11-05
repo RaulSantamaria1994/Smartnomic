@@ -1,5 +1,5 @@
 import { dateSchema, type PeriodResponse } from '@smartnomic/api';
-import { isPeriodStart, periodOf } from '@smartnomic/domain';
+import { isPeriodStart, periodOf, type Period } from '@smartnomic/domain';
 import { and, between, desc, eq, isNull, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -26,13 +26,23 @@ export function registerPeriodRoutes(
     async (request): Promise<PeriodResponse> => {
       const { start } = paramsSchema.parse(request.params);
       const { household } = request.membership!;
-      if (!isPeriodStart(start, household.monthStartDay)) {
-        throw new ApiError(
-          'validation_failed',
-          `${start} no es el inicio de un periodo: el mes del hogar empieza el día ${household.monthStartDay}.`,
-        );
+      // En el último mes del calendario (diciembre de 9999) el periodo acabaría en el año
+      // 10000: se responde como cualquier otra fecha que no vale, no con un 500.
+      let period: Period;
+      try {
+        if (!isPeriodStart(start, household.monthStartDay)) {
+          throw new ApiError(
+            'validation_failed',
+            `${start} no es el inicio de un periodo: el mes del hogar empieza el día ${household.monthStartDay}.`,
+          );
+        }
+        period = periodOf(start, household.monthStartDay);
+      } catch (error) {
+        if (error instanceof RangeError) {
+          throw new ApiError('validation_failed', 'Ese mes está fuera del calendario.');
+        }
+        throw error;
       }
-      const period = periodOf(start, household.monthStartDay);
       const inPeriod = and(
         eq(transactions.householdId, household.id),
         isNull(transactions.deletedAt),
