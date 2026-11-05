@@ -2,7 +2,8 @@
 
 **Rama de la funcionalidad**: `010-exportar-csv`
 **Creada**: 2026-11-05
-**Estado**: Borrador
+**Plan**: [`plan.md`](plan.md)
+**Estado**: Aprobada
 **Entrada**: "Vamos con otra función" → exportar a CSV con filtros. (Pendiente del MVP:
 «Presupuestos, gráficas, búsqueda y exportación a CSV con filtros quedan para más adelante».)
 
