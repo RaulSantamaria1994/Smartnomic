@@ -1,4 +1,4 @@
-import type { Category, ChartsResponse } from '@smartnomic/api';
+import type { Category, ChartsResponse, SavingsGoalDto } from '@smartnomic/api';
 import {
   barShare,
   defaultCategory,
@@ -8,6 +8,7 @@ import {
   sortByAmount,
   type DateString,
 } from '@smartnomic/domain';
+import { router } from 'expo-router';
 import { useRef, useState, type ComponentRef } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +19,7 @@ import { Message } from '../../../src/components/Message';
 import { MonthSlide } from '../../../src/components/MonthSlide';
 import { Screen } from '../../../src/components/Screen';
 import { Amount, AppText, CategoryIcon, ChartRow, EmptyState, Section } from '../../../src/design';
-import { spacing } from '../../../src/design/tokens';
+import { color, spacing } from '../../../src/design/tokens';
 import { formatMoney, formatPeriod, formatSignedMoney } from '../../../src/format';
 import {
   currentPeriodStart,
@@ -26,15 +27,17 @@ import {
   useCategories,
   useCharts,
   useMe,
+  useSavings,
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 
-type ChartKind = 'category' | 'flow' | 'trend';
+type ChartKind = 'category' | 'flow' | 'trend' | 'savings';
 
 const CHARTS: { kind: ChartKind; label: string }[] = [
   { kind: 'category', label: es.charts.kinds.category },
   { kind: 'flow', label: es.charts.kinds.flow },
   { kind: 'trend', label: es.charts.kinds.trend },
+  { kind: 'savings', label: es.charts.kinds.savings },
 ];
 
 /**
@@ -54,6 +57,7 @@ export default function Charts() {
     (household ? currentPeriodStart(household.timezone, household.monthStartDay) : undefined);
   const charts = useCharts(household?.id, periodStart);
   const categories = useCategories(household?.id);
+  const savings = useSavings(household?.id);
   const can = useCan();
 
   if (me.isPending) {
@@ -94,6 +98,7 @@ export default function Charts() {
           onRefresh={() => {
             void charts.refetch();
             void categories.refetch();
+            void savings.refetch();
           }}
         />
       }
@@ -139,6 +144,14 @@ export default function Charts() {
                 categories={categories.data?.categories ?? []}
                 selected={trendCategory}
                 onSelect={setTrendCategory}
+                monthStartDay={household.monthStartDay}
+              />
+            )}
+            {kind === 'savings' && (
+              <SavingsChart
+                data={charts.data}
+                goals={savings.data?.goals}
+                canCreate={can('savings.write')}
                 monthStartDay={household.monthStartDay}
               />
             )}
@@ -302,6 +315,95 @@ function TrendChart({
           />
         );
       })}
+    </>
+  );
+}
+
+/** «Huchas»: lo apartado al final de cada mes y lo que lleva cada hucha (historia 4). */
+function SavingsChart({
+  data,
+  goals,
+  canCreate,
+  monthStartDay,
+}: {
+  data: ChartsResponse;
+  goals: SavingsGoalDto[] | undefined;
+  canCreate: boolean;
+  monthStartDay: number;
+}) {
+  if (!goals) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator accessibilityLabel={es.common.loading} />
+      </View>
+    );
+  }
+  if (goals.length === 0) {
+    return (
+      <EmptyState
+        icon="savings"
+        title={es.savings.empty}
+        hint={es.savings.emptyHint}
+        {...(canCreate && {
+          action: (
+            <Button label={es.savings.newTitle} onPress={() => router.push('/savings/new')} />
+          ),
+        })}
+      />
+    );
+  }
+  const byId = new Map(goals.map((g) => [g.id, g]));
+  const months = data.savings.monthsCents;
+  const maxMonth = Math.max(...months);
+  const rows = sortByAmount(
+    data.savings.goals.map((g) => ({
+      id: g.goalId,
+      goal: byId.get(g.goalId),
+      name: byId.get(g.goalId)?.name ?? es.savings.title,
+      amountCents: g.balanceCents,
+    })),
+  );
+  const maxGoal = rows[0]?.amountCents ?? 0;
+  return (
+    <>
+      <Section title={es.charts.savedByMonth} separated>
+        {data.months.map((month, index) => {
+          const name = formatPeriod(month, monthStartDay);
+          const amount = formatMoney(months[index] ?? 0);
+          return (
+            <ChartRow
+              key={month.start}
+              label={name}
+              value={amount}
+              bars={[{ share: barShare(months[index] ?? 0, maxMonth) }]}
+              accessibilityLabel={es.charts.savedRow(name, amount)}
+            />
+          );
+        })}
+      </Section>
+      <Section title={es.charts.savedByGoal}>
+        {rows.length === 0 ? (
+          <View style={styles.notice}>
+            <AppText variant="body" tone="muted">
+              {es.charts.noSaved}
+            </AppText>
+          </View>
+        ) : (
+          rows.map((row) => {
+            const amount = formatMoney(row.amountCents);
+            return (
+              <ChartRow
+                key={row.id}
+                label={row.name}
+                value={amount}
+                leading={<CategoryIcon icon={row.goal?.icon} tone={color.text.muted} />}
+                bars={[{ share: barShare(row.amountCents, maxGoal) }]}
+                accessibilityLabel={es.charts.goalRow(row.name, amount)}
+              />
+            );
+          })
+        )}
+      </Section>
     </>
   );
 }

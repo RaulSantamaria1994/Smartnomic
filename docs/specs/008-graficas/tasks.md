@@ -74,7 +74,7 @@ fallar antes de implementar.
 
 ## Fase 5: Historia 4 — Huchas (P4)
 
-- [ ] G012 [US4] «Huchas»: una fila por mes con lo apartado al final del mes y la lista de
+- [x] G012 [US4] «Huchas»: una fila por mes con lo apartado al final del mes y la lista de
       huchas con saldo de más a menos; sin huchas, `EmptyState` con el enlace para crear una
       solo para quien tiene `savings.write`
 

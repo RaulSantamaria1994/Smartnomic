@@ -356,6 +356,11 @@ export const es = {
     trendRow: (month: string, category: string, amount: string) =>
       `${month}: ${category}, ${amount}`,
     noCategories: 'No hay categorías de gasto en uso.',
+    savedByMonth: 'Apartado al final de cada mes',
+    savedByGoal: 'Por hucha, al final del mes',
+    savedRow: (month: string, amount: string) => `${month}: apartado en huchas ${amount}`,
+    goalRow: (name: string, amount: string) => `${name}: ${amount}`,
+    noSaved: 'Al final de este mes no había nada en las huchas.',
     flowRow: (month: string, income: string, expense: string, difference: string) =>
       `${month}: ingresos ${income}, gastos ${expense}, diferencia ${difference}`,
   },
