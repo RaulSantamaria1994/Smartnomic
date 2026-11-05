@@ -20,20 +20,20 @@ fallar antes de implementar.
 
 **Objetivo**: cálculos, esquema de la respuesta y ruta listos, sin pantallas.
 
-- [ ] G001 [P] Tests de `packages/domain/src/charts.test.ts`: `chartWindow` con día de inicio
+- [x] G001 [P] Tests de `packages/domain/src/charts.test.ts`: `chartWindow` con día de inicio
       1 y 25 y cambio de año; `shares` (total 0, redondeo); `barShare` (0, mínimo visible,
       máximo 0); `sortByAmount` (empates por nombre); `defaultCategory` (con y sin gastos,
       sin archivadas ni de ingresos)
-- [ ] G002 Implementar `packages/domain/src/charts.ts` y exportarlo
-- [ ] G003 [P] Esquema de la respuesta en `packages/api/src/schemas/charts.ts` (6 meses,
+- [x] G002 Implementar `packages/domain/src/charts.ts` y exportarlo
+- [x] G003 [P] Esquema de la respuesta en `packages/api/src/schemas/charts.ts` (6 meses,
       `monthsCents` de 6, importes enteros no negativos) con sus tests
-- [ ] G004 Tests en `apps/server/test/charts.test.ts`: sin sesión 401; otro hogar 403/404;
+- [x] G004 Tests en `apps/server/test/charts.test.ts`: sin sesión 401; otro hogar 403/404;
       `:start` que no es inicio de periodo 400; lector puede verla; ingresos y gastos por
       periodo (borrados fuera, huchas fuera); gasto por categoría con archivadas; meses sin
       movimientos a 0; día de inicio 25; huchas: aportaciones, retiradas, cerrada y borradas,
       saldo al final de cada periodo y `goals` del último; contraste con la suma de los
       movimientos (CE-801)
-- [ ] G005 Ruta `GET /api/households/:id/charts/:start` en `apps/server/src/routes/charts.ts`
+- [x] G005 Ruta `GET /api/households/:id/charts/:start` en `apps/server/src/routes/charts.ts`
       (tres consultas agregadas en paralelo) y registrarla en `server.ts`
 
 **Punto de control**: la respuesta de la ruta cuadra al céntimo con los movimientos.

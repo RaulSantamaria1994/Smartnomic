@@ -5,6 +5,7 @@ export * from './budgets';
 export * from './calendar';
 export * from './categories';
 export * from './categoryIcons';
+export * from './charts';
 export * from './dates';
 export * from './ids';
 export * from './money';
