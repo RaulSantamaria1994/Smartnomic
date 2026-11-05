@@ -29,6 +29,7 @@ const NAMES = {
   savings: 'piggy-bank-outline',
   budget: 'wallet-outline',
   chart: 'chart-bar',
+  search: 'magnify',
   user: 'account-outline',
   wifiOff: 'wifi-off',
 } as const;

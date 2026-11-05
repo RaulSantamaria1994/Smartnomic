@@ -17,6 +17,8 @@ interface Props extends Omit<TextInputProps, 'style'> {
   suffix?: string;
   /** Sin etiqueta visible (en una fila que ya la dice); el lector de pantalla la sigue oyendo. */
   hideLabel?: boolean;
+  /** Error de este campo: va debajo en rojo y el lector de pantalla lo lee con el campo. */
+  error?: string | null;
   ref?: Ref<React.ComponentRef<typeof TextInput>>;
 }
 
@@ -26,6 +28,7 @@ export function TextField({
   hint,
   suffix,
   hideLabel,
+  error,
   onFocus,
   onBlur,
   ref,
@@ -39,11 +42,12 @@ export function TextField({
           {label}
         </AppText>
       )}
-      <View style={[styles.box, focused && styles.focused]}>
+      <View style={[styles.box, focused && styles.focused, Boolean(error) && styles.invalid]}>
         <TextInput
           ref={ref}
           accessibilityLabel={label}
-          {...(hint && { accessibilityHint: hint })}
+          {...((error || hint) && { accessibilityHint: error || hint })}
+          aria-invalid={Boolean(error)}
           placeholderTextColor={color.text.placeholder}
           style={styles.input}
           onFocus={(e) => {
@@ -65,6 +69,11 @@ export function TextField({
       {hint && (
         <AppText variant="caption" tone="muted">
           {hint}
+        </AppText>
+      )}
+      {error && (
+        <AppText variant="caption" tone="danger" accessibilityLiveRegion="polite">
+          {error}
         </AppText>
       )}
     </View>
@@ -89,6 +98,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.ms + 2,
     minHeight: 52,
   },
+  invalid: { borderColor: color.text.danger },
   focused: {
     borderColor: color.border.focus,
     borderWidth: 2,

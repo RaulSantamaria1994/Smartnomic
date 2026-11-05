@@ -11,10 +11,12 @@ interface Props {
   onPress: () => void;
   /** Icono delante del texto; al elegirlo se cambia por la marca. */
   icon?: ReactNode;
+  /** Se pueden elegir varios a la vez (filtros): rol `checkbox` en lugar de `radio`. */
+  multiple?: boolean;
 }
 
 /** Chip de Material para elegir una opción (especificación 006). */
-export function Chip({ label, selected, onPress, icon }: Props) {
+export function Chip({ label, selected, onPress, icon, multiple }: Props) {
   const reduce = useReduceMotion();
   // La marca crece al elegir el chip (animación 4); si ya venía elegido, está quieta.
   const mark = useRef(new Animated.Value(1)).current;
@@ -36,9 +38,10 @@ export function Chip({ label, selected, onPress, icon }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      accessibilityRole="radio"
+      accessibilityRole={multiple ? 'checkbox' : 'radio'}
       accessibilityState={{ selected, checked: selected }}
-      // react-native-web no pasa `checked` a `aria-checked`, que el rol radio necesita.
+      // react-native-web no pasa `checked` a `aria-checked`, que los roles radio y checkbox
+      // necesitan.
       aria-checked={selected}
       accessibilityLabel={label}
       android_ripple={{ color: color.bg.accentSoft }}

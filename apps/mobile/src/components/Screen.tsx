@@ -9,7 +9,7 @@ import {
   type RefreshControlProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppBar, type AppBarStep } from '../design/AppBar';
+import { AppBar, type AppBarAction, type AppBarStep } from '../design/AppBar';
 import { Brand } from '../design/Brand';
 import { AppText } from '../design/Text';
 import { color, layout, size, spacing } from '../design/tokens';
@@ -26,6 +26,7 @@ export function Screen({
   back,
   prev,
   next,
+  action,
   brand,
   align = 'center',
   bleed,
@@ -41,6 +42,8 @@ export function Screen({
   /** Flechas a los lados del título (cambio de mes). */
   prev?: AppBarStep;
   next?: AppBarStep;
+  /** Botón de icono a la derecha de la barra. */
+  action?: AppBarAction;
   /** Pantallas sin sesión: marca y título dentro del contenido, sin barra superior. */
   brand?: boolean;
   /** Los formularios cortos sin sesión van centrados; el resto, arriba. */
@@ -65,6 +68,7 @@ export function Screen({
           onBack={back === true ? goBack : back || undefined}
           prev={prev}
           next={next}
+          action={action}
         />
       )}
       <KeyboardAvoidingView

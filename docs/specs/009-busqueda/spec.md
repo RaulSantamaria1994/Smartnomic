@@ -61,8 +61,9 @@ suma de la lista.
    y los totales se actualizan, y se vuelve a los 100 primeros.
 7. **Dado** filtros que no encuentran nada, **cuando** se aplican, **entonces** se dice que no
    hay movimientos con esos filtros y se ofrece quitarlos.
-8. **Dado** un resultado, **cuando** se toca, **entonces** se abre ese movimiento (quien puede
-   lo edita o borra) y, al volver, los filtros y la lista siguen como estaban, ya al día.
+8. **Dado** un resultado, **cuando** quien puede editar lo toca, **entonces** se abre ese
+   movimiento para editarlo o borrarlo y, al volver, los filtros y la lista siguen como
+   estaban, ya al día.
 
 ---
 
@@ -94,7 +95,8 @@ excluyen el resto, solos o junto a los otros filtros.
   todos los que cumplen los filtros, no solo los cargados.
 - Un movimiento editado o borrado desde la búsqueda: al volver, la lista y los totales ya
   están al día.
-- Lectores: pueden buscar y abrir movimientos, pero no editarlos (como en «Mes»).
+- Lectores: pueden buscar y ver los resultados, pero no abrirlos para editarlos (como en «Mes»,
+  donde solo los abren quienes pueden editarlos).
 - Sin conexión en Android: se avisa como en el resto de la app; no hay búsqueda sin conexión.
 - Texto grande del sistema y 320 px de ancho: los filtros y las filas no se cortan.
 
@@ -112,7 +114,7 @@ excluyen el resto, solos o junto a los otros filtros.
 - **RF-905**: Arriba DEBE mostrar cuántos movimientos cumplen los filtros y cuánto suman los
   gastos y los ingresos, calculado sobre todos ellos (no solo los cargados) y siempre a partir
   de los movimientos.
-- **RF-906**: Tocar un resultado DEBE abrir el movimiento; al volver, los filtros se conservan y
+- **RF-906**: Tocar un resultado DEBE abrir el movimiento a quien puede editarlo, como en «Mes»; al volver, los filtros se conservan y
   la lista está al día.
 - **RF-907**: No se busca por el texto de la nota.
 - **RF-908**: Todo DEBE cumplir WCAG 2.1 AA, seguir el estilo de la especificación 006 y

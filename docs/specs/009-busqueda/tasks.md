@@ -42,14 +42,14 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Categoría, tipo y fechas (P1) 🎯
 
-- [ ] S006 [US1] App: `api.searchTransactions`, `queryKeys.search` bajo `periods` (test) y
+- [x] S006 [US1] App: `api.searchTransactions`, `queryKeys.search` bajo `periods` (test) y
       `useSearch` con `useInfiniteQuery`
-- [ ] S007 [US1] `AppBar` con `action`, icono `search`, lupa en «Mes»; comprobar la barra a
+- [x] S007 [US1] `AppBar` con `action`, icono `search`, lupa en «Mes»; comprobar la barra a
       320 px
-- [ ] S008 [US1] `TransactionRow` a `src/components/` (con la fecha completa como opción) y
+- [x] S008 [US1] `TransactionRow` a `src/components/` (con la fecha completa como opción) y
       «Mes» usándolo sin cambiar lo que se ve
-- [ ] S009 [US1] `Chip` con `multiple` (rol `checkbox`)
-- [ ] S010 [US1] `app/(app)/search.tsx`: tipo, categorías (archivadas aparte), fechas con su
+- [x] S009 [US1] `Chip` con `multiple` (rol `checkbox`)
+- [x] S010 [US1] `app/(app)/search.tsx`: tipo, categorías (archivadas aparte), fechas con su
       error, número y totales, lista con «Mostrar más», sin resultados con «Quitar filtros»,
       abrir un resultado y volver con los filtros; textos en `es.ts`
 
