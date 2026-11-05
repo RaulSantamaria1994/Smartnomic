@@ -1,5 +1,6 @@
 import {
   categoriesResponseSchema,
+  errorResponseSchema,
   periodResponseSchema,
   type Category,
   type TransactionInput,
@@ -145,6 +146,21 @@ describe('GET /periods/:start', () => {
   it('rechaza una fecha que no es el inicio de un periodo del hogar', async () => {
     expect((await get('2026-10-15')).statusCode).toBe(400);
     expect((await get('no-es-fecha')).statusCode).toBe(400);
+  });
+
+  it('en los extremos del calendario: el primer y el último mes válidos, y 400 (no 500) fuera', async () => {
+    expect((await get('0001-01-01')).statusCode).toBe(200);
+    expect((await get('9999-11-01')).statusCode).toBe(200);
+    // Su periodo acabaría en el año 10000.
+    const last = await get('9999-12-01');
+    expect(last.statusCode).toBe(400);
+    expect(errorResponseSchema.parse(last.json()).error.code).toBe('validation_failed');
+    await ctx.db
+      .update(households)
+      .set({ monthStartDay: 25 })
+      .where(eq(households.id, householdId));
+    expect((await get('9999-11-25')).statusCode).toBe(200);
+    expect((await get('9999-12-25')).statusCode).toBe(400);
   });
 
   it('nadie de otro hogar puede verlo', async () => {
