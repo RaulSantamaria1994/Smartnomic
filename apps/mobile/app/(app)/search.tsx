@@ -1,5 +1,5 @@
 import type { Category, SearchFilters, Transaction } from '@smartnomic/api';
-import { rangeError, type DateString, type TransactionKind } from '@smartnomic/domain';
+import { parseAmount, rangeError, type DateString, type TransactionKind } from '@smartnomic/domain';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
@@ -13,7 +13,7 @@ import { TextField } from '../../src/components/TextField';
 import { TransactionRow } from '../../src/components/TransactionRow';
 import { Amount, AppText, CategoryIcon, EmptyState, Section } from '../../src/design';
 import { spacing } from '../../src/design/tokens';
-import { formatMoney, formatShortDate, parseShortDate } from '../../src/format';
+import { amountErrorMessage, formatMoney, formatShortDate, parseShortDate } from '../../src/format';
 import { useCan, useCategories, useMe, useMembers, useSearch } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
 
@@ -40,6 +40,18 @@ function readDate(text: string): { value?: DateString; error?: string } {
   return value ? { value } : { error: es.search.dateInvalid };
 }
 
+/** Un importe escrito: vacío, válido (en céntimos) o con error. */
+function readAmount(text: string): { value?: number; error?: string } {
+  if (text.trim() === '') return {};
+  const parsed = parseAmount(text);
+  if (parsed.ok) return { value: parsed.value };
+  // El mensaje general de «negativo» habla de elegir gasto o ingreso, que aquí no aplica.
+  return {
+    error:
+      parsed.error === 'negative' ? es.search.amountNegative : amountErrorMessage(parsed.error),
+  };
+}
+
 /**
  * «Buscar movimientos» (especificación 009): filtros arriba y, debajo, cuántos son, cuánto
  * suman y la lista de 100 en 100. Se abre con la lupa de «Mes».
@@ -52,10 +64,15 @@ export default function Search() {
   const can = useCan();
   const [kind, setKind] = useState<KindFilter>('all');
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const amountFrom = useAppliedText();
+  const amountTo = useAppliedText();
   const dateFrom = useAppliedText();
   const dateTo = useAppliedText();
 
-  // Las fechas se comprueban con lo aplicado: el error no salta a mitad de escribir.
+  // Importes y fechas se comprueban con lo aplicado: el error no salta a mitad de escribir.
+  const min = readAmount(amountFrom.applied);
+  const max = readAmount(amountTo.applied);
+  const amountsReversed = rangeError(min.value, max.value) !== null;
   const from = readDate(dateFrom.applied);
   const to = readDate(dateTo.applied);
   const datesReversed = rangeError(from.value, to.value) !== null;
@@ -65,10 +82,12 @@ export default function Search() {
       ...(kind !== 'all' && { kind }),
       categoryIds,
       // Un filtro con error no se envía hasta corregirlo.
+      ...(!amountsReversed && min.value !== undefined && { minCents: min.value }),
+      ...(!amountsReversed && max.value !== undefined && { maxCents: max.value }),
       ...(!datesReversed && from.value && { from: from.value }),
       ...(!datesReversed && to.value && { to: to.value }),
     }),
-    [kind, categoryIds, datesReversed, from.value, to.value],
+    [kind, categoryIds, amountsReversed, min.value, max.value, datesReversed, from.value, to.value],
   );
   const search = useSearch(household?.id, filters);
 
@@ -95,11 +114,15 @@ export default function Search() {
   const hasFilters =
     kind !== 'all' ||
     categoryIds.length > 0 ||
+    amountFrom.text.trim() !== '' ||
+    amountTo.text.trim() !== '' ||
     dateFrom.text.trim() !== '' ||
     dateTo.text.trim() !== '';
   const clear = () => {
     setKind('all');
     setCategoryIds([]);
+    amountFrom.setText('');
+    amountTo.setText('');
     dateFrom.setText('');
     dateTo.setText('');
   };
@@ -167,6 +190,30 @@ export default function Search() {
                 </View>
               </>
             )}
+          </View>
+          <View style={styles.pair}>
+            <View style={styles.half}>
+              <TextField
+                label={es.search.amountFrom}
+                value={amountFrom.text}
+                onChangeText={amountFrom.setText}
+                onSubmitEditing={amountFrom.apply}
+                keyboardType="decimal-pad"
+                suffix="€"
+                error={min.error ?? (amountsReversed ? es.search.amountReversed : null)}
+              />
+            </View>
+            <View style={styles.half}>
+              <TextField
+                label={es.search.amountTo}
+                value={amountTo.text}
+                onChangeText={amountTo.setText}
+                onSubmitEditing={amountTo.apply}
+                keyboardType="decimal-pad"
+                suffix="€"
+                error={max.error}
+              />
+            </View>
           </View>
           <View style={styles.pair}>
             <View style={styles.half}>

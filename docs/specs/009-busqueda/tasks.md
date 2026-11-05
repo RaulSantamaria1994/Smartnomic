@@ -59,7 +59,7 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Importe (P2)
 
-- [ ] S011 [US2] Campos «Importe desde» y «hasta» con `parseAmount`, su error y el rango
+- [x] S011 [US2] Campos «Importe desde» y «hasta» con `parseAmount`, su error y el rango
       al revés
 
 ---
