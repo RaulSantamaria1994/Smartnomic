@@ -18,7 +18,7 @@ import { MonthSlide } from '../../../src/components/MonthSlide';
 import { Screen } from '../../../src/components/Screen';
 import { Amount, AppText, CategoryIcon, ChartRow, EmptyState, Section } from '../../../src/design';
 import { spacing } from '../../../src/design/tokens';
-import { formatMoney, formatPeriod } from '../../../src/format';
+import { formatMoney, formatPeriod, formatSignedMoney } from '../../../src/format';
 import {
   currentPeriodStart,
   useCan,
@@ -28,10 +28,11 @@ import {
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 
-type ChartKind = 'category';
+type ChartKind = 'category' | 'flow';
 
 const CHARTS: { kind: ChartKind; label: string }[] = [
   { kind: 'category', label: es.charts.kinds.category },
+  { kind: 'flow', label: es.charts.kinds.flow },
 ];
 
 /**
@@ -114,7 +115,12 @@ export default function Charts() {
       )}
       <MonthSlide month={periodStart} direction={direction}>
         {charts.data ? (
-          kind === 'category' && <CategoryChart data={charts.data} byId={byId} />
+          <>
+            {kind === 'category' && <CategoryChart data={charts.data} byId={byId} />}
+            {kind === 'flow' && (
+              <FlowChart data={charts.data} monthStartDay={household.monthStartDay} />
+            )}
+          </>
         ) : charts.isPending ? (
           <View style={styles.loading}>
             <ActivityIndicator accessibilityLabel={es.common.loading} />
@@ -170,6 +176,48 @@ function CategoryChart({ data, byId }: { data: ChartsResponse; byId: Map<string,
             leading={<CategoryIcon icon={row.category?.icon} tone={row.category?.color} />}
             bars={[{ share: barShare(row.amountCents, max) }]}
             accessibilityLabel={es.charts.categoryRow(row.name, amount, percent)}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+/** Diferencia con signo: «+150,00 €», «−45,00 €» o «0,00 €». */
+function signed(cents: number): string {
+  if (cents === 0) return formatMoney(0);
+  return formatSignedMoney(Math.abs(cents), cents > 0 ? 'income' : 'expense');
+}
+
+/** «Ingresos y gastos»: los 6 meses, del más antiguo al más reciente (historia 2). */
+function FlowChart({ data, monthStartDay }: { data: ChartsResponse; monthStartDay: number }) {
+  // Misma escala para las 12 barras: la mayor de todas.
+  const max = Math.max(...data.months.flatMap((m) => [m.incomeCents, m.expenseCents]));
+  return (
+    <>
+      {data.months.map((month) => {
+        const name = formatPeriod(month, monthStartDay);
+        const income = formatMoney(month.incomeCents);
+        const expense = formatMoney(month.expenseCents);
+        const difference = signed(month.incomeCents - month.expenseCents);
+        return (
+          <ChartRow
+            key={month.start}
+            label={name}
+            value={difference}
+            bars={[
+              {
+                share: barShare(month.incomeCents, max),
+                tone: 'income',
+                caption: es.charts.income(income),
+              },
+              {
+                share: barShare(month.expenseCents, max),
+                tone: 'expense',
+                caption: es.charts.expenses(expense),
+              },
+            ]}
+            accessibilityLabel={es.charts.flowRow(name, income, expense, difference)}
           />
         );
       })}

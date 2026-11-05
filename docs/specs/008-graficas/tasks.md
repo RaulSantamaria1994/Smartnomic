@@ -59,7 +59,7 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Ingresos y gastos (P2)
 
-- [ ] G010 [US2] «Ingresos y gastos»: una fila por mes con dos barras a la misma escala, sus
+- [x] G010 [US2] «Ingresos y gastos»: una fila por mes con dos barras a la misma escala, sus
       importes y la diferencia con signo; etiqueta accesible completa por fila
 
 ---

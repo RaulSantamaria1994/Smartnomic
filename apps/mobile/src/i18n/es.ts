@@ -349,6 +349,10 @@ export const es = {
     categoryRow: (name: string, amount: string, percent: string) =>
       `${name}: ${amount}, ${percent} del gasto del mes`,
     error: 'No se han podido cargar las gráficas.',
+    income: (amount: string) => `Ingresos ${amount}`,
+    expenses: (amount: string) => `Gastos ${amount}`,
+    flowRow: (month: string, income: string, expense: string, difference: string) =>
+      `${month}: ingresos ${income}, gastos ${expense}, diferencia ${difference}`,
   },
   /** Huchas para objetivos de ahorro (especificación 005). */
   savings: {
