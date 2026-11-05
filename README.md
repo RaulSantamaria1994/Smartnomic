@@ -10,9 +10,10 @@ dinero y reciba recordatorios antes de cada pago. Funciona en Android y en el na
 **Estado:** el MVP (`docs/specs/001-mvp-hogar`) está completo y desplegado en Railway, y el
 calendario de pagos programados (`docs/specs/002-calendario`), el diseño visual
 (`docs/specs/003-diseno-visual`, sustituido por el estilo Android de
-`docs/specs/006-estilo-android`), los iconos de categoría (`docs/specs/004-iconos-categorias`)
-las huchas para objetivos de ahorro (`docs/specs/005-hucha`) y los presupuestos por categoría
-(`docs/specs/007-presupuestos`) también están terminados.
+`docs/specs/006-estilo-android`), los iconos de categoría (`docs/specs/004-iconos-categorias`),
+las huchas para objetivos de ahorro (`docs/specs/005-hucha`), los presupuestos por categoría
+(`docs/specs/007-presupuestos`) y la pestaña de gráficas (`docs/specs/008-graficas`) también
+están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 

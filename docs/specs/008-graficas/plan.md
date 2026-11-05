@@ -170,3 +170,28 @@ apps/mobile/
   evolución, apuntar un gasto y verlo reflejado; las anteriores siguen pasando.
 - CE-802: 500 movimientos por mes durante 6 meses; axe-core en las cuatro gráficas a 320 y
   1280 px; `expo export --platform android`.
+
+## Resultados
+
+- `pnpm check` en verde: 560 tests (dominio de las gráficas, esquema de la respuesta, claves de
+  la caché, contraste de las barras y 16 de servidor: acceso, otro hogar, lector, fechas fuera
+  del calendario, borrados, huchas fuera de los gastos, categorías archivadas, día de inicio 25,
+  huchas con retiradas, cerradas y borradas).
+- CE-801: 600 movimientos y 120 movimientos de huchas en seis meses; cada cifra de las cuatro
+  gráficas coincide al céntimo con la suma de sus movimientos, y los ingresos y gastos de cada
+  mes, con el resumen de «Mes».
+- CE-802: 3.000 movimientos (500 por mes durante 6 meses): la ruta tarda 19 ms de mediana; de
+  recargar a ver las filas, entre 881 y 934 ms (1.006 ms la primera carga en frío, igual que
+  «Mes»); cambiar de gráfica, entre 112 y 154 ms.
+- CE-803: dos toques desde la barra de pestañas (abrir «Gráficas» y tocar la categoría).
+- CE-804: axe-core sin problemas en 26 pantallas, las cuatro gráficas incluidas, a 320 y
+  1280 px; las pruebas de punta a punta anteriores (MVP, calendario, categorías, huchas,
+  animaciones y presupuestos) siguen pasando.
+- Batería de ataques ampliada (otro hogar, IDOR con el id del hogar, sin sesión, lector, fechas
+  absurdas, otros métodos): sin accesos, filtraciones ni errores 500; los logs no llevan
+  importes. Encontró un 500 con fechas en el extremo del calendario (año 1 y 9999), corregido
+  con un 400 y su test. La ruta del periodo de «Mes» tiene el mismo 500 con `9999-12-01`; no se
+  toca en esta funcionalidad.
+- A 320 px, «Calendario» no cabía en la barra de cinco pestañas: las pestañas van sin margen
+  lateral.
+- `expo export --platform android` compila.

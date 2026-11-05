@@ -10,6 +10,8 @@ import type { HouseholdAccess } from '../plugins/household-access';
 
 const paramsSchema = z.object({ householdId: z.uuid(), start: dateSchema });
 
+const FIRST_DATE = '0001-01-01';
+
 /** Los periodos de la ventana como lista `VALUES (idx, inicio, fin)` para unir en SQL. */
 function windowValues(window: Period[]) {
   return sql.join(
@@ -100,13 +102,27 @@ export function registerChartRoutes(
     async (request): Promise<ChartsResponse> => {
       const { start } = paramsSchema.parse(request.params);
       const { household } = request.membership!;
-      if (!isPeriodStart(start, household.monthStartDay)) {
-        throw new ApiError(
-          'validation_failed',
-          `${start} no es el inicio de un periodo: el mes del hogar empieza el día ${household.monthStartDay}.`,
-        );
+      // Fechas en los extremos del calendario (año 1 o 9999): los 6 meses no caben.
+      let window: Period[];
+      try {
+        if (!isPeriodStart(start, household.monthStartDay)) {
+          throw new ApiError(
+            'validation_failed',
+            `${start} no es el inicio de un periodo: el mes del hogar empieza el día ${household.monthStartDay}.`,
+          );
+        }
+        window = chartWindow(start, household.monthStartDay);
+      } catch (error) {
+        if (error instanceof RangeError) {
+          throw new ApiError('validation_failed', 'Las gráficas no llegan tan lejos.');
+        }
+        throw error;
       }
-      return chartsFor(db, household.id, chartWindow(start, household.monthStartDay));
+      // PostgreSQL no admite el año 0.
+      if (window[0]!.start < FIRST_DATE) {
+        throw new ApiError('validation_failed', 'Las gráficas no llegan tan lejos.');
+      }
+      return chartsFor(db, household.id, window);
     },
   );
 }

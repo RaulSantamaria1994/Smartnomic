@@ -3,7 +3,7 @@
 **Rama de la funcionalidad**: `008-graficas`
 **Creada**: 2026-11-05
 **Plan**: [`plan.md`](plan.md)
-**Estado**: Aprobada
+**Estado**: Implementada
 **Entrada**: "Implementa las gráficas." (Pendiente del MVP: «Presupuestos, gráficas, búsqueda y
 exportación a CSV con filtros quedan para más adelante».)
 

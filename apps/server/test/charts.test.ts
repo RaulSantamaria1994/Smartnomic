@@ -135,6 +135,15 @@ describe('acceso a las gráficas (especificación 008)', () => {
     }
   });
 
+  it('fuera del calendario (antes del año 1 o después del 9999), 400 sin 500', async () => {
+    const tooEarly = await getCharts('0001-05-01');
+    expect(tooEarly.statusCode).toBe(400);
+    errorResponseSchema.parse(tooEarly.json());
+    expect((await getCharts('0001-06-01')).statusCode).toBe(200);
+    expect((await getCharts('9999-11-01')).statusCode).toBe(200);
+    expect((await getCharts('9999-12-01')).statusCode).toBe(400);
+  });
+
   it('un lector las ve', async () => {
     const viewer = await signUp(ctx.app);
     await joinHousehold(ctx.db, owner, viewer, 'viewer');

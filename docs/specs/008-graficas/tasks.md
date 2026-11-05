@@ -82,14 +82,14 @@ fallar antes de implementar.
 
 ## Fase 6: Cierre
 
-- [ ] G013 Batería de ataques ampliada a `/charts` (otro hogar, IDOR, `:start` no válido,
+- [x] G013 Batería de ataques ampliada a `/charts` (otro hogar, IDOR, `:start` no válido,
       sin sesión)
-- [ ] G014 Prueba de punta a punta: abrir «Gráficas», cambiar de gráfica y de mes, tocar una
+- [x] G014 Prueba de punta a punta: abrir «Gráficas», cambiar de gráfica y de mes, tocar una
       categoría, apuntar un gasto y verlo; las anteriores siguen pasando; CE-802 con 500
       movimientos por mes durante 6 meses
-- [ ] G015 [P] axe-core en las cuatro gráficas a 320 y 1280 px (CE-804)
-- [ ] G016 [P] `expo export --platform android` compila
-- [ ] G017 Actualizar `README.md` y `AGENTS.md`, el texto de `noAiTells`/tests de la barra si
+- [x] G015 [P] axe-core en las cuatro gráficas a 320 y 1280 px (CE-804)
+- [x] G016 [P] `expo export --platform android` compila
+- [x] G017 Actualizar `README.md` y `AGENTS.md`, el texto de `noAiTells`/tests de la barra si
       cambian, y marcar tareas (el PR, cuando lo pida el propietario)
 
 ---
