@@ -20,19 +20,19 @@ fallar antes de implementar.
 
 **Objetivo**: filtros, páginas y totales listos en el servidor, sin pantallas.
 
-- [ ] S001 [P] Tests de `packages/domain/src/search.ts`: `rangeError` con números y fechas
+- [x] S001 [P] Tests de `packages/domain/src/search.ts`: `rangeError` con números y fechas
       (vacíos, iguales, al revés) y las constantes
-- [ ] S002 Implementar `packages/domain/src/search.ts` y exportarlo
-- [ ] S003 [P] Esquemas en `packages/api/src/schemas/search.ts`: filtros desde la URL (tipo,
+- [x] S002 Implementar `packages/domain/src/search.ts` y exportarlo
+- [x] S003 [P] Esquemas en `packages/api/src/schemas/search.ts`: filtros desde la URL (tipo,
       `categoryId` uno o varios con máximo, importes, fechas, rangos al revés, cursor) y la
       respuesta (`totals` opcional), con sus tests
-- [ ] S004 Tests en `apps/server/test/search.test.ts`: sin sesión 401; otro hogar 403; lector
+- [x] S004 Tests en `apps/server/test/search.test.ts`: sin sesión 401; otro hogar 403; lector
       puede; sin filtros devuelve todo en orden; cada filtro y combinaciones; límites
       incluidos; borrados fuera; ids de categoría ajenos no encuentran nada; páginas de 100
       con cursor sin repetir ni saltar (también con un movimiento nuevo entre páginas);
       totales solo en la primera página y sobre todos; valores no válidos y cursor
       manipulado 400; contraste con un filtrado a mano (CE-901)
-- [ ] S005 Ruta `GET /api/households/:id/transactions/search` en
+- [x] S005 Ruta `GET /api/households/:id/transactions/search` en
       `apps/server/src/routes/search.ts` (consulta de la página y de los totales en paralelo)
       y registrarla en `server.ts`
 

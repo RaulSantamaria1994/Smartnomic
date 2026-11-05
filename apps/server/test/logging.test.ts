@@ -12,6 +12,10 @@ describe('redactUrl', () => {
     expect(redactUrl('/invitacion/ABCDE23456')).toBe('/invitacion/***');
     expect(redactUrl('/restablecer?token=secreto')).toBe('/restablecer');
     expect(redactUrl('/api/households/1/upcoming?days=30')).toBe('/api/households/1/upcoming');
+    // Los filtros de la búsqueda llevan importes y fechas (especificación 009).
+    expect(redactUrl('/api/households/1/transactions/search?minCents=5000&from=2026-01-01')).toBe(
+      '/api/households/1/transactions/search',
+    );
   });
 });
 
