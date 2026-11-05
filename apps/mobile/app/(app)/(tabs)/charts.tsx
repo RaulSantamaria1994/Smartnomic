@@ -1,14 +1,15 @@
 import type { Category, ChartsResponse } from '@smartnomic/api';
 import {
   barShare,
+  defaultCategory,
   periodOf,
   shares,
   shiftPeriod,
   sortByAmount,
   type DateString,
 } from '@smartnomic/domain';
-import { useState } from 'react';
-import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native';
+import { useRef, useState, type ComponentRef } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '../../../src/api/http';
 import { Button } from '../../../src/components/Button';
@@ -28,11 +29,12 @@ import {
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 
-type ChartKind = 'category' | 'flow';
+type ChartKind = 'category' | 'flow' | 'trend';
 
 const CHARTS: { kind: ChartKind; label: string }[] = [
   { kind: 'category', label: es.charts.kinds.category },
   { kind: 'flow', label: es.charts.kinds.flow },
+  { kind: 'trend', label: es.charts.kinds.trend },
 ];
 
 /**
@@ -45,6 +47,8 @@ export default function Charts() {
   const [start, setStart] = useState<DateString | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [kind, setKind] = useState<ChartKind>('category');
+  // Categoría de «Evolución»; sin elegir, la de más gasto del mes (`defaultCategory`).
+  const [trendCategory, setTrendCategory] = useState<string | null>(null);
   const periodStart =
     start ??
     (household ? currentPeriodStart(household.timezone, household.monthStartDay) : undefined);
@@ -104,7 +108,10 @@ export default function Charts() {
             key={chart.kind}
             label={chart.label}
             selected={kind === chart.kind}
-            onPress={() => setKind(chart.kind)}
+            onPress={() => {
+              if (chart.kind === 'trend') setTrendCategory(null);
+              setKind(chart.kind);
+            }}
           />
         ))}
       </View>
@@ -116,7 +123,25 @@ export default function Charts() {
       <MonthSlide month={periodStart} direction={direction}>
         {charts.data ? (
           <>
-            {kind === 'category' && <CategoryChart data={charts.data} byId={byId} />}
+            {kind === 'category' && (
+              <CategoryChart
+                data={charts.data}
+                byId={byId}
+                onOpen={(id) => {
+                  setTrendCategory(id);
+                  setKind('trend');
+                }}
+              />
+            )}
+            {kind === 'trend' && (
+              <TrendChart
+                data={charts.data}
+                categories={categories.data?.categories ?? []}
+                selected={trendCategory}
+                onSelect={setTrendCategory}
+                monthStartDay={household.monthStartDay}
+              />
+            )}
             {kind === 'flow' && (
               <FlowChart data={charts.data} monthStartDay={household.monthStartDay} />
             )}
@@ -137,7 +162,16 @@ export default function Charts() {
 }
 
 /** «Por categoría»: en qué se va el dinero del mes elegido (historia 1). */
-function CategoryChart({ data, byId }: { data: ChartsResponse; byId: Map<string, Category> }) {
+function CategoryChart({
+  data,
+  byId,
+  onOpen,
+}: {
+  data: ChartsResponse;
+  byId: Map<string, Category>;
+  /** Abre la evolución de la categoría tocada (RF-806). */
+  onOpen: (categoryId: string) => void;
+}) {
   const last = data.months.length - 1;
   const rows = sortByAmount(
     data.categories
@@ -176,6 +210,95 @@ function CategoryChart({ data, byId }: { data: ChartsResponse; byId: Map<string,
             leading={<CategoryIcon icon={row.category?.icon} tone={row.category?.color} />}
             bars={[{ share: barShare(row.amountCents, max) }]}
             accessibilityLabel={es.charts.categoryRow(row.name, amount, percent)}
+            accessibilityHint={es.charts.trendHint}
+            onPress={() => onOpen(row.id)}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+/** «Evolución»: lo gastado en una categoría en cada uno de los 6 meses (historia 3). */
+function TrendChart({
+  data,
+  categories,
+  selected,
+  onSelect,
+  monthStartDay,
+}: {
+  data: ChartsResponse;
+  categories: Category[];
+  selected: string | null;
+  onSelect: (categoryId: string) => void;
+  monthStartDay: number;
+}) {
+  const scroller = useRef<ComponentRef<typeof ScrollView>>(null);
+  const last = data.months.length - 1;
+  const choices = categories
+    .filter((c) => c.kind === 'expense' && !c.archived)
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  const id =
+    selected ??
+    defaultCategory(
+      categories,
+      data.categories.map((c) => ({
+        categoryId: c.categoryId,
+        amountCents: c.monthsCents[last] ?? 0,
+      })),
+    );
+  const category = categories.find((c) => c.id === id);
+  if (!id || !category) {
+    return <EmptyState icon="chart" title={es.charts.noCategories} />;
+  }
+  const series =
+    data.categories.find((c) => c.categoryId === id)?.monthsCents ?? data.months.map(() => 0);
+  const max = Math.max(...series);
+  return (
+    <>
+      <AppText variant="caption" tone="muted" style={styles.categoriesLabel}>
+        {es.charts.trendChooser}
+      </AppText>
+      <ScrollView
+        ref={scroller}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categories}
+        accessibilityRole="radiogroup"
+        accessibilityLabel={es.charts.trendChooser}
+      >
+        {choices.map((c) => (
+          <View
+            key={c.id}
+            onLayout={(event) => {
+              // La elegida queda a la vista aunque esté al final de la lista.
+              if (c.id === id) {
+                scroller.current?.scrollTo({
+                  x: Math.max(0, event.nativeEvent.layout.x - spacing.md),
+                  animated: false,
+                });
+              }
+            }}
+          >
+            <Chip
+              label={c.name}
+              selected={c.id === id}
+              onPress={() => onSelect(c.id)}
+              icon={<CategoryIcon icon={c.icon} tone={c.color} size="sm" />}
+            />
+          </View>
+        ))}
+      </ScrollView>
+      {data.months.map((month, index) => {
+        const name = formatPeriod(month, monthStartDay);
+        const amount = formatMoney(series[index] ?? 0);
+        return (
+          <ChartRow
+            key={month.start}
+            label={name}
+            value={amount}
+            bars={[{ share: barShare(series[index] ?? 0, max) }]}
+            accessibilityLabel={es.charts.trendRow(name, category.name, amount)}
           />
         );
       })}
@@ -233,6 +356,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  categoriesLabel: { paddingHorizontal: spacing.md, paddingBottom: spacing.xs },
+  categories: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
   },
   notice: { padding: spacing.md, gap: spacing.sm },

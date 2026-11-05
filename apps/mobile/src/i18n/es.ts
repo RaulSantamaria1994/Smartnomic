@@ -351,6 +351,11 @@ export const es = {
     error: 'No se han podido cargar las gráficas.',
     income: (amount: string) => `Ingresos ${amount}`,
     expenses: (amount: string) => `Gastos ${amount}`,
+    trendHint: 'Muestra su evolución mes a mes',
+    trendChooser: 'Categoría',
+    trendRow: (month: string, category: string, amount: string) =>
+      `${month}: ${category}, ${amount}`,
+    noCategories: 'No hay categorías de gasto en uso.',
     flowRow: (month: string, income: string, expense: string, difference: string) =>
       `${month}: ingresos ${income}, gastos ${expense}, diferencia ${difference}`,
   },

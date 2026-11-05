@@ -66,7 +66,7 @@ fallar antes de implementar.
 
 ## Fase 4: Historia 3 — Evolución de una categoría (P3)
 
-- [ ] G011 [US3] «Evolución»: chips de categorías de gasto no archivadas, `defaultCategory`
+- [x] G011 [US3] «Evolución»: chips de categorías de gasto no archivadas, `defaultCategory`
       al abrirla desde el selector, filas por mes; tocar una fila de «Por categoría» abre
       su evolución (RF-806, CE-803)
 
