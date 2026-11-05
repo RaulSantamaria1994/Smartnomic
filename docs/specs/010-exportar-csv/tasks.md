@@ -45,10 +45,10 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Exportar desde la búsqueda (P1) 🎯
 
-- [ ] X007 [US1] `saveFile(name, content, mimeType)` en `src/export/` (web y Android) y la
+- [x] X007 [US1] `saveFile(name, content, mimeType)` en `src/export/` (web y Android) y la
       exportación completa usándolo sin cambiar lo que hace
-- [ ] X008 [US1] `api.exportTransactions` y `src/export/export-transactions.ts`
-- [ ] X009 [US1] Botón «Exportar a CSV» en `app/(app)/search.tsx` (solo con resultados, con
+- [x] X008 [US1] `api.exportTransactions` y `src/export/export-transactions.ts`
+- [x] X009 [US1] Botón «Exportar a CSV» en `app/(app)/search.tsx` (solo con resultados, con
       estado de carga y error); textos en `es.ts`
 
 **Punto de control**: RF-1001, RF-1006 y RF-1007.

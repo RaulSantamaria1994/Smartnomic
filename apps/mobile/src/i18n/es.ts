@@ -360,6 +360,8 @@ export const es = {
     noneHint: 'Prueba a quitar alguno.',
     empty: 'Aún no hay movimientos.',
     showMore: 'Mostrar más',
+    export: 'Exportar a CSV',
+    exportOffline: 'Sin conexión: no se ha podido exportar.',
     error: 'No se ha podido buscar.',
     offline: 'Sin conexión: la búsqueda necesita conexión.',
   },
