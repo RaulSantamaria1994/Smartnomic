@@ -15,6 +15,7 @@ import { authClient } from '../../../src/session/auth-client';
 import { es } from '../../../src/i18n/es';
 import { remindersSupported } from '../../../src/reminders/reminders';
 import { signOut } from '../../../src/session/sign-out';
+import { useOutbox } from '../../../src/outbox/useOutbox';
 import { AppText, Icon, ListRow, Section, type IconName } from '../../../src/design';
 import { color, spacing } from '../../../src/design/tokens';
 import { switchColors } from '../../../src/components/switchColors';
@@ -27,6 +28,8 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
  */
 export default function Account() {
   const queryClient = useQueryClient();
+  const outbox = useOutbox();
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const me = useMe();
   const [time, setTime] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
@@ -75,6 +78,14 @@ export default function Account() {
     }
   }
 
+  // Cerrar sesión con movimientos sin enviar los perdería: se avisa y hay que confirmarlo
+  // (especificación 011, RF-1107). La bandeja de la cuenta se borra con la sesión.
+  async function leave(confirmed: boolean) {
+    if (outbox.items.length > 0 && !confirmed) return setConfirmSignOut(true);
+    await outbox.clear();
+    await signOut(queryClient);
+  }
+
   async function deleteAccount() {
     setDeleteError(null);
     if (!password) return setDeleteError(es.account.passwordRequired);
@@ -88,7 +99,7 @@ export default function Account() {
       return setDeleteError(e instanceof Error ? e.message : es.auth.errors.unknown);
     }
     // La sesión ya no existe en el servidor: se limpia lo que queda en el dispositivo.
-    await Promise.all([clearCache(queryClient), syncReminders([])]);
+    await Promise.all([clearCache(queryClient), syncReminders([]), outbox.clear()]);
     await authClient.signOut().catch(() => undefined);
     router.replace('/entrar');
   }
@@ -174,11 +185,17 @@ export default function Account() {
       </Section>
 
       <Section title={es.account.title} padded>
-        <Button
-          variant="secondary"
-          label={es.auth.signOut}
-          onPress={() => void signOut(queryClient)}
-        />
+        <Button variant="secondary" label={es.auth.signOut} onPress={() => void leave(false)} />
+        {confirmSignOut && (
+          <>
+            <Message text={es.outbox.signOutWarning(outbox.items.length)} />
+            <Button
+              variant="danger"
+              label={es.outbox.signOutAnyway}
+              onPress={() => void leave(true)}
+            />
+          </>
+        )}
         <AppText variant="bodyStrong" accessibilityRole="header">
           {es.account.deleteTitle}
         </AppText>

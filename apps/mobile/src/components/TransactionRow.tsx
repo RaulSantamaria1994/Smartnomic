@@ -13,17 +13,20 @@ export function TransactionRow({
   when,
   category,
   author,
+  status,
   onPress,
 }: {
-  transaction: Transaction;
+  transaction: Pick<Transaction, 'kind' | 'amountCents' | 'note'>;
   /** Cuándo, ya escrito: «Hoy», «martes, 27 de octubre» o «27/10/2026». */
   when: string;
   category: Category | undefined;
   author: string | null;
+  /** Estado de un movimiento sin enviar (especificación 011), delante de todo lo demás. */
+  status?: string;
   onPress: (() => void) | undefined;
 }) {
   const name = category?.name ?? '—';
-  const detail = [when, transaction.note, author && es.household.byMember(author)]
+  const detail = [status, when, transaction.note, author && es.household.byMember(author)]
     .filter(Boolean)
     .join(' · ');
   return (

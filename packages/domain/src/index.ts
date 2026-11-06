@@ -10,6 +10,7 @@ export * from './csv';
 export * from './dates';
 export * from './ids';
 export * from './money';
+export * from './outbox';
 export * from './periods';
 export * from './permissions';
 export * from './recurrence';

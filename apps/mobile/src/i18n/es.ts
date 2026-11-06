@@ -331,6 +331,32 @@ export const es = {
     start: 'Ponerle un límite a una categoría',
     startHint: 'Por ejemplo, lo que quieres gastar al mes en el supermercado.',
   },
+  /** Movimientos apuntados sin conexión (especificación 011). */
+  outbox: {
+    savedOffline: 'Sin conexión: se enviará cuando vuelva.',
+    banner: (n: number) => (n === 1 ? '1 movimiento sin enviar' : `${n} movimientos sin enviar`),
+    bannerHint: 'Se enviarán solos cuando vuelva la conexión.',
+    rejectedBanner: (n: number) =>
+      n === 1 ? '1 no se ha podido enviar' : `${n} no se han podido enviar`,
+    rejectedHint: 'Toca el movimiento en la lista para corregirlo o descartarlo.',
+    sendNow: 'Enviar ahora',
+    sending: 'Enviando…',
+    pending: 'Pendiente de enviar',
+    rejected: (reason: string) => `No se ha podido enviar: ${reason}`,
+    rejectedShort: 'No se ha podido enviar',
+    editTitle: 'Movimiento sin enviar',
+    editHint: 'Aún no se ha guardado en el hogar. Puedes corregirlo o descartarlo.',
+    discard: 'Descartar',
+    discardConfirm: '¿Descartar este movimiento? No se guardará.',
+    discardYes: 'Sí, descartar',
+    keep: 'No, mantenerlo',
+    notFound: 'Este movimiento ya se ha enviado o descartado.',
+    signOutWarning: (n: number) =>
+      n === 1
+        ? 'Tienes 1 movimiento sin enviar. Si cierras sesión, se perderá.'
+        : `Tienes ${n} movimientos sin enviar. Si cierras sesión, se perderán.`,
+    signOutAnyway: 'Cerrar sesión igualmente',
+  },
   /** Búsqueda de movimientos (especificación 009). */
   search: {
     title: 'Buscar movimientos',

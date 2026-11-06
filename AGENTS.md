@@ -64,7 +64,11 @@ clave con cursor y con el número y los totales sumados en SQL; la búsqueda cue
 muestra la búsqueda: `GET /api/households/:id/transactions/export` en
 `apps/server/src/routes/export-csv.ts`, con los mismos filtros que la búsqueda
 (`routes/transaction-filters.ts`) y el formato en `packages/domain/src/csv.ts` (comillas y
-protección contra fórmulas). El
+protección contra fórmulas). **`011-sin-conexion`**: en Android, un movimiento nuevo que no
+se puede guardar por falta de conexión va a una bandeja de salida (`apps/mobile/src/outbox/`,
+AsyncStorage por cuenta) y se envía solo después con su mismo id (el `PUT` es idempotente); el
+servidor no cambia. Los totales con pendientes salen de `packages/domain/src/outbox.ts`. En la
+web no hay bandeja, salvo la compilación de pruebas con `EXPO_PUBLIC_E2E_OUTBOX=1`. El
 aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo

@@ -2,6 +2,7 @@ import { Redirect, Stack } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 import { UndoSnackbar } from '../../src/components/UndoSnackbar';
 import { useReminderSync } from '../../src/hooks/useReminderSync';
+import { useOutboxSync } from '../../src/outbox/useOutbox';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { colors } from '../../src/theme';
@@ -24,6 +25,7 @@ export default function AppLayout() {
 
 function SignedIn() {
   useReminderSync();
+  useOutboxSync();
   return (
     <View style={{ flex: 1 }}>
       <Stack screenOptions={{ headerShown: false }} />
