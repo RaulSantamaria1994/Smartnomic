@@ -12,6 +12,9 @@ import {
   compareDates,
   daysBetween,
   sortBudgets,
+  budgetsWithPending,
+  pendingInPeriod,
+  summaryWithPending,
   periodOf,
   shiftPeriod,
   type DateString,
@@ -26,6 +29,9 @@ import { AnimatedList } from '../../../src/components/AnimatedList';
 import { MonthSlide } from '../../../src/components/MonthSlide';
 import { Screen } from '../../../src/components/Screen';
 import { TransactionRow } from '../../../src/components/TransactionRow';
+import { OutboxBanner } from '../../../src/components/OutboxBanner';
+import type { PendingTransaction } from '../../../src/outbox/outbox';
+import { useOutbox } from '../../../src/outbox/useOutbox';
 import { Message } from '../../../src/components/Message';
 import { ReminderBanners } from '../../../src/components/ReminderBanners';
 import {
@@ -69,6 +75,14 @@ import { es } from '../../../src/i18n/es';
  */
 const PAGE_SIZE = 100;
 
+/** Una fila de la lista: un movimiento del servidor o uno apuntado sin conexión. */
+interface ListItem {
+  key: string;
+  date: DateString;
+  transaction?: Transaction;
+  pending?: PendingTransaction;
+}
+
 /** Días que faltan para que un vencimiento se destaque como «vence pronto». */
 const SOON_DAYS = 3;
 
@@ -89,6 +103,7 @@ export default function Month() {
   const rules = useRecurring(household?.id);
   const can = useCan();
   const canWrite = can('transactions.write');
+  const outbox = useOutbox();
   const members = useMembers(household?.id);
   const savings = useSavings(household?.id);
 
@@ -126,8 +141,29 @@ export default function Month() {
       ? (t.memberId && names.get(t.memberId)) || es.household.formerMember
       : null;
   const offline = period.error instanceof ApiError && period.error.code === 'network';
-  const data = period.data;
+  const serverData = period.data;
+  // Lo apuntado sin conexión que cae en este periodo cuenta ya en el resumen, los
+  // presupuestos y la lista (especificación 011, RF-1105).
+  const pendingHere = serverData
+    ? pendingInPeriod(
+        outbox.items.filter((p) => p.householdId === household.id),
+        serverData.period,
+      )
+    : [];
+  const data = serverData && {
+    ...serverData,
+    summary: summaryWithPending(serverData.summary, pendingHere),
+    budgets: budgetsWithPending(serverData.budgets, pendingHere),
+  };
   const visibleTransactions = data ? data.transactions.slice(0, shown) : [];
+  // Los pendientes van delante de los movimientos de su mismo día.
+  const listItems: ListItem[] = [
+    // Entre ellos, el último apuntado primero, como en el resto de la lista.
+    ...[...pendingHere]
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      .map((p) => ({ key: p.id, pending: p, date: p.input.date })),
+    ...visibleTransactions.map((t) => ({ key: t.id, transaction: t, date: t.date })),
+  ].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 
   return (
     <Screen
@@ -152,9 +188,10 @@ export default function Month() {
         />
       }
     >
-      {(offline || upcoming.data) && (
+      {(offline || upcoming.data || outbox.items.length > 0) && (
         <View style={styles.notices}>
           {offline && <Message text={es.month.offline} />}
+          <OutboxBanner householdId={household.id} />
           <ReminderBanners
             occurrences={upcoming.data?.occurrences}
             today={upcoming.data?.today}
@@ -198,7 +235,7 @@ export default function Month() {
             </View>
           )}
 
-          {data && data.transactions.length === 0 && (
+          {data && data.transactions.length === 0 && pendingHere.length === 0 && (
             <EmptyState
               icon="tag"
               title={es.month.empty}
@@ -210,17 +247,36 @@ export default function Month() {
             <AnimatedList
               // Otro mes es otra lista: entra deslizando entera, sin fundir fila a fila.
               key={periodStart}
-              items={visibleTransactions}
-              keyOf={(t) => t.id}
-              render={(t) => (
-                <TransactionRow
-                  transaction={t}
-                  when={dayLabel(t.date, today)}
-                  category={byId.get(t.categoryId)}
-                  author={authorOf(t)}
-                  onPress={canWrite ? () => router.push(`/transaction/${t.id}`) : undefined}
-                />
-              )}
+              items={listItems}
+              keyOf={(item) => item.key}
+              render={(item) =>
+                item.pending ? (
+                  <TransactionRow
+                    transaction={{ ...item.pending.input, note: item.pending.input.note ?? null }}
+                    when={dayLabel(item.pending.input.date, today)}
+                    category={byId.get(item.pending.input.categoryId)}
+                    author={null}
+                    status={
+                      item.pending.status === 'rejected'
+                        ? es.outbox.rejected(item.pending.reason ?? es.outbox.rejectedShort)
+                        : es.outbox.pending
+                    }
+                    onPress={() => router.push(`/pending/${item.pending!.id}`)}
+                  />
+                ) : (
+                  <TransactionRow
+                    transaction={item.transaction!}
+                    when={dayLabel(item.transaction!.date, today)}
+                    category={byId.get(item.transaction!.categoryId)}
+                    author={authorOf(item.transaction!)}
+                    onPress={
+                      canWrite
+                        ? () => router.push(`/transaction/${item.transaction!.id}`)
+                        : undefined
+                    }
+                  />
+                )
+              }
             />
           )}
           {data && data.transactions.length > shown && (

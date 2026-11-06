@@ -40,12 +40,12 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Apuntar sin cobertura (P1) 🎯
 
-- [ ] O005 [US1] `useOutbox` (estado y envío automático: abrir, primer plano, cada 30 s,
+- [x] O005 [US1] `useOutbox` (estado y envío automático: abrir, primer plano, cada 30 s,
       tras una petición buena, «Enviar ahora») e invalidar `periods` al enviar
-- [ ] O006 [US1] `new.tsx`: sin conexión, a la bandeja con el mismo id, se cierra y se anuncia
-- [ ] O007 [US1] «Mes»: aviso «N movimientos sin enviar» con «Enviar ahora», pendientes en la
+- [x] O006 [US1] `new.tsx`: sin conexión, a la bandeja con el mismo id, se cierra y se anuncia
+- [x] O007 [US1] «Mes»: aviso «N movimientos sin enviar» con «Enviar ahora», pendientes en la
       lista con su estado, resumen y presupuestos con pendientes; textos en `es.ts`
-- [ ] O008 [US1] `app/(app)/pending/[id].tsx`: corregir o descartar (con confirmación)
+- [x] O008 [US1] `app/(app)/pending/[id].tsx`: corregir o descartar (con confirmación)
 
 **Punto de control**: RF-1101, RF-1103, RF-1105 y RF-1108.
 
