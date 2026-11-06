@@ -61,13 +61,13 @@ fallar antes de implementar.
 
 - [x] R008 Batería de ataques ampliada a `/api/realtime` (otro hogar, sin sesión, sesión
       caducada, `Origin` ajeno, mensajes del cliente, muchas conexiones)
-- [ ] R009 Prueba de punta a punta con dos miembros en dos navegadores: cada tipo de cambio en
+- [x] R009 Prueba de punta a punta con dos miembros en dos navegadores: cada tipo de cambio en
       < 2 s (CE-1201), corte de 30 s (CE-1202), quitar a un miembro (CE-1203), 20 cambios
       seguidos (CE-1204), rutas con 50 conexiones (CE-1205); las anteriores siguen pasando
-- [ ] R010 [P] axe-core en las pantallas principales a 320 y 1280 px (nada nuevo que ver, pero
+- [x] R010 [P] axe-core en las pantallas principales a 320 y 1280 px (nada nuevo que ver, pero
       que nada se rompa)
-- [ ] R011 [P] `expo export --platform android` compila
-- [ ] R012 Actualizar `README.md` y `AGENTS.md` (dependencia nueva) y marcar tareas (el PR,
+- [x] R011 [P] `expo export --platform android` compila
+- [x] R012 Actualizar `README.md` y `AGENTS.md` (dependencia nueva) y marcar tareas (el PR,
       cuando lo pida el propietario)
 
 ---

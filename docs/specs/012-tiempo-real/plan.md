@@ -136,3 +136,33 @@ scope)` envía el aviso a todas. Sin dependencias de las rutas.
   de 30 s y reconexión, 20 cambios seguidos, quitar a un miembro; las anteriores siguen
   pasando; tiempos de las rutas con 50 conexiones abiertas.
 - `expo export --platform android`.
+
+## Resultados
+
+- `pnpm check` en verde: 655 tests (18 del servidor con conexiones reales: sesión, `Origin`,
+  un aviso por cada tipo de cambio, sin datos, otro hogar, quien sale, sesión cerrada, límite de
+  conexiones y `ping`; y los de la app: qué recarga cada aviso, agrupar avisos, URL y esperas de
+  reconexión).
+- CE-1201: con dos miembros en dos navegadores, cada cambio se ve en la otra sesión sin recargar:
+  movimiento 340 ms, presupuesto 333 ms, hucha 352 ms, pago recurrente 372 ms, pagar un
+  vencimiento 371 ms, categoría 346 ms, ajustes del hogar 344 ms, cambio de rol 333 ms (a quien
+  pasa a lector le desaparece «Apuntar»).
+- CE-1202: cortando 30 s la conexión en tiempo real con un gasto por medio, se ve 3,1 s después
+  de recuperarla; tras reiniciar el servidor, 1 s; al volver de segundo plano, 67 ms (en segundo
+  plano la conexión se cierra y no llega nada).
+- CE-1203: quien es quitado queda en su hogar nuevo en menos de 1 s y deja de recibir avisos
+  del anterior; un miembro de otro hogar no recibe nada, aunque pida el hogar ajeno en la URL.
+- CE-1204: 20 movimientos casi a la vez se ven en 414 ms con una sola recarga en la otra sesión.
+- CE-1205: con 50 conexiones abiertas recibiendo avisos, las rutas responden igual (mediana
+  3,8 ms frente a 4,2 ms; p95 12,8 ms frente a 13,3 ms). Pasan las pruebas de punta a punta
+  anteriores.
+- Batería de ataques: sin sesión o con cookie inventada, 401; `Origin` ajeno o `null`, 403; los
+  mensajes del cliente se ignoran (500 seguidos no llegan a nadie) y uno de más de 1 KB cierra
+  la conexión (1009); como mucho 10 conexiones por cuenta; 200 intentos sin sesión, todos 401.
+  Encontró que una conexión abierta antes de cerrar la sesión seguía recibiendo avisos: ahora se
+  cierra con el siguiente `ping` (como mucho 25 s).
+- axe-core sin problemas en las 29 pantallas a 320 y 1280 px.
+- `expo export --platform android` compila.
+- Queda tras desplegar: comprobar que el proxy de Railway mantiene la conexión y que la CSP
+  admite `wss`. Si la sesión se cierra en otro dispositivo, la app reintenta conectar cada 5 s
+  (recibe 401) hasta que vuelve a entrar; como antes, la app no trata ese 401 de forma general.

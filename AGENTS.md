@@ -68,7 +68,16 @@ protección contra fórmulas). **`011-sin-conexion`**: en Android, un movimiento
 se puede guardar por falta de conexión va a una bandeja de salida (`apps/mobile/src/outbox/`,
 AsyncStorage por cuenta) y se envía solo después con su mismo id (el `PUT` es idempotente); el
 servidor no cambia. Los totales con pendientes salen de `packages/domain/src/outbox.ts`. En la
-web no hay bandeja, salvo la compilación de pruebas con `EXPO_PUBLIC_E2E_OUTBOX=1`. El
+web no hay bandeja, salvo la compilación de pruebas con `EXPO_PUBLIC_E2E_OUTBOX=1`.
+**`012-tiempo-real`**: el servidor avisa por WebSocket (`@fastify/websocket`, dependencia
+añadida por esta funcionalidad) a las apps abiertas de un hogar de qué ha cambiado, sin datos:
+`{ type: 'changed', scope }` (esquema en `packages/api/src/schemas/realtime.ts`). Los avisos
+salen de un único gancho `onResponse` en `apps/server/src/routes/realtime.ts` según la URL de
+la ruta (`/api/households/:householdId/<sección>`); las rutas sin el hogar en la URL lo añaden a
+mano con `request.realtime`. Una ruta nueva bajo un hogar avisa sola; si su sección no está en
+`SCOPES`, añádela. Las conexiones viven en memoria (`src/realtime/hub.ts`, una sola instancia);
+se cierran (4001) si el usuario deja el hogar o su sesión termina. En la app,
+`src/realtime/useRealtime.ts` decide qué consultas recargar con `src/realtime/scopes.ts`. El
 aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo
