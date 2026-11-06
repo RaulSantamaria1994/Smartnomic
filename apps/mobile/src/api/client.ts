@@ -5,6 +5,7 @@ import {
   chartsResponseSchema,
   categoriesResponseSchema,
   categorySchema,
+  csvExportSchema,
   householdExportSchema,
   householdSchema,
   invitationPreviewSchema,
@@ -61,6 +62,11 @@ export const api = {
   searchTransactions: (householdId: string, filters: SearchFilters, cursor?: string) =>
     request(`${household(householdId)}/transactions/search${searchQueryString(filters, cursor)}`, {
       schema: searchResponseSchema,
+    }),
+  /** Archivo CSV con los movimientos que cumplen los filtros (especificación 010). */
+  exportTransactions: (householdId: string, filters: SearchFilters) =>
+    request(`${household(householdId)}/transactions/export${searchQueryString(filters)}`, {
+      schema: csvExportSchema,
     }),
   /** Gráficas de los 6 meses que terminan en el que empieza en `start` (especificación 008). */
   charts: (householdId: string, start: string) =>

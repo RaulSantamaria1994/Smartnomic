@@ -60,7 +60,11 @@ periodos que terminan en `:start`; la ventana y los porcentajes salen de
 clave con cursor y con el número y los totales sumados en SQL; la búsqueda cuelga también de
 `periods` pero no se guarda en la caché de Android, ver `persistable`). Todo lo que cuelga de
 `periods` no son solo meses: para encontrar un movimiento cargado se usa
-`findCachedTransaction`. El
+`findCachedTransaction`. **`010-exportar-csv`** exporta a CSV (para Excel en español) lo que
+muestra la búsqueda: `GET /api/households/:id/transactions/export` en
+`apps/server/src/routes/export-csv.ts`, con los mismos filtros que la búsqueda
+(`routes/transaction-filters.ts`) y el formato en `packages/domain/src/csv.ts` (comillas y
+protección contra fórmulas). El
 aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo

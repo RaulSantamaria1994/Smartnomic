@@ -1,12 +1,13 @@
-import { searchQuerySchema, type SearchQuery, type SearchResponse } from '@smartnomic/api';
+import { searchQuerySchema, type SearchResponse } from '@smartnomic/api';
 import { isValidDate, SEARCH_PAGE_SIZE } from '@smartnomic/domain';
-import { and, desc, eq, gte, inArray, isNull, lte, sql, type SQL } from 'drizzle-orm';
+import { and, desc, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Database } from '../db/client';
 import { transactions } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import { filtersOf } from './transaction-filters';
 import { toTransaction } from './transactions';
 
 const paramsSchema = z.object({ householdId: z.uuid() });
@@ -41,21 +42,6 @@ function decodeCursor(text: string): Cursor {
     throw invalid;
   }
   return value as Cursor;
-}
-
-/** Condiciones de los filtros, siempre dentro del hogar y sin borrados (RF-902). */
-function filtersOf(householdId: string, query: SearchQuery): SQL {
-  const conditions: (SQL | undefined)[] = [
-    eq(transactions.householdId, householdId),
-    isNull(transactions.deletedAt),
-    query.kind && eq(transactions.kind, query.kind),
-    query.categoryIds.length > 0 ? inArray(transactions.categoryId, query.categoryIds) : undefined,
-    query.minCents !== undefined ? gte(transactions.amountCents, query.minCents) : undefined,
-    query.maxCents !== undefined ? lte(transactions.amountCents, query.maxCents) : undefined,
-    query.from ? gte(transactions.date, query.from) : undefined,
-    query.to ? lte(transactions.date, query.to) : undefined,
-  ];
-  return and(...conditions)!;
 }
 
 export function registerSearchRoutes(

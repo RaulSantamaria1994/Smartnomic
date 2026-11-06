@@ -11,6 +11,7 @@ import { Screen } from '../../src/components/Screen';
 import { SegmentedControl } from '../../src/components/SegmentedControl';
 import { TextField } from '../../src/components/TextField';
 import { TransactionRow } from '../../src/components/TransactionRow';
+import { exportTransactions } from '../../src/export/export-transactions';
 import { Amount, AppText, CategoryIcon, EmptyState, Section } from '../../src/design';
 import { spacing } from '../../src/design/tokens';
 import { amountErrorMessage, formatMoney, formatShortDate, parseShortDate } from '../../src/format';
@@ -90,6 +91,8 @@ export default function Search() {
     [kind, categoryIds, amountsReversed, min.value, max.value, datesReversed, from.value, to.value],
   );
   const search = useSearch(household?.id, filters);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   if (!household) {
     return (
@@ -126,6 +129,26 @@ export default function Search() {
     dateFrom.setText('');
     dateTo.setText('');
   };
+
+  // Exporta exactamente lo que muestra la búsqueda: los mismos filtros (especificación 010).
+  async function runExport() {
+    if (exporting) return;
+    setExportError(null);
+    setExporting(true);
+    try {
+      await exportTransactions(household!.id, filters);
+    } catch (e) {
+      setExportError(
+        e instanceof ApiError && e.code === 'network'
+          ? es.search.exportOffline
+          : e instanceof Error
+            ? e.message
+            : es.auth.errors.unknown,
+      );
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const memberList = members.data?.members ?? [];
   const names = new Map(memberList.map((m) => [m.id, m.name]));
@@ -272,6 +295,19 @@ export default function Search() {
         </View>
       )}
 
+      {totals && totals.count > 0 && (
+        <View style={styles.export}>
+          {/* Fuera del bloque de totales, que el lector de pantalla lee como uno solo. */}
+          <Button
+            label={es.search.export}
+            variant="secondary"
+            loading={exporting}
+            onPress={() => void runExport()}
+          />
+          {exportError && <Message text={exportError} />}
+        </View>
+      )}
+
       {search.isPending ? (
         <View style={styles.notice}>
           <ActivityIndicator accessibilityLabel={es.common.loading} />
@@ -330,5 +366,11 @@ const styles = StyleSheet.create({
   notice: { padding: spacing.md, gap: spacing.sm },
   totals: { padding: spacing.md, gap: spacing.sm },
   sums: { flexDirection: 'row', gap: spacing.xl },
+  export: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+    alignItems: 'flex-start',
+  },
   more: { padding: spacing.md, alignItems: 'flex-start' },
 });
