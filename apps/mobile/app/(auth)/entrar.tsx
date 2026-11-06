@@ -8,12 +8,15 @@ import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { authErrorMessage } from '../../src/session/auth-errors';
 import { safeNext } from '../../src/session/next';
+import { sessionEnd } from '../../src/session/session-ended';
 
 export default function SignIn() {
   const next = safeNext(useLocalSearchParams<{ next?: string }>().next);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // Si se llega aquí porque la sesión terminó fuera de la app, se dice (una vez).
+  const [ended] = useState(() => sessionEnd.takeNotice());
   const [loading, setLoading] = useState(false);
 
   async function submit() {
@@ -28,6 +31,7 @@ export default function SignIn() {
 
   return (
     <Screen brand title={es.auth.signIn.title}>
+      {ended && <Message text={es.auth.signIn.sessionEnded} />}
       <TextField
         label={es.auth.email}
         value={email}
