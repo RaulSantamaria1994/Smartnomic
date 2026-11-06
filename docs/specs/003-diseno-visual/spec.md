@@ -88,7 +88,8 @@ toque desde cualquier pantalla principal, y apunta un gasto con el botón centra
 2. **Dado** un miembro con rol de lector, **cuando** usa la app, **entonces** el botón «+»
    no aparece, porque no puede apuntar.
 3. **Dado** la pantalla de apuntar, **cuando** se abre, **entonces** el importe es grande y
-   tiene el foco, y las categorías son botones con icono y color.
+   las categorías son botones con icono y color. El teclado no se abre solo: solo al tocar un
+   campo (decisión del propietario, 2026-11-06).
 
 ---
 

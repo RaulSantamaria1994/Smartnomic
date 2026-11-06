@@ -2,6 +2,7 @@ import { Tabs, useIsFocused } from 'expo-router';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { FabLayer } from '../../../src/components/Fab';
+import { InTabsContext } from '../../../src/components/in-tabs';
 import { TabBar } from '../../../src/components/TabBar';
 import { color } from '../../../src/design/tokens';
 
@@ -11,7 +12,11 @@ import { color } from '../../../src/design/tokens';
  */
 function OnlyWhenFocused({ children }: { children: ReactNode }) {
   const focused = useIsFocused();
-  return <View style={[styles.scene, !focused && styles.hidden]}>{children}</View>;
+  return (
+    <InTabsContext.Provider value={true}>
+      <View style={[styles.scene, !focused && styles.hidden]}>{children}</View>
+    </InTabsContext.Provider>
+  );
 }
 
 /** Pantallas principales con la barra inferior (especificación 003, historia 3). */
