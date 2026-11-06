@@ -20,18 +20,18 @@ fallar antes de implementar.
 
 **Objetivo**: la bandeja guarda, envía, reintenta y rechaza bien, sin pantallas.
 
-- [ ] O001 [P] Tests de `packages/domain/src/outbox.ts`: `sendOutcome` para cada código
+- [x] O001 [P] Tests de `packages/domain/src/outbox.ts`: `sendOutcome` para cada código
       (2xx, sin respuesta, 401, 408, 429, 5xx, 400, 403, 404, 409, 422);
       `summaryWithPending` (ingresos y gastos, otros periodos fuera, rechazados fuera, día de
       inicio 25); `budgetsWithPending` (su categoría, ingresos fuera, categorías sin
       presupuesto); `pendingInPeriod`
-- [ ] O002 Implementar `packages/domain/src/outbox.ts` y exportarlo
-- [ ] O003 Tests del motor `apps/mobile/src/outbox/outbox.test.ts` con almacenamiento y envío
+- [x] O002 Implementar `packages/domain/src/outbox.ts` y exportarlo
+- [x] O003 Tests del motor `apps/mobile/src/outbox/outbox.test.ts` con almacenamiento y envío
       falsos: añadir, corregir y descartar; orden de envío; reintentar para la cola;
       rechazado sigue con el siguiente y guarda el motivo; corte a mitad del envío y reenvío
       sin duplicar (CE-1102); volver a leer tras «reiniciar» (CE-1101); dos envíos a la vez no
       se pisan; separado por cuenta
-- [ ] O004 Implementar `src/outbox/outbox.ts` y el almacenamiento (`outbox-storage.native.ts`
+- [x] O004 Implementar `src/outbox/outbox.ts` y el almacenamiento (`outbox-storage.native.ts`
       con AsyncStorage, `outbox-storage.ts` sin bandeja salvo `EXPO_PUBLIC_E2E_OUTBOX=1`)
 
 **Punto de control**: RF-1102 a RF-1104 y RF-1106 en el motor.
