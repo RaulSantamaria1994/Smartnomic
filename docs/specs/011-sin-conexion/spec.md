@@ -2,7 +2,8 @@
 
 **Rama de la funcionalidad**: `011-sin-conexion`
 **Creada**: 2026-11-06
-**Estado**: Borrador
+**Plan**: [`plan.md`](plan.md)
+**Estado**: Aprobada
 **Entrada**: "Vamos con guardar sin conexión." (Pendiente del MVP: «Sin conexión solo se
 consultan datos; guardar cambios sin conexión y sincronizarlos después llega más adelante».)
 
