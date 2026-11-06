@@ -104,6 +104,16 @@ describe('conectarse (especificación 012)', () => {
     app.ws.close();
   });
 
+  it('al cerrar la sesión en el servidor, la conexión abierta se cierra en el siguiente ping', async () => {
+    const { ws, closed } = await connect(owner);
+    const codes: number[] = [];
+    ws.on('close', (code: number) => codes.push(code));
+    const out = await call(ctx.app, owner, 'POST', '/api/auth/sign-out', {});
+    expect(out.statusCode, out.body).toBe(200);
+    await Promise.race([closed, tick(1000)]);
+    expect(codes).toEqual([4001]);
+  });
+
   it('envía un ping para que la conexión no se cierre por estar callada', async () => {
     const { ws, received } = await connect(owner);
     await tick(120);

@@ -2,7 +2,9 @@ import type { RealtimeScope } from '@smartnomic/api';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { Auth } from '../auth';
+import { and, gt, inArray } from 'drizzle-orm';
 import type { Database } from '../db/client';
+import { sessions } from '../db/schema';
 import { findMembership } from '../households';
 import { ApiError } from '../plugins/errors';
 import type { RealtimeHub } from '../realtime/hub';
@@ -35,6 +37,9 @@ const SCOPES: Record<string, RealtimeScope> = {
   'transfer-ownership': 'members',
   invitations: 'members',
 };
+
+/** Sesión con la que se abrió cada conexión (para cerrarla si la sesión termina). */
+const realtimeSessions = new WeakMap<FastifyRequest, string>();
 
 const HOUSEHOLD_ROUTE = /^\/api\/households\/:householdId(?:\/([^/]+))?/;
 
@@ -78,7 +83,19 @@ export function registerRealtimeRoutes(
     }
   });
 
-  const ping = setInterval(() => hub.broadcast({ type: 'ping' }), deps.pingMs ?? DEFAULT_PING_MS);
+  const liveSessions = async (ids: string[]) => {
+    const rows = await db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(and(inArray(sessions.id, ids), gt(sessions.expiresAt, new Date())));
+    return new Set(rows.map((row) => row.id));
+  };
+
+  // Con cada ping, además, fuera las conexiones cuya sesión se ha cerrado o ha caducado.
+  const ping = setInterval(() => {
+    hub.broadcast({ type: 'ping' });
+    hub.dropEndedSessions(liveSessions).catch((error: unknown) => app.log.error(error));
+  }, deps.pingMs ?? DEFAULT_PING_MS);
   ping.unref();
   app.addHook('onClose', async () => clearInterval(ping));
 
@@ -98,10 +115,16 @@ export function registerRealtimeRoutes(
         if (!membership) throw new ApiError('forbidden', 'No eres miembro de ningún hogar.');
         request.user = { id: session.user.id, name: session.user.name, email: session.user.email };
         request.membership = membership;
+        realtimeSessions.set(request, session.session.id);
       },
     },
     (socket, request) => {
-      const release = hub.add(socket, request.user!.id, request.membership!.household.id);
+      const release = hub.add(
+        socket,
+        request.user!.id,
+        request.membership!.household.id,
+        realtimeSessions.get(request)!,
+      );
       socket.on('close', release);
       // La app no envía nada: lo que llegue se ignora.
       socket.on('message', () => undefined);

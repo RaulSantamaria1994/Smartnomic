@@ -59,7 +59,7 @@ fallar antes de implementar.
 
 ## Fase 4: Cierre
 
-- [ ] R008 Batería de ataques ampliada a `/api/realtime` (otro hogar, sin sesión, sesión
+- [x] R008 Batería de ataques ampliada a `/api/realtime` (otro hogar, sin sesión, sesión
       caducada, `Origin` ajeno, mensajes del cliente, muchas conexiones)
 - [ ] R009 Prueba de punta a punta con dos miembros en dos navegadores: cada tipo de cambio en
       < 2 s (CE-1201), corte de 30 s (CE-1202), quitar a un miembro (CE-1203), 20 cambios
