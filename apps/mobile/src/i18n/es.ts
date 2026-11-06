@@ -25,6 +25,7 @@ export const es = {
       submit: 'Entrar',
       noAccount: '¿No tienes cuenta? Regístrate',
       forgot: '¿Has olvidado la contraseña?',
+      sessionEnded: 'Tu sesión ha terminado. Vuelve a entrar.',
     },
     signUp: {
       title: 'Crear cuenta',

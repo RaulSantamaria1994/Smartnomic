@@ -164,5 +164,6 @@ scope)` envía el aviso a todas. Sin dependencias de las rutas.
 - axe-core sin problemas en las 29 pantallas a 320 y 1280 px.
 - `expo export --platform android` compila.
 - Queda tras desplegar: comprobar que el proxy de Railway mantiene la conexión y que la CSP
-  admite `wss`. Si la sesión se cierra en otro dispositivo, la app reintenta conectar cada 5 s
-  (recibe 401) hasta que vuelve a entrar; como antes, la app no trata ese 401 de forma general.
+  admite `wss`. Si la sesión termina fuera de la app, el cierre con el siguiente `ping` hace que
+  la app reciba un 401 y lleve a «Entrar» con un aviso (arreglo posterior,
+  `fix/sesion-caducada`).

@@ -15,6 +15,7 @@ import { authClient } from '../../../src/session/auth-client';
 import { es } from '../../../src/i18n/es';
 import { remindersSupported } from '../../../src/reminders/reminders';
 import { signOut } from '../../../src/session/sign-out';
+import { sessionEnd } from '../../../src/session/session-ended';
 import { useOutbox } from '../../../src/outbox/useOutbox';
 import { AppText, Icon, ListRow, Section, type IconName } from '../../../src/design';
 import { color, spacing } from '../../../src/design/tokens';
@@ -82,6 +83,7 @@ export default function Account() {
   // (especificación 011, RF-1107). La bandeja de la cuenta se borra con la sesión.
   async function leave(confirmed: boolean) {
     if (outbox.items.length > 0 && !confirmed) return setConfirmSignOut(true);
+    sessionEnd.leaving();
     await outbox.clear();
     await signOut(queryClient);
   }
@@ -93,6 +95,8 @@ export default function Account() {
     setDeleting(true);
     try {
       await api.deleteAccount(password);
+      // Desde aquí los 401 son por haber borrado la cuenta, no una sesión caducada.
+      sessionEnd.leaving();
     } catch (e) {
       setDeleting(false);
       setConfirmDelete(false);

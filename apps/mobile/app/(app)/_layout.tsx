@@ -1,4 +1,5 @@
 import { Redirect, Stack } from 'expo-router';
+import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { UndoSnackbar } from '../../src/components/UndoSnackbar';
 import { useReminderSync } from '../../src/hooks/useReminderSync';
@@ -6,6 +7,7 @@ import { useOutboxSync } from '../../src/outbox/useOutbox';
 import { useRealtime } from '../../src/realtime/useRealtime';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
+import { sessionEnd } from '../../src/session/session-ended';
 import { colors } from '../../src/theme';
 
 /** Pantallas que necesitan sesión: sin ella, se va a entrar. */
@@ -25,6 +27,7 @@ export default function AppLayout() {
 }
 
 function SignedIn() {
+  useEffect(() => sessionEnd.started(), []);
   useReminderSync();
   useOutboxSync();
   useRealtime();

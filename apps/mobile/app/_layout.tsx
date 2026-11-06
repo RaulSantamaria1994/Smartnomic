@@ -9,6 +9,7 @@ import { persister } from '../src/cache/cache';
 import { watchAppFocus } from '../src/cache/focus';
 import { CACHE_MAX_AGE, createQueryClient } from '../src/cache/query-client';
 import { useAppFonts } from '../src/design/fonts';
+import { bindSessionEnd, sessionEnd } from '../src/session/session-ended';
 import { color } from '../src/design/tokens';
 
 watchAppFocus();
@@ -16,7 +17,13 @@ watchAppFocus();
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
-  const [queryClient] = useState(createQueryClient);
+  const [queryClient] = useState(() => {
+    // Un 401 en cualquier petición: la sesión terminó fuera de la app (caducada o cerrada en
+    // otro dispositivo) y se lleva a «Entrar».
+    const client = createQueryClient((error) => void sessionEnd.onError(error));
+    bindSessionEnd(client);
+    return client;
+  });
   const fontsReady = useAppFonts();
 
   useEffect(() => {
