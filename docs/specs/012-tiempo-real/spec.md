@@ -2,7 +2,8 @@
 
 **Rama de la funcionalidad**: `012-tiempo-real`
 **Creada**: 2026-11-06
-**Estado**: Borrador
+**Plan**: [`plan.md`](plan.md)
+**Estado**: Aprobada
 **Entrada**: "Vamos con cambios en tiempo real." (Pendiente del MVP: «Los cambios de otros
 miembros se ven al actualizar o reabrir la app; las actualizaciones en tiempo real […] quedan
 para más adelante».)
