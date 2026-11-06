@@ -50,7 +50,7 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Conexión que va y viene (P2)
 
-- [ ] R007 [US2] Reconexión con esperas crecientes (test de la secuencia), ponerse al día al
+- [x] R007 [US2] Reconexión con esperas crecientes (test de la secuencia), ponerse al día al
       reconectar, cerrar en segundo plano y abrir al volver
 
 **Punto de control**: RF-1204 a RF-1206.

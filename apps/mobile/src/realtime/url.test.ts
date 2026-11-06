@@ -19,9 +19,7 @@ describe('realtimeUrl (especificación 012)', () => {
 });
 
 describe('reconnectDelay (RF-1204)', () => {
-  it('esperas crecientes que se quedan en 30 s', () => {
-    expect([0, 1, 2, 3, 4, 5, 20].map(reconnectDelay)).toEqual([
-      1000, 2000, 5000, 10_000, 30_000, 30_000, 30_000,
-    ]);
+  it('esperas crecientes que se quedan en 5 s, para estar al día en menos de 10 s (CE-1202)', () => {
+    expect([0, 1, 2, 3, 20].map(reconnectDelay)).toEqual([1000, 2000, 5000, 5000, 5000]);
   });
 });

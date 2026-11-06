@@ -101,7 +101,8 @@ scope)` envía el aviso a todas. Sin dependencias de las rutas.
     pestaña) y la cierra al pasar a segundo plano o cerrar sesión.
   - Agrupa los avisos que llegan en 300 ms y luego invalida una sola vez cada consulta
     afectada (CE-1204).
-  - Reconecta sola con esperas crecientes (1, 2, 5, 10 y 30 s) y, al reconectar, invalida todo
+  - Reconecta sola con esperas crecientes (1, 2 y luego cada 5 s, para estar al día en menos de
+    10 s al volver la conexión, CE-1202) y, al reconectar, invalida todo
     lo del hogar (RF-1204).
   - No muestra mensajes ni anuncia nada al lector de pantalla (RF-1202). Las pantallas de
     edición no cambian lo que se está escribiendo: sus formularios ya guardan su propio estado.
