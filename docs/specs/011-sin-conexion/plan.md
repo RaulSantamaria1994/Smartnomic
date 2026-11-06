@@ -138,3 +138,30 @@ apps/mobile/
   ver que llega una vez; un rechazo, corregirlo y descartarlo; cerrar sesión con pendientes.
 - axe-core en «Mes» con pendientes y un rechazado a 320 y 1280 px; `expo export --platform
 android`.
+
+## Resultados
+
+- `pnpm check` en verde: 626 tests (8 del dominio: qué se reintenta y qué se rechaza, resumen y
+  presupuestos con pendientes; 10 del motor de la bandeja con almacenamiento y servidor falsos:
+  orden, sin conexión, rechazos con motivo, corregir, cortes, reinicios, envíos a la vez y
+  cuentas).
+- CE-1101: en el navegador (compilación de pruebas, guardado cortado), 20 movimientos apuntados
+  sin conexión con tres recargas por medio: siguen los 20 y, al volver la conexión, llegan los
+  20 una sola vez con sus importes exactos.
+- CE-1102: perdiendo la respuesta de uno de cada tres envíos (9 cortes en 29 envíos), no se
+  pierde ni se duplica ninguno.
+- CE-1103: apuntar sin conexión son los mismos pasos que con conexión.
+- CE-1104: el resumen de «Mes» con los pendientes (90,50 €) es el mismo después de enviarlos.
+- CE-1105: axe-core sin problemas en «Mes» con un pendiente y un rechazado, en la pantalla del
+  pendiente y en la confirmación de descartar, a 320 y 1280 px; también en las 29 pantallas de
+  antes con la compilación normal.
+- Punta a punta: presupuesto con un gasto pendiente, corregir y descartar, envío automático (el
+  pendiente llegó 326 ms después de la primera petición con conexión), un rechazo (409 simulado)
+  con su motivo y corregirlo, y cerrar sesión con pendientes. Con la compilación normal de la
+  web todo sigue como antes (guardar sin conexión avisa y conserva lo escrito) y pasan las
+  pruebas anteriores.
+- Cambio sobre la especificación: una categoría archivada mientras tanto no es un rechazo,
+  porque el servidor acepta movimientos en categorías archivadas; el ejemplo pasó a ser perder el
+  permiso de apuntar.
+- `expo export --platform android` compila, con la bandeja incluida. El almacenamiento de
+  Android (AsyncStorage) solo se prueba con el APK.

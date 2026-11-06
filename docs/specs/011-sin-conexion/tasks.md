@@ -62,14 +62,14 @@ fallar antes de implementar.
 
 ## Fase 4: Cierre
 
-- [ ] O011 Prueba de punta a punta (compilación de pruebas, red cortada con Playwright):
+- [x] O011 Prueba de punta a punta (compilación de pruebas, red cortada con Playwright):
       apuntar sin conexión, «Mes» con pendientes, recargar, recuperar la red y llegar una vez;
       20 pendientes con recargas (CE-1101); cortes durante el envío (CE-1102); un rechazo,
       corregirlo y descartarlo; cerrar sesión con pendientes; las anteriores siguen pasando
-- [ ] O012 [P] axe-core en «Mes» con pendientes y un rechazado, y en la pantalla del
+- [x] O012 [P] axe-core en «Mes» con pendientes y un rechazado, y en la pantalla del
       pendiente, a 320 y 1280 px (CE-1105)
-- [ ] O013 [P] `expo export --platform android` compila
-- [ ] O014 Actualizar `README.md` y `AGENTS.md` y marcar tareas (el PR, cuando lo pida el
+- [x] O013 [P] `expo export --platform android` compila
+- [x] O014 Actualizar `README.md` y `AGENTS.md` y marcar tareas (el PR, cuando lo pida el
       propietario)
 
 ---

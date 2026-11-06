@@ -13,8 +13,9 @@ calendario de pagos programados (`docs/specs/002-calendario`), el diseño visual
 `docs/specs/006-estilo-android`), los iconos de categoría (`docs/specs/004-iconos-categorias`),
 las huchas para objetivos de ahorro (`docs/specs/005-hucha`), los presupuestos por categoría
 (`docs/specs/007-presupuestos`), la pestaña de gráficas (`docs/specs/008-graficas`), la
-búsqueda de movimientos (`docs/specs/009-busqueda`) y la exportación a CSV con filtros
-(`docs/specs/010-exportar-csv`) también están terminados.
+búsqueda de movimientos (`docs/specs/009-busqueda`), la exportación a CSV con filtros
+(`docs/specs/010-exportar-csv`) y apuntar movimientos sin conexión en Android
+(`docs/specs/011-sin-conexion`) también están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 
