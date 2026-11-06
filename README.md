@@ -14,8 +14,9 @@ calendario de pagos programados (`docs/specs/002-calendario`), el diseño visual
 las huchas para objetivos de ahorro (`docs/specs/005-hucha`), los presupuestos por categoría
 (`docs/specs/007-presupuestos`), la pestaña de gráficas (`docs/specs/008-graficas`), la
 búsqueda de movimientos (`docs/specs/009-busqueda`), la exportación a CSV con filtros
-(`docs/specs/010-exportar-csv`) y apuntar movimientos sin conexión en Android
-(`docs/specs/011-sin-conexion`) también están terminados.
+(`docs/specs/010-exportar-csv`), apuntar movimientos sin conexión en Android
+(`docs/specs/011-sin-conexion`) y los cambios en tiempo real entre miembros
+(`docs/specs/012-tiempo-real`) también están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 
@@ -126,6 +127,11 @@ al tocar uno se abre el vencimiento. En el navegador no hay avisos: la pantalla 
 destaca los pagos atrasados y los que vencen en los próximos 3 días. Los avisos solo se
 pueden probar en un APK o en un build de desarrollo, no en Expo Go. En Android los últimos datos se guardan
 para verlos sin conexión.
+
+**Tiempo real**: con la app a la vista, lo que cambia otro miembro del hogar se ve solo, sin
+recargar ni mensajes. La app abre una conexión WebSocket con `/api/realtime`; en segundo plano
+la cierra y al volver se pone al día. Tras desplegar, conviene comprobar que el proxy de Railway
+mantiene la conexión abierta (el servidor envía un `ping` cada 25 s).
 
 ## Publicar el servidor (Railway)
 
