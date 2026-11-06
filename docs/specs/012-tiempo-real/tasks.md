@@ -39,9 +39,9 @@ fallar antes de implementar.
 
 ## Fase 2: Historia 1 — Ver los cambios de otros al momento (P1) 🎯
 
-- [ ] R005 [US1] Tests de `apps/mobile/src/realtime/scopes.ts` (qué consultas invalida cada
+- [x] R005 [US1] Tests de `apps/mobile/src/realtime/scopes.ts` (qué consultas invalida cada
       ámbito, agrupar avisos) e implementación
-- [ ] R006 [US1] `useRealtime`: conectar en primer plano, URL `ws`/`wss`, cabeceras de sesión en
+- [x] R006 [US1] `useRealtime`: conectar en primer plano, URL `ws`/`wss`, cabeceras de sesión en
       Android, agrupar 300 ms, invalidar; montarlo en `SignedIn`; cerrar al cerrar sesión
 
 **Punto de control**: RF-1201, RF-1202 y RF-1207.
