@@ -52,6 +52,9 @@ export function registerAccountRoutes(
         await tx.delete(verifications).where(eq(verifications.value, user.id));
         await tx.delete(users).where(eq(users.id, user.id));
       });
+      // Los demás miembros ven que ya no está; su conexión de tiempo real se cierra.
+      if (membership)
+        request.realtime = [{ householdId: membership.household.id, scope: 'members' }];
       return reply.status(204).send();
     },
   );

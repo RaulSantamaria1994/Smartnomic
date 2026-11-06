@@ -20,17 +20,17 @@ fallar antes de implementar.
 
 **Objetivo**: el servidor acepta conexiones y avisa a cada hogar de sus cambios.
 
-- [ ] R001 [P] `realtimeMessageSchema` y `REALTIME_SCOPES` en `packages/api/src/schemas/realtime.ts`
+- [x] R001 [P] `realtimeMessageSchema` y `REALTIME_SCOPES` en `packages/api/src/schemas/realtime.ts`
       con sus tests
-- [ ] R002 Añadir `@fastify/websocket` al servidor
-- [ ] R003 Tests en `apps/server/test/realtime.test.ts` con `injectWS`: sin sesión 401; sin
+- [x] R002 Añadir `@fastify/websocket` al servidor
+- [x] R003 Tests en `apps/server/test/realtime.test.ts` con `injectWS`: sin sesión 401; sin
       hogar 403; `Origin` no permitido 403; un aviso por cada tipo de cambio
       (movimientos, recurrentes y vencimientos, huchas, presupuestos, categorías, ajustes del
       hogar, miembros e invitaciones, aceptar una invitación, borrar la cuenta) y con el ámbito
       correcto; los avisos no llevan datos; otro hogar no recibe nada; un `GET` o un cambio
       fallido no avisa; quien sale o es quitado deja de recibir (se le cierra); más de 10
       conexiones por cuenta cierra las antiguas; `ping`
-- [ ] R004 `src/realtime/hub.ts`, `src/routes/realtime.ts` y el gancho `onResponse`;
+- [x] R004 `src/realtime/hub.ts`, `src/routes/realtime.ts` y el gancho `onResponse`;
       avisos a mano en aceptar invitación y borrar cuenta
 
 **Punto de control**: RF-1201 y RF-1203 en el servidor.

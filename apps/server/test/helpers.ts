@@ -40,6 +40,7 @@ export function useTestServer(
     trustProxy?: boolean;
     clientIpHeader?: string;
     now?: () => Date;
+    realtimePingMs?: number;
   } = {},
 ) {
   const context = {} as TestContext;
@@ -67,6 +68,7 @@ export function useTestServer(
       invitationRateLimit: options.invitationRateLimit ?? { max: 1000, timeWindow: '1 minute' },
       ...(options.trustProxy !== undefined && { trustProxy: options.trustProxy }),
       ...(options.clientIpHeader && { clientIpHeader: options.clientIpHeader }),
+      ...(options.realtimePingMs && { realtimePingMs: options.realtimePingMs }),
     });
   });
 

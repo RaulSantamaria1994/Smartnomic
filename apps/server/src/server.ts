@@ -10,7 +10,10 @@ import { loggerOptions } from './logging';
 import { registerErrorHandler } from './plugins/errors';
 import { createHouseholdAccess } from './plugins/household-access';
 import { registerSecurityHeaders } from './plugins/security-headers';
+import websocket from '@fastify/websocket';
+import { RealtimeHub } from './realtime/hub';
 import { registerAccountRoutes } from './routes/account';
+import { registerRealtimeRoutes } from './routes/realtime';
 import { registerCalendarRoutes } from './routes/calendar';
 import { registerCategoryRoutes } from './routes/categories';
 import { registerExportRoutes } from './routes/export';
@@ -59,6 +62,8 @@ export interface ServerOptions {
   now?: () => Date;
   /** Límite para ver y aceptar invitaciones por IP. Por defecto, 20 por minuto. */
   invitationRateLimit?: AuthRateLimit;
+  /** Cada cuánto se envía el ping del tiempo real (los tests lo acortan). */
+  realtimePingMs?: number;
 }
 
 const DEFAULT_AUTH_RATE_LIMIT: AuthRateLimit = { max: 10, timeWindow: '1 minute' };
@@ -94,6 +99,22 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
   if (options.api) {
     const { db, auth } = options.api;
     const access = createHouseholdAccess({ auth, db });
+    // Tiempo real (especificación 012): antes que el resto de rutas, para que su gancho de
+    // avisos las cubra a todas.
+    await app.register(websocket, { options: { maxPayload: 1024 } });
+    registerRealtimeRoutes(app, {
+      db,
+      auth,
+      hub: new RealtimeHub(),
+      allowedOrigins: [
+        new URL(auth.options.baseURL!).origin,
+        ...((auth.options.trustedOrigins as string[] | undefined) ?? []).filter((o) =>
+          /^https?:\/\//.test(o),
+        ),
+        ...(options.corsOrigins ?? []),
+      ],
+      ...(options.realtimePingMs && { pingMs: options.realtimePingMs }),
+    });
     registerAuthRoutes(app, auth, {
       rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
     });

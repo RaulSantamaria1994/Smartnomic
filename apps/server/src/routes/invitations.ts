@@ -229,6 +229,12 @@ export function registerInvitationRoutes(
           .insert(members)
           .values({ householdId: invitation.householdId, userId: user.id, role: invitation.role });
       });
+      // El hogar al que entra ve al nuevo miembro, y el que deja (si sigue existiendo) que se
+      // ha ido; sus conexiones de tiempo real del hogar anterior se cierran.
+      request.realtime = [
+        { householdId: invitation.householdId, scope: 'members' },
+        ...(current ? [{ householdId: current.household.id, scope: 'members' as const }] : []),
+      ];
       return meResponse(db, user);
     },
   );
