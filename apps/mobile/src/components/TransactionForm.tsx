@@ -1,7 +1,6 @@
 import type { Category, TransactionInput } from '@smartnomic/api';
 import { addDays, parseAmount, type DateString, type TransactionKind } from '@smartnomic/domain';
-import { useEffect, useRef, useState } from 'react';
-import type { TextInput } from 'react-native';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ApiError } from '../api/http';
 import { amountErrorMessage, formatAmountInput, formatShortDate, parseShortDate } from '../format';
@@ -14,8 +13,6 @@ import { Chip } from './Chip';
 import { Message } from './Message';
 import { SegmentedControl } from './SegmentedControl';
 import { TextField } from './TextField';
-
-const FOCUS_DELAY_MS = 400;
 
 export interface TransactionFormValues {
   kind: TransactionKind;
@@ -49,16 +46,6 @@ export function TransactionForm({ initial, categories, today, onSubmit, extraAct
   const [note, setNote] = useState(initial.note ?? '');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const amountRef = useRef<React.ComponentRef<typeof TextInput>>(null);
-
-  // Al apuntar, el cursor va directo al importe. Se espera a que termine la transición de
-  // la pantalla: si no, en la web el navegador desplaza la vista para enseñar el campo.
-  const isNew = initial.amountCents === undefined;
-  useEffect(() => {
-    if (!isNew) return;
-    const timer = setTimeout(() => amountRef.current?.focus(), FOCUS_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [isNew]);
 
   // Las archivadas no se ofrecen, salvo la que ya tenía el movimiento (RF-021).
   const options = categories.filter(
@@ -125,7 +112,6 @@ export function TransactionForm({ initial, categories, today, onSubmit, extraAct
         placeholder="0,00"
         keyboardType="decimal-pad"
         suffix="€"
-        ref={amountRef}
       />
 
       <AppText variant="small" tone="muted">

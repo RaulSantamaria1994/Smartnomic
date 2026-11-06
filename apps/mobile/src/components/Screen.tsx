@@ -8,11 +8,12 @@ import {
   StyleSheet,
   type RefreshControlProps,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppBar, type AppBarAction, type AppBarStep } from '../design/AppBar';
 import { Brand } from '../design/Brand';
 import { AppText } from '../design/Text';
 import { color, layout, size, spacing } from '../design/tokens';
+import { useInTabs } from './in-tabs';
 
 /** Vuelve a la pantalla anterior o, si se entró por un enlace directo, a «Mes». */
 export function goBack() {
@@ -57,6 +58,11 @@ export function Screen({
   children: ReactNode;
 }) {
   const bar = Boolean(title && !brand);
+  // Con barra superior, abajo no hay margen seguro: fuera de las pestañas, el contenido deja
+  // sitio a los botones del móvil (barra de navegación de Android) para que no tapen los suyos.
+  const insets = useSafeAreaInsets();
+  const inTabs = useInTabs();
+  const bottomInset = bar && !inTabs ? insets.bottom : 0;
   // Barra verde: iconos claros arriba; pantallas blancas sin barra: oscuros.
   useFocusEffect(useCallback(() => setStatusBarStyle(bar ? 'light' : 'dark'), [bar]));
   return (
@@ -82,6 +88,9 @@ export function Screen({
             bar && styles.wide,
             bleed && styles.bleed,
             fab && styles.fab,
+            bottomInset > 0 && {
+              paddingBottom: (fab ? styles.fab.paddingBottom : spacing.md) + bottomInset,
+            },
           ]}
           keyboardShouldPersistTaps="handled"
           refreshControl={refreshControl}
