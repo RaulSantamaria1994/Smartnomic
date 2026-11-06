@@ -53,9 +53,9 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Lo que no se puede enviar (P2)
 
-- [ ] O009 [US2] Rechazados: «No se ha podido enviar: …» en «Mes» y en el aviso; corregir lo
+- [x] O009 [US2] Rechazados: «No se ha podido enviar: …» en «Mes» y en el aviso; corregir lo
       devuelve a la cola
-- [ ] O010 [US2] Cerrar sesión con pendientes pide confirmación y borra la bandeja de esa
+- [x] O010 [US2] Cerrar sesión con pendientes pide confirmación y borra la bandeja de esa
       cuenta (RF-1107)
 
 ---

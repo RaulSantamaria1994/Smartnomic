@@ -40,6 +40,11 @@ export function OutboxBanner({ householdId }: { householdId: string }) {
               {es.outbox.bannerHint}
             </AppText>
           )}
+          {rejected > 0 && (
+            <AppText variant="caption" style={{ color: tone.fg }}>
+              {es.outbox.rejectedHint}
+            </AppText>
+          )}
         </View>
       </View>
       {waiting > 0 && (

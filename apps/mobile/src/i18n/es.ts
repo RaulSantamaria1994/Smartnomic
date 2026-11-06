@@ -338,6 +338,7 @@ export const es = {
     bannerHint: 'Se enviarán solos cuando vuelva la conexión.',
     rejectedBanner: (n: number) =>
       n === 1 ? '1 no se ha podido enviar' : `${n} no se han podido enviar`,
+    rejectedHint: 'Toca el movimiento en la lista para corregirlo o descartarlo.',
     sendNow: 'Enviar ahora',
     sending: 'Enviando…',
     pending: 'Pendiente de enviar',

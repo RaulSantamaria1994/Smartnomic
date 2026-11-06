@@ -21,7 +21,7 @@ consultan datos; guardar cambios sin conexión y sincronizarlos después llega m
   pendientes, y contando ya en el resumen; arriba, un aviso con cuántos hay sin enviar.
 - P: ¿Cuándo se envían? → R: Solos, al volver la conexión o al abrir la app; además, un botón
   «Enviar ahora» en el aviso.
-- P: ¿Y si uno no se puede enviar (categoría archivada, ya no puedes editar en el hogar…)? →
+- P: ¿Y si uno no se puede enviar (por ejemplo, ya no puedes editar en el hogar)? →
   R: Se queda en pendientes marcado «No se ha podido enviar», con el motivo, y se puede corregir
   o descartar. Nunca se pierde sin avisar.
 
@@ -64,9 +64,10 @@ abrir la app, se recupera la conexión y todos llegan al servidor una sola vez, 
 
 ### Historia 2: Lo que no se puede enviar (Prioridad: P2)
 
-Mientras Lucía estaba sin cobertura, Juan archivó la categoría «Ocio». Al volver la conexión, el
-gasto de Lucía en Ocio no se puede guardar. Se queda en pendientes con «No se ha podido enviar:
-la categoría está archivada» y Lucía lo corrige eligiendo otra categoría, y entonces se envía.
+Mientras Lucía estaba sin cobertura, Juan, el propietario, la pasó a lectora del hogar. Al
+volver la conexión, el gasto de Lucía no se puede guardar: se queda en pendientes con «No se ha
+podido enviar» y el motivo que da el servidor, y Lucía decide descartarlo (o, si el problema
+fuera de los datos, corregirlo y enviarlo de nuevo).
 
 **Por qué esta prioridad**: es raro, pero sin esto se perderían datos sin avisar.
 
@@ -98,6 +99,9 @@ motivo; al corregirlo se envía y al descartarlo desaparece.
 - Entrar con otra cuenta en el mismo móvil: no ve ni envía los pendientes de la anterior.
 - Los pendientes se guardan para el hogar en el que se apuntaron; si se sale de ese hogar,
   al enviarlos se rechazan con su motivo y se pueden descartar.
+- Una categoría archivada mientras tanto no es un rechazo: el servidor acepta movimientos en
+  categorías archivadas (archivar no rompe los movimientos que las usan) y el pendiente se
+  guarda en ella.
 - «Gráficas» y la búsqueda muestran lo que ya está en el servidor: un pendiente aparece en
   ellas al enviarse.
 - Un pendiente con una fecha de otro mes cuenta en ese mes.
