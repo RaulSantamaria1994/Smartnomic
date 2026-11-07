@@ -26,10 +26,10 @@ import {
   useCan,
   useCategories,
   useCharts,
-  useMe,
   useSavings,
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
+import { useHousehold } from '../../../src/households/active';
 
 type ChartKind = 'category' | 'flow' | 'trend' | 'savings';
 
@@ -45,8 +45,7 @@ const CHARTS: { kind: ChartKind; label: string }[] = [
  * arriba, para el mes que se elige con las flechas (las de evolución terminan en él).
  */
 export default function Charts() {
-  const me = useMe();
-  const household = me.data?.household;
+  const { me, household } = useHousehold();
   const [start, setStart] = useState<DateString | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [kind, setKind] = useState<ChartKind>('category');

@@ -15,11 +15,12 @@ import { IconPicker } from '../../../src/components/IconPicker';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
-import { useCan, useCategories, useMe } from '../../../src/hooks/data';
+import { useCan, useCategories } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { colors, spacing } from '../../../src/theme';
 import { CategoryIcon } from '../../../src/design/CategoryIcon';
 import { categoryPalette, color as tokens, typography } from '../../../src/design/tokens';
+import { useHousehold } from '../../../src/households/active';
 
 /** Colores para elegir: con contraste suficiente sobre blanco (constitución, art. VIII). */
 const PALETTE = categoryPalette;
@@ -29,8 +30,7 @@ type Feedback = { text: string; kind: 'error' | 'success' } | null;
 /** Crear, renombrar, archivar y restaurar categorías (T093, RF-021). */
 export default function Categories() {
   const queryClient = useQueryClient();
-  const me = useMe();
-  const householdId = me.data?.household.id;
+  const householdId = useHousehold().household?.id;
   const categories = useCategories(householdId);
   const canWrite = useCan()('categories.write');
   const [kind, setKind] = useState<TransactionKind>('expense');

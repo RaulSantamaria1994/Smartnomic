@@ -2,10 +2,9 @@ import type { SearchFilters } from '@smartnomic/api';
 import { can, civilDateIn, periodOf, type Action, type DateString } from '@smartnomic/domain';
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api, queryKeys } from '../api/client';
+import { useHousehold } from '../households/active';
 
-export function useMe() {
-  return useQuery({ queryKey: queryKeys.me, queryFn: api.me });
-}
+export { useMe } from './me';
 
 export function useCategories(householdId: string | undefined) {
   return useQuery({
@@ -107,9 +106,9 @@ export function useInvitations(householdId: string | undefined, enabled: boolean
   });
 }
 
-/** ¿Puede el usuario hacer esto en su hogar? Mismas reglas que el servidor (RF-006). */
+/** ¿Puede el usuario hacer esto en el hogar elegido? Mismas reglas que el servidor (RF-006). */
 export function useCan(): (action: Action) => boolean {
-  const role = useMe().data?.member.role;
+  const role = useHousehold().member?.role;
   return (action) => (role ? can(role, action) : false);
 }
 

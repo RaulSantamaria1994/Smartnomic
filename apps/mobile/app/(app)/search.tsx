@@ -15,8 +15,9 @@ import { exportTransactions } from '../../src/export/export-transactions';
 import { Amount, AppText, CategoryIcon, EmptyState, Section } from '../../src/design';
 import { spacing } from '../../src/design/tokens';
 import { amountErrorMessage, formatMoney, formatShortDate, parseShortDate } from '../../src/format';
-import { useCan, useCategories, useMe, useMembers, useSearch } from '../../src/hooks/data';
+import { useCan, useCategories, useMembers, useSearch } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
+import { useHousehold } from '../../src/households/active';
 
 type KindFilter = 'all' | TransactionKind;
 
@@ -58,8 +59,7 @@ function readAmount(text: string): { value?: number; error?: string } {
  * suman y la lista de 100 en 100. Se abre con la lupa de «Mes».
  */
 export default function Search() {
-  const me = useMe();
-  const household = me.data?.household;
+  const { household, member } = useHousehold();
   const categories = useCategories(household?.id);
   const members = useMembers(household?.id);
   const can = useCan();
@@ -154,7 +154,7 @@ export default function Search() {
   const names = new Map(memberList.map((m) => [m.id, m.name]));
   const shared = memberList.length > 1;
   const authorOf = (t: Transaction) =>
-    members.data && (shared || t.memberId !== me.data?.member.id)
+    members.data && (shared || t.memberId !== member?.id)
       ? (t.memberId && names.get(t.memberId)) || es.household.formerMember
       : null;
   const canWrite = can('transactions.write');

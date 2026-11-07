@@ -22,7 +22,7 @@ import {
   transactions,
   users,
 } from '../db/schema';
-import { findMembership } from '../households';
+import { firstMembership } from '../households';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
 import { meResponse } from './me';
@@ -135,7 +135,7 @@ export function registerInvitationRoutes(
 
   /** Qué pasará con el hogar actual de quien acepta (RF-008). */
   async function currentHouseholdImpact(userId: string) {
-    const current = await findMembership(db, userId);
+    const current = await firstMembership(db, userId);
     if (!current) return { current, impact: 'leave' as const, hasData: false };
     if (current.member.role !== 'owner')
       return { current, impact: 'leave' as const, hasData: false };
@@ -171,6 +171,7 @@ export function registerInvitationRoutes(
         role: invitation.role as InvitationPreview['role'],
         expiresAt: invitation.expiresAt.toISOString(),
         alreadyMember: current?.household.id === invitation.householdId,
+        atLimit: false,
         currentHousehold: impact,
         currentHouseholdHasData: hasData,
       };

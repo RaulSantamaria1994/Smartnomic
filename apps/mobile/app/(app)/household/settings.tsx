@@ -6,22 +6,22 @@ import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
-import { useCan, useMe } from '../../../src/hooks/data';
+import { useCan } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { colors } from '../../../src/theme';
 import { typography } from '../../../src/design/tokens';
+import { useHousehold } from '../../../src/households/active';
 
 /** Nombre del hogar y día de inicio del mes (T092, RF-003). Solo el propietario. */
 export default function HouseholdSettings() {
   const queryClient = useQueryClient();
-  const me = useMe();
+  const { household } = useHousehold();
   const canEdit = useCan()('household.update');
   const [name, setName] = useState<string | null>(null);
   const [day, setDay] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const household = me.data?.household;
   if (!household) {
     return (
       <Screen>

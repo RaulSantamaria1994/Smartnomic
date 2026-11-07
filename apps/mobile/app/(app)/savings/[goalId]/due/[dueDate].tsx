@@ -17,16 +17,16 @@ import {
   formatDueDate,
   formatMoney,
 } from '../../../../../src/format';
-import { todayIn, useMe, useSavings } from '../../../../../src/hooks/data';
+import { todayIn, useSavings } from '../../../../../src/hooks/data';
 import { useRefreshSavings } from '../../../../../src/hooks/useRuleMutations';
 import { es } from '../../../../../src/i18n/es';
 import { newTransactionId } from '../../../../../src/ids';
+import { useHousehold } from '../../../../../src/households/active';
 
 /** Confirmar o saltar la aportación de un mes (especificación 005, historia 2). */
 export default function SavingsDue() {
   const { goalId, dueDate } = useLocalSearchParams<{ goalId: string; dueDate: string }>();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const savings = useSavings(household?.id);
   const refresh = useRefreshSavings(household?.id);
   // Un id por pantalla: reintentar no aparta dos veces.

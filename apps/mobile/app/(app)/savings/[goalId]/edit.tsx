@@ -6,15 +6,15 @@ import { Button } from '../../../../src/components/Button';
 import { Message } from '../../../../src/components/Message';
 import { SavingsForm } from '../../../../src/components/SavingsForm';
 import { goBack, Screen } from '../../../../src/components/Screen';
-import { todayIn, useMe, useSavings } from '../../../../src/hooks/data';
+import { todayIn, useSavings } from '../../../../src/hooks/data';
 import { useRefreshSavings } from '../../../../src/hooks/useRuleMutations';
 import { es } from '../../../../src/i18n/es';
+import { useHousehold } from '../../../../src/households/active';
 
 /** Editar una hucha: nombre, icono, objetivo, plazo o día (especificación 005, historia 4). */
 export default function EditSavingsGoal() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const savings = useSavings(household?.id);
   const refresh = useRefreshSavings(household?.id);
 

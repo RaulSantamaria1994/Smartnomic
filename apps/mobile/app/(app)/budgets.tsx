@@ -12,8 +12,9 @@ import { TextField } from '../../src/components/TextField';
 import { AppText, CategoryIcon, Section } from '../../src/design';
 import { color, spacing } from '../../src/design/tokens';
 import { amountErrorMessage, formatAmountInput, formatMoney } from '../../src/format';
-import { currentPeriodStart, useCan, useCategories, useMe, usePeriod } from '../../src/hooks/data';
+import { currentPeriodStart, useCan, useCategories, usePeriod } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
+import { useHousehold } from '../../src/households/active';
 
 /**
  * Presupuestos de todas las categorías de gasto a la vez (especificación 007, historia 1):
@@ -22,8 +23,7 @@ import { es } from '../../src/i18n/es';
  */
 export default function Budgets() {
   const queryClient = useQueryClient();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const start = household
     ? currentPeriodStart(household.timezone, household.monthStartDay)
     : undefined;

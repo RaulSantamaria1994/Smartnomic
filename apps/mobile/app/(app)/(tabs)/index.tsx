@@ -60,7 +60,6 @@ import {
   todayIn,
   useCan,
   useCategories,
-  useMe,
   useMembers,
   usePeriod,
   useRecurring,
@@ -68,6 +67,7 @@ import {
   useUpcoming,
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
+import { useHousehold } from '../../../src/households/active';
 
 /**
  * Movimientos que se pintan de una vez. Con cientos en un periodo, pintarlos todos retrasa
@@ -88,8 +88,7 @@ const SOON_DAYS = 3;
 
 /** Pantalla «Mes»: resumen del periodo, próximos pagos y movimientos (especificación 003). */
 export default function Month() {
-  const me = useMe();
-  const household = me.data?.household;
+  const { me, household, member } = useHousehold();
   const [start, setStart] = useState<DateString | null>(null);
   const [shown, setShown] = useState(PAGE_SIZE);
   const [direction, setDirection] = useState<1 | -1>(1);
@@ -114,7 +113,7 @@ export default function Month() {
       </SafeAreaView>
     );
   }
-  if (!household || !periodStart || !me.data) {
+  if (!household || !member || !periodStart || !me.data) {
     return (
       <SafeAreaView style={styles.center}>
         <Message text={me.error?.message ?? es.auth.errors.unknown} />
@@ -137,7 +136,7 @@ export default function Month() {
   const names = new Map(memberList.map((m) => [m.id, m.name]));
   const shared = memberList.length > 1;
   const authorOf = (t: Transaction) =>
-    members.data && (shared || t.memberId !== me.data?.member.id)
+    members.data && (shared || t.memberId !== member?.id)
       ? (t.memberId && names.get(t.memberId)) || es.household.formerMember
       : null;
   const offline = period.error instanceof ApiError && period.error.code === 'network';
@@ -196,7 +195,7 @@ export default function Month() {
             occurrences={upcoming.data?.occurrences}
             today={upcoming.data?.today}
             hasRules={(rules.data?.rules.length ?? 0) > 0}
-            remindersEnabled={me.data.member.remindersEnabled}
+            remindersEnabled={member.remindersEnabled}
           />
         </View>
       )}

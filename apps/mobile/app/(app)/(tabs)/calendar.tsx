@@ -33,17 +33,16 @@ import {
   useCan,
   useCategories,
   useSavings,
-  useMe,
   useMembers,
   useRecurring,
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { color, spacing } from '../../../src/design/tokens';
+import { useHousehold } from '../../../src/households/active';
 
 /** Calendario de pagos programados (especificación 002, historias 1 y 2). */
 export default function Calendar() {
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const current = household ? monthOf(todayIn(household.timezone)) : undefined;
   const [month, setMonth] = useState<string | null>(null);
   const [selected, setSelected] = useState<DateString | null>(null);

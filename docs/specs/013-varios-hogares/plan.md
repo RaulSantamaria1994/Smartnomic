@@ -73,7 +73,7 @@ member }`; con 5 hogares, `409 conflict` «Ya estás en 5 hogares, el máximo. S
   bórralo para crear otro.».
 - `DELETE /api/households/:householdId` → `204`, solo el propietario y si es el único
   miembro; si no, `409`. Borra el hogar y todo lo suyo (las tablas ya borran en cascada).
-- `POST /api/households/:householdId/leave` → `{ households }` (ya no crea uno vacío).
+- `POST /api/households/:householdId/leave` → la respuesta de `me` (ya no crea uno vacío).
 - Invitaciones:
   - Vista previa: se quitan `currentHousehold` y `currentHouseholdHasData` (ver
     «Compatibilidad») y se añade `atLimit` (ya estás en 5).
@@ -103,8 +103,9 @@ darse antes. Se acepta, porque la APK nueva se publica a la vez.
   - `createHousehold(tx, user, name, timezone)`: la usan el registro y `POST /api/households`;
     crea las categorías de siempre.
   - Lo que ahora hace `ensureHousehold` queda solo para el registro.
-- `plugins/household-access.ts`: `requireMember` usa `params.householdId` (todas las rutas que
-  lo usan lo llevan; un test lo comprueba recorriendo las rutas registradas).
+- `plugins/household-access.ts`: `requireMember` usa `params.householdId`. Una ruta con
+  `requireMember` sin `:householdId` no deja pasar a nadie (403): falla cerrada, y un test lo
+  comprueba.
 - `routes/households.ts`: crear y borrar. Borrar ofrece la exportación en la app, no en el
   servidor, que ya tiene `GET …/export`.
 - `routes/members.ts`: `leave` sin hogar nuevo.
@@ -170,8 +171,8 @@ darse antes. Se acepta, porque la APK nueva se publica a la vez.
 
 ## Riesgos
 
-- **Rutas sin comprobar el hogar**: un test recorre todas las rutas registradas con
-  `requireMember` y exige que lleven `:householdId`. La batería de ataques repite cada ruta
+- **Rutas sin comprobar el hogar**: `requireMember` sin `:householdId` en la URL responde 403
+  (falla cerrada). La batería de ataques repite cada ruta
   con el hogar ajeno.
 - **Muchos cambios en la app** (unos 45 usos de `me.household`): se cambian con un solo hook y
   se busca con `grep` que no quede ninguno; las pruebas de punta a punta anteriores pasan.

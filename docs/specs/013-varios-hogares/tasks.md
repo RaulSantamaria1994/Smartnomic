@@ -21,18 +21,18 @@ fallar antes de implementar.
 **Objetivo**: el servidor admite varios hogares por persona y comprueba cada petición contra
 el hogar de la URL, sin cambiar aún lo que ve la app.
 
-- [ ] H001 [P] Dominio: `activeHousehold` y `MAX_HOUSEHOLDS` en `packages/domain` con sus
+- [x] H001 [P] Dominio: `activeHousehold` y `MAX_HOUSEHOLDS` en `packages/domain` con sus
       tests (guardado y presente, guardado y quitado, id desconocido, lista vacía)
-- [ ] H002 [P] Contrato en `packages/api`: `me` con `households` (y `household`/`member`
+- [x] H002 [P] Contrato en `packages/api`: `me` con `households` (y `household`/`member`
       nulos sin hogares), crear hogar, vista previa de invitación con `atLimit`; tests de los
       esquemas
-- [ ] H003 Migración `0008`: índice único (hogar, usuario), fuera el de usuario, índice por
+- [x] H003 Migración `0008`: índice único (hogar, usuario), fuera el de usuario, índice por
       usuario
-- [ ] H004 Tests del servidor con un usuario en dos hogares: lee y cambia cada uno con su
+- [x] H004 Tests del servidor con un usuario en dos hogares: lee y cambia cada uno con su
       rol; desde la sesión no se llega a un hogar ajeno; todas las rutas con `requireMember`
       llevan `:householdId` (recorriendo las rutas registradas); `me` lista los dos y
       `household` es el más antiguo; `me` sin hogares no crea uno
-- [ ] H005 `findMembership(userId, householdId)`, `listMemberships`, `createHousehold`;
+- [x] H005 `findMembership(userId, householdId)`, `listMemberships`, `createHousehold`;
       `requireMember` por el hogar de la URL; `me` nuevo; el registro sigue creando su hogar
 
 **Punto de control**: RF-1301, RF-1304 (servidor), RF-1309 y RF-1311.
@@ -62,10 +62,10 @@ el hogar de la URL, sin cambiar aún lo que ve la app.
 
 ## Fase 3: Historia 2 — Crear un hogar y quitar los que no se usan (P2)
 
-- [ ] H012 [US2] Tests y rutas: `POST /api/households` (límite de 5, también con dos
-      peticiones a la vez; categorías de siempre; zona horaria); `DELETE
-    /api/households/:id` (solo propietario único; con más miembros o sin ser propietario,
-      `409`/`403`); salir sin crear hogar
+- [ ] H012 [US2] Tests y rutas: crear hogar con `POST /api/households` (límite de 5, también
+      con dos peticiones a la vez; categorías de siempre; zona horaria); borrar hogar con
+      `DELETE /api/households/:id` (solo el propietario si es el único miembro; si no, `409`
+      o `403`); salir sin crear hogar
 - [ ] H013 [US2] Borrar la cuenta con varios hogares: bloqueo con los nombres de los hogares
       en los que es propietario con más miembros; borra los suyos de un solo miembro; tests
 - [ ] H014 [US2] App: «Crear hogar» (`app/(app)/households/new.tsx`), «Borrar el hogar» en
@@ -92,7 +92,8 @@ el hogar de la URL, sin cambiar aún lo que ve la app.
       (CE-1302)
 - [ ] H017 Punta a punta con tres personas y dos hogares: cambiar de hogar (CE-1301), aceptar
       con datos (CE-1303), quedarse sin hogar de cada forma (CE-1304), crear y borrar; las
-      anteriores siguen pasando; peticiones al abrir con 5 hogares
+      anteriores siguen pasando (`us4` cambia: quien sale ya no recibe un hogar vacío, vuelve
+      al suyo); peticiones al abrir con 5 hogares
 - [ ] H018 [P] axe-core en la lista de hogares, crear hogar, borrar hogar y sin hogar, a 320
       y 1280 px (CE-1305)
 - [ ] H019 [P] `expo export --platform android` compila

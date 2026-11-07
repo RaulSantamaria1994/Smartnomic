@@ -3,11 +3,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { queryKeys } from '../api/queryKeys';
 import { API_URL } from '../config';
-import { useMe } from '../hooks/data';
 import { isForeground, onForegroundChange } from './foreground';
 import { openSocket } from './open-socket';
 import { createBatcher, keysToRefresh } from './scopes';
 import { realtimeUrl, reconnectDelay } from './url';
+import { useHousehold } from '../households/active';
 
 /** Los avisos que llegan en este tiempo se agrupan en una sola recarga. */
 const BATCH_MS = 300;
@@ -20,7 +20,7 @@ const BATCH_MS = 300;
  */
 export function useRealtime(): void {
   const queryClient = useQueryClient();
-  const householdId = useMe().data?.household.id;
+  const householdId = useHousehold().household?.id;
 
   useEffect(() => {
     if (!householdId || typeof WebSocket === 'undefined') return;

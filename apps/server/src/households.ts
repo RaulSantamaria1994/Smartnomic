@@ -1,6 +1,6 @@
 import { DEFAULT_TIMEZONE, timeZoneSchema } from '@smartnomic/api';
-import { DEFAULT_CATEGORIES } from '@smartnomic/domain';
-import { count, eq, TransactionRollbackError } from 'drizzle-orm';
+import { DEFAULT_CATEGORIES, MAX_HOUSEHOLDS } from '@smartnomic/domain';
+import { and, asc, count, eq, sql } from 'drizzle-orm';
 import type { Database } from './db/client';
 import { categories, households, members } from './db/schema';
 
@@ -12,59 +12,93 @@ export interface Membership {
   member: MemberRow;
 }
 
-export async function findMembership(db: Database, userId: string): Promise<Membership | null> {
+/** La pertenencia del usuario a ese hogar, o `null` si no es miembro (especificación 013). */
+export async function findMembership(
+  db: Database,
+  userId: string,
+  householdId: string,
+): Promise<Membership | null> {
   const [row] = await db
     .select({ household: households, member: members })
     .from(members)
     .innerJoin(households, eq(households.id, members.householdId))
-    .where(eq(members.userId, userId))
+    .where(and(eq(members.userId, userId), eq(members.householdId, householdId)))
     .limit(1);
   return row ?? null;
 }
 
+/** Los hogares del usuario, del más antiguo al más nuevo (por cuándo entró). */
+export async function listMemberships(db: Database, userId: string): Promise<Membership[]> {
+  return db
+    .select({ household: households, member: members })
+    .from(members)
+    .innerJoin(households, eq(households.id, members.householdId))
+    .where(eq(members.userId, userId))
+    .orderBy(asc(members.joinedAt), asc(members.id));
+}
+
+/** El hogar más antiguo del usuario (lo que veía la app antes de varios hogares). */
+export async function firstMembership(db: Database, userId: string): Promise<Membership | null> {
+  return (await listMemberships(db, userId))[0] ?? null;
+}
+
+type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
+
 /**
- * Devuelve el hogar del usuario y, si aún no tiene, le crea uno del que es propietario
- * (especificación 001, RF-002). Es idempotente: se puede llamar a la vez desde el registro
- * y desde `GET /api/me` sin crear dos hogares.
+ * Bloquea, hasta el final de la transacción, los cambios en los hogares de un usuario: así
+ * dos peticiones a la vez no le llevan por encima del máximo (RF-1301).
+ */
+export async function lockUserHouseholds(tx: Tx, userId: string): Promise<number> {
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${'households:' + userId}))`);
+  const [row] = await tx.select({ total: count() }).from(members).where(eq(members.userId, userId));
+  return row?.total ?? 0;
+}
+
+/**
+ * Crea un hogar del que el usuario es propietario, con las categorías de siempre
+ * (especificación 001, RF-002; 013, RF-1305). Con el máximo de hogares, `'limit'`.
+ */
+export async function createHousehold(
+  db: Database,
+  user: { id: string },
+  options: { name: string; timezone: string | null | undefined; onlyIfNone?: boolean },
+): Promise<Membership | 'limit' | 'exists'> {
+  const zone = timeZoneSchema.safeParse(options.timezone).success
+    ? (options.timezone as string)
+    : DEFAULT_TIMEZONE;
+  return db.transaction(async (tx) => {
+    const total = await lockUserHouseholds(tx, user.id);
+    if (options.onlyIfNone && total > 0) return 'exists';
+    if (total >= MAX_HOUSEHOLDS) return 'limit';
+    const [household] = await tx
+      .insert(households)
+      .values({ name: options.name, timezone: zone })
+      .returning();
+    if (!household) throw new Error('No se pudo crear el hogar');
+    const [member] = await tx
+      .insert(members)
+      .values({ householdId: household.id, userId: user.id, role: 'owner' })
+      .returning();
+    if (!member) throw new Error('No se pudo crear el miembro');
+    await tx.insert(categories).values(defaultCategoryRows(household.id));
+    return { household, member };
+  });
+}
+
+/**
+ * Al registrarse: el primer hogar del usuario (RF-002, RF-1309). Si ya tiene alguno (el alta
+ * se repite), no crea otro.
  */
 export async function ensureHousehold(
   db: Database,
   user: { id: string; name: string },
   timezone: string | null | undefined,
-): Promise<Membership> {
-  const existing = await findMembership(db, user.id);
-  if (existing) return existing;
-
-  const zone = timeZoneSchema.safeParse(timezone).success ? (timezone as string) : DEFAULT_TIMEZONE;
-  const created = await db
-    .transaction(async (tx) => {
-      const [household] = await tx
-        .insert(households)
-        .values({ name: householdName(user.name), timezone: zone })
-        .returning();
-      if (!household) throw new Error('No se pudo crear el hogar');
-      const [member] = await tx
-        .insert(members)
-        .values({ householdId: household.id, userId: user.id, role: 'owner' })
-        // Otro proceso lo ha creado a la vez: se deshace este hogar y se usa el suyo.
-        .onConflictDoNothing({ target: members.userId })
-        .returning();
-      if (!member) {
-        tx.rollback();
-        return null;
-      }
-      await tx.insert(categories).values(defaultCategoryRows(household.id));
-      return { household, member };
-    })
-    .catch((error: unknown) => {
-      if (error instanceof TransactionRollbackError) return null;
-      throw error;
-    });
-
-  if (created) return created;
-  const membership = await findMembership(db, user.id);
-  if (!membership) throw new Error('El usuario no tiene hogar');
-  return membership;
+): Promise<void> {
+  await createHousehold(db, user, {
+    name: householdName(user.name),
+    timezone,
+    onlyIfNone: true,
+  });
 }
 
 function householdName(userName: string): string {

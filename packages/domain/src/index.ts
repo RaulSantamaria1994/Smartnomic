@@ -8,6 +8,7 @@ export * from './categoryIcons';
 export * from './charts';
 export * from './csv';
 export * from './dates';
+export * from './households';
 export * from './ids';
 export * from './money';
 export * from './outbox';

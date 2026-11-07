@@ -45,12 +45,10 @@ describe('registro', () => {
     const user = await signUp(ctx.app);
     await ctx.db.delete(households);
 
-    const results = await Promise.all(
+    await Promise.all(
       Array.from({ length: 5 }, () => ensureHousehold(ctx.db, user, 'Europe/Madrid')),
     );
 
-    const ids = new Set(results.map((r) => r.household.id));
-    expect(ids.size).toBe(1);
     expect(await ctx.db.select().from(households)).toHaveLength(1);
   });
 });
@@ -75,22 +73,8 @@ describe('GET /api/me', () => {
     expect(response.statusCode).toBe(200);
     const me = meResponseSchema.parse(response.json());
     expect(me.user).toEqual({ id: user.id, name: 'Marcos', email: user.email });
-    expect(me.household.name).toBe('Hogar de Marcos');
-    expect(me.member.role).toBe('owner');
-  });
-
-  it('crea el hogar si el usuario no tiene', async () => {
-    const user = await signUp(ctx.app);
-    await ctx.db.delete(households);
-
-    const response = await ctx.app.inject({
-      method: 'GET',
-      url: '/api/me',
-      headers: { cookie: user.cookie },
-    });
-
-    expect(response.statusCode).toBe(200);
-    expect(meResponseSchema.parse(response.json()).member.role).toBe('owner');
+    expect(me.household?.name).toBe('Hogar de Marcos');
+    expect(me.member?.role).toBe('owner');
   });
 
   it('tras cerrar sesión vuelve a responder 401', async () => {
@@ -123,12 +107,12 @@ describe('acceso por hogar', () => {
 
     const response = await ctx.app.inject({
       method: 'GET',
-      url: `/api/households/${me.household.id}`,
+      url: `/api/households/${me.household!.id}`,
       headers: { cookie: user.cookie },
     });
 
     expect(response.statusCode).toBe(200);
-    expect(householdSchema.parse(response.json()).id).toBe(me.household.id);
+    expect(householdSchema.parse(response.json()).id).toBe(me.household!.id);
   });
 
   it('nadie puede ver el hogar de otro (403)', async () => {
@@ -138,7 +122,7 @@ describe('acceso por hogar', () => {
       (
         await ctx.app.inject({ method: 'GET', url: '/api/me', headers: { cookie: lucia.cookie } })
       ).json(),
-    ).household.id;
+    ).household!.id;
 
     const response = await ctx.app.inject({
       method: 'GET',
@@ -174,19 +158,21 @@ describe('restricciones de la base de datos', () => {
     ).rejects.toThrow();
   });
 
-  it('un usuario solo puede pertenecer a un hogar', async () => {
+  it('un usuario puede estar en varios hogares, pero solo una vez en cada uno (013)', async () => {
     const user = await signUp(ctx.app);
     const other = await signUp(ctx.app);
     const [otherMembership] = await ctx.db
       .select()
       .from(members)
       .where(eq(members.userId, other.id));
+    const row = {
+      householdId: otherMembership!.householdId,
+      userId: user.id,
+      role: 'editor' as const,
+    };
 
-    await expect(
-      ctx.db
-        .insert(members)
-        .values({ householdId: otherMembership!.householdId, userId: user.id, role: 'editor' }),
-    ).rejects.toThrow();
+    await ctx.db.insert(members).values(row);
+    await expect(ctx.db.insert(members).values({ ...row, role: 'viewer' })).rejects.toThrow();
   });
 });
 

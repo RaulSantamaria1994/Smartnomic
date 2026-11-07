@@ -9,12 +9,12 @@ import { Message } from '../../src/components/Message';
 import { Screen } from '../../src/components/Screen';
 import { exportHousehold } from '../../src/export/export-household';
 import { formatDay } from '../../src/format';
-import { useMe } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { colors, spacing } from '../../src/theme';
 import { typography } from '../../src/design/tokens';
 import { switchColors } from '../../src/components/switchColors';
+import { useHousehold } from '../../src/households/active';
 
 /**
  * Unirse a un hogar con un enlace o un código (T082, RF-005, RF-008). Sin sesión, manda a
@@ -64,7 +64,7 @@ function Preview({ code }: { code: string }) {
   const [joining, setJoining] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
-  const myHousehold = useMe().data?.household.id;
+  const myHousehold = useHousehold().household?.id;
   const goHome = () => router.replace('/');
 
   if (preview.isPending) {

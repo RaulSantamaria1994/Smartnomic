@@ -5,7 +5,7 @@ import type { FastifyInstance } from 'fastify';
 import type { Auth, AuthRateLimit } from '../auth';
 import type { Database } from '../db/client';
 import { households, members, users, verifications } from '../db/schema';
-import { findMembership } from '../households';
+import { firstMembership } from '../households';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
 
@@ -33,7 +33,7 @@ export function registerAccountRoutes(
         .catch(() => false);
       if (!valid) throw new ApiError('validation_failed', 'La contraseña no es correcta.');
 
-      const membership = await findMembership(db, user.id);
+      const membership = await firstMembership(db, user.id);
       await db.transaction(async (tx) => {
         if (membership?.member.role === 'owner') {
           const [row] = await tx

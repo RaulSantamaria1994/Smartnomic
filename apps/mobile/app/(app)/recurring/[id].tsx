@@ -7,14 +7,14 @@ import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { RuleForm } from '../../../src/components/RuleForm';
 import { goBack, Screen } from '../../../src/components/Screen';
-import { todayIn, useCategories, useMe, useRecurring } from '../../../src/hooks/data';
+import { todayIn, useCategories, useRecurring } from '../../../src/hooks/data';
 import { useRefreshRecurring } from '../../../src/hooks/useRuleMutations';
 import { es } from '../../../src/i18n/es';
+import { useHousehold } from '../../../src/households/active';
 
 export default function EditRule() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const categories = useCategories(household?.id);
   const rules = useRecurring(household?.id);
   const refresh = useRefreshRecurring(household?.id);

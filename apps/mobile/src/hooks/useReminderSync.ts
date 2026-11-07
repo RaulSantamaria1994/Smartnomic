@@ -12,7 +12,8 @@ import {
   syncReminders,
 } from '../reminders/reminders';
 import { useNotificationPermission } from '../state/permission';
-import { useMe, useRecurring, useSavings, useUpcoming } from './data';
+import { useRecurring, useSavings, useUpcoming } from './data';
+import { useHousehold } from '../households/active';
 
 /** Ventana de avisos programados (plan: 60 días, con tope de 50 avisos). */
 const REMINDER_WINDOW_DAYS = 60;
@@ -24,9 +25,7 @@ const REMINDER_WINDOW_DAYS = 60;
  */
 export function useReminderSync(): void {
   const queryClient = useQueryClient();
-  const me = useMe();
-  const household = me.data?.household;
-  const member = me.data?.member;
+  const { household, member } = useHousehold();
   const rules = useRecurring(household?.id);
   const upcoming = useUpcoming(household?.id, REMINDER_WINDOW_DAYS);
   const goals = useSavings(household?.id).data?.goals;

@@ -7,7 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { persistable } from '../src/api/queryKeys';
 import { persister } from '../src/cache/cache';
 import { watchAppFocus } from '../src/cache/focus';
-import { CACHE_MAX_AGE, createQueryClient } from '../src/cache/query-client';
+import { CACHE_BUSTER, CACHE_MAX_AGE, createQueryClient } from '../src/cache/query-client';
 import { useAppFonts } from '../src/design/fonts';
 import { bindSessionEnd, sessionEnd } from '../src/session/session-ended';
 import { color } from '../src/design/tokens';
@@ -38,6 +38,9 @@ export default function RootLayout() {
         persistOptions={{
           persister,
           maxAge: CACHE_MAX_AGE,
+          // Cambia cuando cambia la forma de lo guardado: la caché anterior se descarta en vez
+          // de leerse mal (013: `me` con varios hogares).
+          buster: CACHE_BUSTER,
           dehydrateOptions: {
             shouldDehydrateQuery: (query) =>
               defaultShouldDehydrateQuery(query) && persistable(query.queryKey),

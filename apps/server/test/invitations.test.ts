@@ -138,8 +138,8 @@ describe('aceptar invitaciones', () => {
 
     expect(response.statusCode).toBe(200);
     const after = meResponseSchema.parse(response.json());
-    expect(after.household.id).toBe(householdId);
-    expect(after.member.role).toBe('editor');
+    expect(after.household?.id).toBe(householdId);
+    expect(after.member?.role).toBe('editor');
     expect(
       await ctx.db.select().from(households).where(eq(households.id, oldHousehold)),
     ).toHaveLength(0);

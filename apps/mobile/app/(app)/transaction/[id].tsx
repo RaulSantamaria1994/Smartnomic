@@ -9,10 +9,11 @@ import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { goBack, Screen } from '../../../src/components/Screen';
 import { TransactionForm } from '../../../src/components/TransactionForm';
-import { todayIn, useCategories, useMe } from '../../../src/hooks/data';
+import { todayIn, useCategories } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { useUndo } from '../../../src/state/undo';
 import type { Transaction } from '@smartnomic/api';
+import { useHousehold } from '../../../src/households/active';
 
 /** Busca el movimiento en lo ya cargado (meses y búsqueda). */
 function useCachedTransaction(
@@ -31,8 +32,7 @@ function useCachedTransaction(
 export default function EditTransaction() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const categories = useCategories(household?.id);
   const transaction = useCachedTransaction(household?.id, id);
   const offerUndo = useUndo((state) => state.offer);
