@@ -1,16 +1,10 @@
 name: APK de Android
 
-# Compila el APK en las máquinas de GitHub, sin EAS: a mano (pestaña Actions, «Run
-# workflow») y en cada fusión a main. El APK se descarga desde la ejecución (Artifacts).
-# En los PR solo se compila si cambian este flujo o su script, para probarlos antes.
+# Compila el APK en las máquinas de GitHub, sin EAS. Solo a mano (pestaña Actions, «Run
+# workflow»), cuando lo pide el propietario: ni en las fusiones a main ni en los PR. El APK
+# se descarga desde la ejecución (Artifacts).
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-  pull_request:
-    paths:
-      - .github/workflows/android.yml
-      - apps/mobile/scripts/prepare-android-ci.cjs
 
 # El token de GitHub solo puede leer el repositorio (mínimo privilegio).
 permissions:

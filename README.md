@@ -153,8 +153,8 @@ El repositorio trae un `Dockerfile` (exporta la web y la sirve junto con la API)
 ### Con GitHub Actions
 
 El flujo `.github/workflows/android.yml` compila el APK en las máquinas de GitHub (sin
-cuenta de Expo) en cada fusión a `main` y cuando se lanza a mano: **Actions → APK de
-Android → Run workflow**. Tarda unos 20 minutos; el APK se descarga en la ejecución, en
+cuenta de Expo) solo cuando se lanza a mano: **Actions → APK de Android → Run workflow**
+(no se compila solo al fusionar en `main`). Se puede elegir la rama. Tarda unos 20 minutos; el APK se descarga en la ejecución, en
 **Artifacts** (`smartnomic-<número>`, un zip con `app-release.apk`). Cada ejecución sube el
 número de versión, así que se instala encima del anterior.
 
