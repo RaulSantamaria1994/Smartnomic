@@ -27,6 +27,7 @@ export function useRealtime(): void {
     const url = realtimeUrl(
       API_URL,
       typeof window === 'undefined' ? undefined : window.location?.origin,
+      householdId,
     );
     const refresh = (scopes: readonly RealtimeScope[] | 'all') => {
       for (const queryKey of keysToRefresh(householdId, scopes)) {

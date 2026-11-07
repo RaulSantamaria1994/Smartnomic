@@ -5,7 +5,7 @@ import type { FastifyInstance } from 'fastify';
 import type { Auth, AuthRateLimit } from '../auth';
 import type { Database } from '../db/client';
 import { households, members, users, verifications } from '../db/schema';
-import { firstMembership } from '../households';
+import { listMemberships } from '../households';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
 
@@ -33,28 +33,42 @@ export function registerAccountRoutes(
         .catch(() => false);
       if (!valid) throw new ApiError('validation_failed', 'La contraseña no es correcta.');
 
-      const membership = await firstMembership(db, user.id);
+      // Todos sus hogares (especificación 013): donde es propietario con más miembros hay que
+      // pasar antes la propiedad; los que solo tienen a esta persona se borran con la cuenta.
+      const memberships = await listMemberships(db, user.id);
       await db.transaction(async (tx) => {
-        if (membership?.member.role === 'owner') {
-          const [row] = await tx
-            .select({ total: count() })
-            .from(members)
-            .where(eq(members.householdId, membership.household.id));
-          if ((row?.total ?? 0) > 1) {
-            throw new ApiError(
-              'conflict',
-              'Eres el propietario de un hogar con más miembros. Pasa antes la propiedad a uno de ellos.',
-            );
-          }
+        const owned = memberships.filter((m) => m.member.role === 'owner');
+        const counts = await Promise.all(
+          owned.map(async (m) => {
+            const [row] = await tx
+              .select({ total: count() })
+              .from(members)
+              .where(eq(members.householdId, m.household.id));
+            return { membership: m, total: row?.total ?? 0 };
+          }),
+        );
+        const blocked = counts
+          .filter((c) => c.total > 1)
+          .map((c) => `«${c.membership.household.name}»`);
+        if (blocked.length > 0) {
+          throw new ApiError(
+            'conflict',
+            `Eres el propietario de ${blocked.length > 1 ? 'hogares' : 'un hogar'} con más miembros (${blocked.join(', ')}). Pasa antes la propiedad a uno de ellos.`,
+          );
+        }
+        for (const { membership } of counts) {
           await tx.delete(households).where(eq(households.id, membership.household.id));
         }
-        // Las sesiones, las cuentas de Better Auth y la pertenencia al hogar caen en cascada.
+        // Las sesiones, las cuentas de Better Auth y la pertenencia a los hogares caen en
+        // cascada; sus movimientos se quedan como de «un antiguo miembro».
         await tx.delete(verifications).where(eq(verifications.value, user.id));
         await tx.delete(users).where(eq(users.id, user.id));
       });
-      // Los demás miembros ven que ya no está; su conexión de tiempo real se cierra.
-      if (membership)
-        request.realtime = [{ householdId: membership.household.id, scope: 'members' }];
+      // Los demás miembros ven que ya no está; sus conexiones de tiempo real se cierran.
+      request.realtime = memberships.map((m) => ({
+        householdId: m.household.id,
+        scope: 'members' as const,
+      }));
       return reply.status(204).send();
     },
   );

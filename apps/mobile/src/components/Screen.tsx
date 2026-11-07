@@ -9,7 +9,7 @@ import {
   type RefreshControlProps,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppBar, type AppBarAction, type AppBarStep } from '../design/AppBar';
+import { AppBar, type AppBarAction, type AppBarStep, type AppBarSwitcher } from '../design/AppBar';
 import { Brand } from '../design/Brand';
 import { AppText } from '../design/Text';
 import { color, layout, size, spacing } from '../design/tokens';
@@ -28,6 +28,7 @@ export function Screen({
   prev,
   next,
   action,
+  switcher,
   brand,
   align = 'center',
   bleed,
@@ -45,6 +46,8 @@ export function Screen({
   next?: AppBarStep;
   /** Botón de icono a la derecha de la barra. */
   action?: AppBarAction;
+  /** Nombre del hogar bajo el título, para cambiar de hogar (especificación 013). */
+  switcher?: AppBarSwitcher;
   /** Pantallas sin sesión: marca y título dentro del contenido, sin barra superior. */
   brand?: boolean;
   /** Los formularios cortos sin sesión van centrados; el resto, arriba. */
@@ -75,6 +78,7 @@ export function Screen({
           prev={prev}
           next={next}
           action={action}
+          switcher={switcher}
         />
       )}
       <KeyboardAvoidingView

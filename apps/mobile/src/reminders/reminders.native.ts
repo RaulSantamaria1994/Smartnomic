@@ -2,7 +2,7 @@
 import * as Notifications from 'expo-notifications';
 import { Linking, Platform } from 'react-native';
 import { es } from '../i18n/es';
-import { reminderInstant, type PlannedReminder } from './plan';
+import { reminderInstant, type PlannedHouseholdReminder } from './plan';
 
 export type PermissionStatus = 'granted' | 'denied' | 'undetermined' | 'unsupported';
 
@@ -29,14 +29,19 @@ async function ensureChannel(): Promise<void> {
 }
 
 /** Sustituye los avisos programados por los de ahora (al abrir, al volver y tras cambios). */
-export async function syncReminders(planned: readonly PlannedReminder[]): Promise<void> {
+export async function syncReminders(planned: readonly PlannedHouseholdReminder[]): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
   if (planned.length === 0 || (await permissionStatus()) !== 'granted') return;
   await ensureChannel();
-  for (const { reminder, title, body } of planned) {
+  for (const { reminder, title, body, householdId } of planned) {
     await Notifications.scheduleNotificationAsync({
       identifier: reminder.id,
-      content: { title, body, data: { ruleId: reminder.ruleId, dueDate: reminder.dueDate } },
+      content: {
+        title,
+        body,
+        // El hogar del aviso, para abrirlo en ese hogar (especificación 013).
+        data: { ruleId: reminder.ruleId, dueDate: reminder.dueDate, householdId },
+      },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: reminderInstant(reminder),
@@ -67,13 +72,18 @@ export async function openNotificationSettings(): Promise<void> {
 
 /** Al tocar un aviso se abre su vencimiento (RF-034), también si la app estaba cerrada. */
 export function onReminderOpened(
-  handler: (target: { ruleId: string; dueDate: string }) => void,
+  handler: (target: { ruleId: string; dueDate: string; householdId?: string }) => void,
 ): () => void {
   const open = (response: Notifications.NotificationResponse | null) => {
     const data = response?.notification.request.content.data as
-      { ruleId?: unknown; dueDate?: unknown } | undefined;
+      { ruleId?: unknown; dueDate?: unknown; householdId?: unknown } | undefined;
     if (typeof data?.ruleId === 'string' && typeof data.dueDate === 'string') {
-      handler({ ruleId: data.ruleId, dueDate: data.dueDate });
+      handler({
+        ruleId: data.ruleId,
+        dueDate: data.dueDate,
+        // Los avisos programados antes de varios hogares no lo llevan.
+        ...(typeof data.householdId === 'string' && { householdId: data.householdId }),
+      });
     }
   };
   void Notifications.getLastNotificationResponseAsync().then(open);

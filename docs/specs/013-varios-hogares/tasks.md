@@ -41,19 +41,19 @@ el hogar de la URL, sin cambiar aún lo que ve la app.
 
 ## Fase 2: Historia 1 — Estar en dos hogares y cambiar entre ellos (P1) 🎯
 
-- [ ] H006 [US1] Tests y cambio de aceptar una invitación: conserva el hogar actual y sus
+- [x] H006 [US1] Tests y cambio de aceptar una invitación: conserva el hogar actual y sus
       datos (CE-1303); con 5 hogares, `409`; ya miembro, como ahora; la vista previa con
       `atLimit` y los campos viejos fijos (compatibilidad)
-- [ ] H007 [US1] Tests y cambio del tiempo real por hogar: `?householdId=` (sin él, el
+- [x] H007 [US1] Tests y cambio del tiempo real por hogar: `?householdId=` (sin él, el
       primero); hogar ajeno, `403`; quitar a alguien de un hogar solo le cierra esa conexión
-- [ ] H008 [US1] App: `src/households/active.ts` (`useHousehold`, `useSwitchHousehold`,
+- [x] H008 [US1] App: `src/households/active.ts` (`useHousehold`, `useSwitchHousehold`,
       guardado por cuenta en el dispositivo) y cambiar todos los usos de `me.household` y
       `me.member`
-- [ ] H009 [US1] App: nombre del hogar en la barra como botón y la lista de hogares
+- [x] H009 [US1] App: nombre del hogar en la barra como botón y la lista de hogares
       (`app/(app)/households/index.tsx`) con el elegido y el rol; textos en `es.ts`
-- [ ] H010 [US1] App: tiempo real con el hogar elegido; bandeja sin conexión filtrada por el
+- [x] H010 [US1] App: tiempo real con el hogar elegido; bandeja sin conexión filtrada por el
       hogar elegido; aceptar una invitación elige el hogar nuevo y ya no avisa de perder datos
-- [ ] H011 [US1] Recordatorios de todos los hogares (tests de la planificación con varios
+- [x] H011 [US1] Recordatorios de todos los hogares (tests de la planificación con varios
       hogares y el nombre del hogar en el texto; al tocar, se elige ese hogar)
 
 **Punto de control**: RF-1302 a RF-1304 y RF-1310.
@@ -66,7 +66,7 @@ el hogar de la URL, sin cambiar aún lo que ve la app.
       con dos peticiones a la vez; categorías de siempre; zona horaria); borrar hogar con
       `DELETE /api/households/:id` (solo el propietario si es el único miembro; si no, `409`
       o `403`); salir sin crear hogar
-- [ ] H013 [US2] Borrar la cuenta con varios hogares: bloqueo con los nombres de los hogares
+- [x] H013 [US2] Borrar la cuenta con varios hogares: bloqueo con los nombres de los hogares
       en los que es propietario con más miembros; borra los suyos de un solo miembro; tests
 - [ ] H014 [US2] App: «Crear hogar» (`app/(app)/households/new.tsx`), «Borrar el hogar» en
       ajustes (exportar antes, confirmación), salir lleva a otro hogar; textos del límite

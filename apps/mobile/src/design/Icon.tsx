@@ -16,6 +16,7 @@ const NAMES = {
   back: 'chevron-left',
   arrowBack: 'arrow-left',
   forward: 'chevron-right',
+  expand: 'chevron-down',
   bell: 'bell-outline',
   close: 'close',
   check: 'check',

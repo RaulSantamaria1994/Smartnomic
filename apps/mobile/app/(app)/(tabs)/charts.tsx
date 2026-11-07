@@ -30,6 +30,7 @@ import {
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { useHousehold } from '../../../src/households/active';
+import { useHouseholdSwitcher } from '../../../src/households/useSwitcher';
 
 type ChartKind = 'category' | 'flow' | 'trend' | 'savings';
 
@@ -46,6 +47,7 @@ const CHARTS: { kind: ChartKind; label: string }[] = [
  */
 export default function Charts() {
   const { me, household } = useHousehold();
+  const switcher = useHouseholdSwitcher();
   const [start, setStart] = useState<DateString | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [kind, setKind] = useState<ChartKind>('category');
@@ -86,7 +88,7 @@ export default function Charts() {
   return (
     <Screen
       title={formatPeriod(current, household.monthStartDay)}
-      subtitle={es.charts.title}
+      switcher={switcher}
       prev={{ label: es.month.previous, onPress: () => move(-1) }}
       next={{ label: es.month.next, onPress: () => move(1) }}
       bleed

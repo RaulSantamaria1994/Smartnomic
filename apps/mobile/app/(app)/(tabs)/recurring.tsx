@@ -10,10 +10,12 @@ import { es } from '../../../src/i18n/es';
 import { Amount, CategoryIcon, EmptyState, ListRow } from '../../../src/design';
 import { spacing } from '../../../src/design/tokens';
 import { useHousehold } from '../../../src/households/active';
+import { useHouseholdSwitcher } from '../../../src/households/useSwitcher';
 
 /** Lista de pagos y cobros recurrentes del hogar (T062). */
 export default function RecurringList() {
   const { household } = useHousehold();
+  const switcher = useHouseholdSwitcher();
   const rules = useRecurring(household?.id);
   const categories = useCategories(household?.id);
   const can = useCan();
@@ -21,7 +23,7 @@ export default function RecurringList() {
   const byId = new Map((categories.data?.categories ?? []).map((c) => [c.id, c]));
 
   return (
-    <Screen title={es.recurring.title} bleed fab={can('transactions.write')}>
+    <Screen title={es.recurring.title} switcher={switcher} bleed fab={can('transactions.write')}>
       {rules.isPending && <ActivityIndicator accessibilityLabel={es.common.loading} />}
       {rules.error && (
         <View style={styles.block}>

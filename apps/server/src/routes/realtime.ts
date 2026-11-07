@@ -25,6 +25,8 @@ declare module 'fastify' {
   }
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** Sección de la URL → ámbito del aviso. */
 const SCOPES: Record<string, RealtimeScope> = {
   transactions: 'transactions',
@@ -111,8 +113,16 @@ export function registerRealtimeRoutes(
         }
         const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
         if (!session) throw new ApiError('unauthenticated', 'Inicia sesión para continuar.');
-        const membership = await firstMembership(db, session.user.id);
-        if (!membership) throw new ApiError('forbidden', 'No eres miembro de ningún hogar.');
+        // El hogar elegido en la app (especificación 013). Sin él, el primero: la app instalada
+        // antes de varios hogares no lo envía (constitución, art. V.4).
+        const wanted = (request.query as { householdId?: unknown } | undefined)?.householdId;
+        const membership =
+          wanted === undefined
+            ? await firstMembership(db, session.user.id)
+            : typeof wanted === 'string' && UUID.test(wanted)
+              ? await findMembership(db, session.user.id, wanted)
+              : null;
+        if (!membership) throw new ApiError('forbidden', 'No eres miembro de este hogar.');
         request.user = { id: session.user.id, name: session.user.name, email: session.user.email };
         request.membership = membership;
         realtimeSessions.set(request, session.session.id);

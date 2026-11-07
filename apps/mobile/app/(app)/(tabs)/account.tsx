@@ -21,6 +21,7 @@ import { AppText, Icon, ListRow, Section, type IconName } from '../../../src/des
 import { color, spacing } from '../../../src/design/tokens';
 import { switchColors } from '../../../src/components/switchColors';
 import { useHousehold } from '../../../src/households/active';
+import { useHouseholdSwitcher } from '../../../src/households/useSwitcher';
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -33,6 +34,7 @@ export default function Account() {
   const outbox = useOutbox();
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const { me, household: current, member: currentMember } = useHousehold();
+  const switcher = useHouseholdSwitcher();
   const [time, setTime] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -120,7 +122,7 @@ export default function Account() {
   }
 
   return (
-    <Screen title={es.tabs.household} bleed fab={can('transactions.write')}>
+    <Screen title={es.tabs.household} switcher={switcher} bleed fab={can('transactions.write')}>
       <Section>
         <MenuRow
           icon="household"

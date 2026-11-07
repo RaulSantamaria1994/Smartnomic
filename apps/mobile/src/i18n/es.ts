@@ -305,6 +305,16 @@ export const es = {
     delete: 'Borrar mi cuenta',
     confirmDelete: 'Pulsa otra vez para borrar tu cuenta para siempre.',
   },
+  /** Varios hogares (especificación 013). */
+  households: {
+    title: 'Tus hogares',
+    switchLabel: (name: string) => `Hogar: ${name}. Cambiar de hogar`,
+    current: 'Elegido',
+    withOthers: (names: string[]) =>
+      names.length === 0 ? 'Solo tú' : `Con ${names.join(', ').replace(/, ([^,]*)$/, ' y $1')}`,
+    create: 'Crear hogar',
+    atLimit: 'Ya estás en 5 hogares, el máximo. Sal de uno o bórralo para crear otro.',
+  },
   householdMenu: {
     title: 'Hogar',
     members: 'Miembros e invitaciones',
@@ -593,15 +603,8 @@ export const es = {
     used: 'Esta invitación ya se ha usado. Pide una nueva.',
     revoked: 'Esta invitación se ha anulado. Pide una nueva.',
     alreadyMember: 'Ya eres miembro de este hogar.',
-    blocked:
-      'Eres el propietario de un hogar con más miembros. Antes de unirte a otro, pasa la propiedad a uno de ellos en «Miembros del hogar».',
-    leaveCurrent: 'Al unirte saldrás de tu hogar actual.',
-    deleteCurrent: 'Tu hogar actual se borrará.',
-    loseData:
-      'Tu hogar actual tiene movimientos o pagos recurrentes y se borrarán. Esta acción no se puede deshacer.',
-    confirmLoseData: 'Entiendo que se borrarán mis datos',
-    exportFirst: 'Exportar mis datos antes',
-    exported: 'Datos exportados.',
+    atLimit: 'Ya estás en 5 hogares, el máximo. Sal de uno o bórralo para unirte a otro.',
+    keepOthers: 'Seguirás también en tus otros hogares.',
     accept: 'Unirme',
     goHome: 'Ir al inicio',
   },

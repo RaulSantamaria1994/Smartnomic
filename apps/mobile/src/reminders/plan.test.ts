@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { localNow, planReminders, reminderInstant, reminderRoute, reminderText } from './plan';
+import {
+  localNow,
+  planAllReminders,
+  planReminders,
+  reminderInstant,
+  reminderRoute,
+  reminderText,
+} from './plan';
 
 const rule = {
   id: '019a2b3c-4d5e-7f60-8a1b-2c3d4e5f6a7b',
@@ -153,5 +160,56 @@ describe('planReminders', () => {
         new Date(2026, 9, 27, 8, 0),
       ),
     ).toEqual([]);
+  });
+});
+
+describe('planAllReminders (especificación 013)', () => {
+  const now = new Date(2026, 9, 27, 8, 0);
+  const settings = { remindersEnabled: true, reminderTime: '09:00' };
+  const other = { ...rule, id: '019a2b3c-4d5e-7f60-8a1b-2c3d4e5f6a7c', name: 'Luz' };
+  const home = {
+    household: { id: 'h1', name: 'Casa' },
+    member: settings,
+    occurrences: [{ ruleId: rule.id, dueDate: '2026-11-01', overdue: false }],
+    rules: [rule],
+    savings: { pending: [], goals: [] },
+  };
+  const beach = {
+    household: { id: 'h2', name: 'Piso de la playa' },
+    member: { remindersEnabled: true, reminderTime: '20:00' },
+    occurrences: [{ ruleId: other.id, dueDate: '2026-10-29', overdue: false }],
+    rules: [other],
+    savings: { pending: [], goals: [] },
+  };
+
+  it('con un solo hogar, los avisos de siempre, sin nombre del hogar', () => {
+    const planned = planAllReminders([home], now);
+    expect(planned.map((p) => [p.householdId, p.title, p.body])).toEqual([
+      ['h1', 'Mañana vence Alquiler', '1 de noviembre · Toca para ver el importe'],
+      ['h1', 'Hoy vence Alquiler', 'Toca para ver el importe'],
+    ]);
+  });
+
+  it('junta los de todos los hogares, cada uno con sus ajustes y el nombre de su hogar', () => {
+    const planned = planAllReminders([home, beach], now);
+    expect(planned.map((p) => [p.reminder.date, p.reminder.time, p.householdId, p.body])).toEqual([
+      ['2026-10-28', '20:00', 'h2', 'Piso de la playa · 29 de octubre · Toca para ver el importe'],
+      ['2026-10-29', '20:00', 'h2', 'Piso de la playa · Toca para ver el importe'],
+      ['2026-10-31', '09:00', 'h1', 'Casa · 1 de noviembre · Toca para ver el importe'],
+      ['2026-11-01', '09:00', 'h1', 'Casa · Toca para ver el importe'],
+    ]);
+  });
+
+  it('un hogar con los avisos desactivados no avisa; los demás, sí', () => {
+    const planned = planAllReminders(
+      [{ ...home, member: { ...settings, remindersEnabled: false } }, beach],
+      now,
+    );
+    expect(new Set(planned.map((p) => p.householdId))).toEqual(new Set(['h2']));
+  });
+
+  it('el tope de avisos es para todos juntos: se quedan los más cercanos', () => {
+    const planned = planAllReminders([home, beach], now, 3);
+    expect(planned.map((p) => p.reminder.date)).toEqual(['2026-10-28', '2026-10-29', '2026-10-31']);
   });
 });

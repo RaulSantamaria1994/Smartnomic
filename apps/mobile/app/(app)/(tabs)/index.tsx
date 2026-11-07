@@ -68,6 +68,7 @@ import {
 } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { useHousehold } from '../../../src/households/active';
+import { useHouseholdSwitcher } from '../../../src/households/useSwitcher';
 
 /**
  * Movimientos que se pintan de una vez. Con cientos en un periodo, pintarlos todos retrasa
@@ -89,6 +90,7 @@ const SOON_DAYS = 3;
 /** Pantalla «Mes»: resumen del periodo, próximos pagos y movimientos (especificación 003). */
 export default function Month() {
   const { me, household, member } = useHousehold();
+  const switcher = useHouseholdSwitcher();
   const [start, setStart] = useState<DateString | null>(null);
   const [shown, setShown] = useState(PAGE_SIZE);
   const [direction, setDirection] = useState<1 | -1>(1);
@@ -167,7 +169,7 @@ export default function Month() {
   return (
     <Screen
       title={formatPeriod(current, household.monthStartDay)}
-      subtitle={household.name}
+      switcher={switcher}
       prev={{ label: es.month.previous, onPress: () => move(-1) }}
       next={{ label: es.month.next, onPress: () => move(1) }}
       action={{ icon: 'search', label: es.search.title, onPress: () => router.push('/search') }}

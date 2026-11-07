@@ -137,7 +137,7 @@ darse antes. Se acepta, porque la APK nueva se publica a la vez.
     (`AppBar`, `Screen` con `householdSwitcher`);
   - abre `app/(app)/households/index.tsx`: la lista con el elegido marcado, el rol de cada uno,
     «Crear hogar» y, si hay 5, el aviso del límite;
-  - al tocar un hogar, se elige y se vuelve a «Mes».
+  - al tocar un hogar, se elige y se vuelve a la pestaña desde la que se abrió.
 - `app/(app)/households/new.tsx`: crear con nombre (mismas reglas que en ajustes).
 - «Ajustes del hogar»: «Borrar el hogar», solo para el propietario cuando es el único miembro.
   Ofrece exportar y pide confirmación, como al borrar la cuenta.
@@ -149,7 +149,8 @@ darse antes. Se acepta, porque la APK nueva se publica a la vez.
   - `useReminderSync` pide `recurring`, `upcoming` y `savings` de **todos** los hogares
     (`useQueries`) y planifica con los ajustes de aviso de cada miembro;
   - el texto lleva el nombre del hogar cuando hay más de uno;
-  - el enlace del aviso lleva `?hogar=<id>`, y al abrirlo se elige ese hogar.
+  - cada aviso guarda su hogar y, al tocarlo, se elige ese hogar antes de abrir el
+    vencimiento.
   - Tope: el de 50 avisos programados, ahora entre todos.
 - Tiempo real: `useRealtime` conecta con el hogar elegido (`?householdId=`); al cambiar de
   hogar, cierra y abre otra conexión, y se pone al día.

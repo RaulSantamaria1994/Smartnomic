@@ -9,20 +9,14 @@ import {
   type Invitation,
   type InvitationPreview,
 } from '@smartnomic/api';
-import { and, asc, count, eq, gt } from 'drizzle-orm';
+import { MAX_HOUSEHOLDS } from '@smartnomic/domain';
+import { and, asc, eq, gt } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { AuthRateLimit } from '../auth';
 import type { Database } from '../db/client';
-import {
-  households,
-  invitations,
-  members,
-  recurringRules,
-  transactions,
-  users,
-} from '../db/schema';
-import { firstMembership } from '../households';
+import { households, invitations, members, users } from '../db/schema';
+import { listMemberships, lockUserHouseholds } from '../households';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
 import { meResponse } from './me';
@@ -133,28 +127,8 @@ export function registerInvitationRoutes(
     return row;
   }
 
-  /** Qué pasará con el hogar actual de quien acepta (RF-008). */
-  async function currentHouseholdImpact(userId: string) {
-    const current = await firstMembership(db, userId);
-    if (!current) return { current, impact: 'leave' as const, hasData: false };
-    if (current.member.role !== 'owner')
-      return { current, impact: 'leave' as const, hasData: false };
-    const householdId = current.household.id;
-    const [[people], [moves], [rules]] = await Promise.all([
-      db.select({ total: count() }).from(members).where(eq(members.householdId, householdId)),
-      db
-        .select({ total: count() })
-        .from(transactions)
-        .where(eq(transactions.householdId, householdId)),
-      db
-        .select({ total: count() })
-        .from(recurringRules)
-        .where(eq(recurringRules.householdId, householdId)),
-    ]);
-    const hasData = (moves?.total ?? 0) + (rules?.total ?? 0) > 0;
-    if ((people?.total ?? 0) > 1) return { current, impact: 'blocked' as const, hasData };
-    return { current, impact: 'delete' as const, hasData };
-  }
+  /** Mensaje cuando ya está en el máximo de hogares (especificación 013, RF-1301). */
+  const LIMIT_MESSAGE = `Ya estás en ${MAX_HOUSEHOLDS} hogares, el máximo. Sal de uno o bórralo para unirte a otro.`;
 
   // Ver a qué hogar invita un código antes de aceptarlo. Con límite: impide probar códigos.
   app.get(
@@ -163,51 +137,48 @@ export function registerInvitationRoutes(
     async (request): Promise<InvitationPreview> => {
       const { code } = codeParams.parse(request.params);
       const { invitation, householdName, invitedBy } = await findInvitation(code);
-      const { current, impact, hasData } = await currentHouseholdImpact(request.user!.id);
+      const mine = await listMemberships(db, request.user!.id);
       return {
         state: stateOf(invitation, now()),
         householdName,
         invitedBy,
         role: invitation.role as InvitationPreview['role'],
         expiresAt: invitation.expiresAt.toISOString(),
-        alreadyMember: current?.household.id === invitation.householdId,
-        atLimit: false,
-        currentHousehold: impact,
-        currentHouseholdHasData: hasData,
+        alreadyMember: mine.some((m) => m.household.id === invitation.householdId),
+        atLimit: mine.length >= MAX_HOUSEHOLDS,
+        // Aceptar ya no saca de ningún hogar (especificación 013). Valores fijos para la app
+        // instalada antes de varios hogares (constitución, art. V.4).
+        currentHousehold: 'leave',
+        currentHouseholdHasData: false,
       };
     },
   );
 
-  // Aceptar: una sola vez, aunque dos personas lo intenten a la vez (RF-004, RF-008).
+  // Aceptar: una sola vez, aunque dos personas lo intenten a la vez (RF-004). Se entra en el
+  // hogar sin salir de los demás, hasta el máximo (especificación 013, RF-1302).
   app.post(
     '/api/invitations/:code/accept',
     { preHandler: access.requireSession, config: { rateLimit: deps.rateLimit } },
     async (request) => {
       const { code } = codeParams.parse(request.params);
-      const { confirmLoseData } = acceptInvitationSchema.parse(request.body ?? {});
+      // `confirmLoseData` ya no hace falta: se acepta y se ignora (la app instalada lo envía).
+      acceptInvitationSchema.parse(request.body ?? {});
       const user = request.user!;
       const { invitation } = await findInvitation(code);
 
       const state = stateOf(invitation, now());
       if (state !== 'valid') throw new ApiError('conflict', STATE_MESSAGES[state]);
-      const { current, impact, hasData } = await currentHouseholdImpact(user.id);
-      if (current?.household.id === invitation.householdId) {
-        throw new ApiError('conflict', 'Ya eres miembro de este hogar.');
-      }
-      if (impact === 'blocked') {
-        throw new ApiError(
-          'conflict',
-          'Tu hogar actual tiene más miembros: antes de unirte a otro, pasa la propiedad a uno de ellos.',
-        );
-      }
-      if (impact === 'delete' && hasData && !confirmLoseData) {
-        throw new ApiError(
-          'conflict',
-          'Tu hogar actual tiene datos que se borrarán. Confirma que quieres unirte.',
-        );
-      }
 
       await db.transaction(async (tx) => {
+        // Con el bloqueo, dos aceptaciones a la vez no pasan del máximo.
+        const total = await lockUserHouseholds(tx, user.id);
+        const [already] = await tx
+          .select({ id: members.id })
+          .from(members)
+          .where(and(eq(members.userId, user.id), eq(members.householdId, invitation.householdId)));
+        if (already) throw new ApiError('conflict', 'Ya eres miembro de este hogar.');
+        if (total >= MAX_HOUSEHOLDS) throw new ApiError('conflict', LIMIT_MESSAGE);
+
         const [used] = await tx
           .update(invitations)
           .set({ status: 'used', usedBy: user.id, usedAt: now() })
@@ -221,21 +192,12 @@ export function registerInvitationRoutes(
           .returning({ id: invitations.id });
         if (!used) throw new ApiError('conflict', STATE_MESSAGES.used);
 
-        if (current && impact === 'delete') {
-          await tx.delete(households).where(eq(households.id, current.household.id));
-        } else if (current) {
-          await tx.delete(members).where(eq(members.id, current.member.id));
-        }
         await tx
           .insert(members)
           .values({ householdId: invitation.householdId, userId: user.id, role: invitation.role });
       });
-      // El hogar al que entra ve al nuevo miembro, y el que deja (si sigue existiendo) que se
-      // ha ido; sus conexiones de tiempo real del hogar anterior se cierran.
-      request.realtime = [
-        { householdId: invitation.householdId, scope: 'members' },
-        ...(current ? [{ householdId: current.household.id, scope: 'members' as const }] : []),
-      ];
+      // El hogar al que entra ve al nuevo miembro.
+      request.realtime = [{ householdId: invitation.householdId, scope: 'members' }];
       return meResponse(db, user);
     },
   );

@@ -12,6 +12,13 @@ export interface AppBarAction {
   onPress: () => void;
 }
 
+/** El nombre del hogar bajo el título, que abre la lista de hogares (especificación 013). */
+export interface AppBarSwitcher {
+  name: string;
+  label: string;
+  onPress: () => void;
+}
+
 export interface AppBarStep {
   label: string;
   onPress: () => void;
@@ -30,9 +37,11 @@ export function AppBar({
   prev,
   next,
   action,
+  switcher,
 }: {
   title: string;
   subtitle?: string;
+  switcher?: AppBarSwitcher;
   onBack?: () => void;
   prev?: AppBarStep;
   next?: AppBarStep;
@@ -55,7 +64,25 @@ export function AppBar({
           >
             {title}
           </AppText>
-          {subtitle && (
+          {switcher && (
+            <Pressable
+              onPress={switcher.onPress}
+              accessibilityRole="button"
+              accessibilityLabel={switcher.label}
+              hitSlop={{ top: spacing.sm, bottom: spacing.sm, left: spacing.sm, right: spacing.sm }}
+              style={({ pressed }) => [
+                styles.switcher,
+                centered && styles.switcherCentered,
+                pressed && styles.pressed,
+              ]}
+            >
+              <AppText variant="small" tone="onAccentMuted" numberOfLines={1} style={styles.shrink}>
+                {switcher.name}
+              </AppText>
+              <Icon name="expand" size={16} tint={color.text.onAccentMuted} />
+            </Pressable>
+          )}
+          {!switcher && subtitle && (
             <AppText
               variant="small"
               tone="onAccentMuted"
@@ -129,6 +156,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  switcher: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, maxWidth: '100%' },
+  switcherCentered: { alignSelf: 'center' },
+  shrink: { flexShrink: 1 },
   disabled: { opacity: 0.4 },
   pressed: { opacity: 0.7 },
 });

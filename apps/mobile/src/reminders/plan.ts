@@ -4,7 +4,12 @@ import type {
   UpcomingOccurrenceDto,
   UpcomingSavings,
 } from '@smartnomic/api';
-import { formatDate, remindersToSchedule, type Reminder } from '@smartnomic/domain';
+import {
+  formatDate,
+  MAX_SCHEDULED_REMINDERS,
+  remindersToSchedule,
+  type Reminder,
+} from '@smartnomic/domain';
 import { formatDayMonth } from '../format';
 import { es } from '../i18n/es';
 
@@ -85,6 +90,47 @@ export function planReminders(
     const rule = byId.get(reminder.ruleId)!;
     return { reminder, ...reminderText(reminder, rule) };
   });
+}
+
+/** Lo que hace falta de un hogar para planificar sus avisos. */
+export interface HouseholdReminders {
+  household: { id: string; name: string };
+  member: Pick<Member, 'remindersEnabled' | 'reminderTime'>;
+  occurrences: readonly UpcomingOccurrenceDto[];
+  rules: readonly RecurringRule[];
+  savings: SavingsReminders;
+}
+
+/** Un aviso y el hogar del que es, para abrirlo en ese hogar al tocarlo. */
+export interface PlannedHouseholdReminder extends PlannedReminder {
+  householdId: string;
+}
+
+/**
+ * Avisos de todos los hogares (especificación 013, RF-1310): cada uno con los ajustes de aviso
+ * de ese miembro y, si hay más de un hogar, el nombre del hogar en el texto. El tope de avisos
+ * programados es para todos juntos: se quedan los más cercanos.
+ */
+export function planAllReminders(
+  households: readonly HouseholdReminders[],
+  now: Date,
+  limit = MAX_SCHEDULED_REMINDERS,
+): PlannedHouseholdReminder[] {
+  const named = households.length > 1;
+  return households
+    .flatMap(({ household, member, occurrences, rules, savings }) =>
+      planReminders(occurrences, rules, member, now, savings).map((planned) => ({
+        ...planned,
+        householdId: household.id,
+        body: named ? `${household.name} · ${planned.body}` : planned.body,
+      })),
+    )
+    .sort((a, b) =>
+      a.reminder.date === b.reminder.date
+        ? a.reminder.time.localeCompare(b.reminder.time)
+        : a.reminder.date.localeCompare(b.reminder.date),
+    )
+    .slice(0, limit);
 }
 
 /** Pantalla que abre un aviso al tocarlo: el vencimiento o la aportación de la hucha. */
