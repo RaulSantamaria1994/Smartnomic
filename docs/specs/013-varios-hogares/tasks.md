@@ -77,7 +77,7 @@ el hogar de la URL, sin cambiar aún lo que ve la app.
 
 ## Fase 4: Historia 3 — Quedarse sin hogar (P3)
 
-- [ ] H015 [US3] App: `app/(app)/sin-hogar.tsx` con «Crear hogar» y el código de invitación;
+- [x] H015 [US3] App: `app/(app)/sin-hogar.tsx` con «Crear hogar» y el código de invitación;
       `SignedIn` lleva a ella sin hogares; si el hogar elegido desaparece, pasar a otro o a
       ella
 

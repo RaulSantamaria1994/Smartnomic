@@ -323,6 +323,12 @@ export const es = {
     confirmDelete: 'Pulsa otra vez para borrar el hogar y todos sus datos para siempre.',
     atLimit: 'Ya estás en 5 hogares, el máximo. Sal de uno o bórralo para crear otro.',
   },
+  /** Sin ningún hogar (especificación 013). */
+  noHousehold: {
+    title: 'No estás en ningún hogar',
+    hint: 'Crea uno para llevar tus cuentas o únete a otro con el código o el enlace de una invitación.',
+    joinTitle: 'Unirme con una invitación',
+  },
   householdMenu: {
     title: 'Hogar',
     members: 'Miembros e invitaciones',

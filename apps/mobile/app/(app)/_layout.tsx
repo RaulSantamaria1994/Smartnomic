@@ -1,7 +1,9 @@
 import { Redirect, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { NoHousehold } from '../../src/components/NoHousehold';
 import { UndoSnackbar } from '../../src/components/UndoSnackbar';
+import { useMe } from '../../src/hooks/me';
 import { useReminderSync } from '../../src/hooks/useReminderSync';
 import { useOutboxSync } from '../../src/outbox/useOutbox';
 import { useRealtime } from '../../src/realtime/useRealtime';
@@ -31,6 +33,9 @@ function SignedIn() {
   useReminderSync();
   useOutboxSync();
   useRealtime();
+  const me = useMe();
+  // Sin hogares, en lugar de cualquier pantalla de un hogar (especificación 013, RF-1308).
+  if (me.data && me.data.households.length === 0) return <NoHousehold />;
   return (
     <View style={{ flex: 1 }}>
       <Stack screenOptions={{ headerShown: false }} />

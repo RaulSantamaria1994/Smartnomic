@@ -73,11 +73,13 @@ export function useReminderSync(): void {
     })();
   }, [hasRules, setPermission]);
 
-  // Reprogramar con los últimos datos conocidos.
+  // Reprogramar con los últimos datos conocidos. Sin ningún hogar, no queda nada que avisar.
+  const noHouseholds = me.data?.households.length === 0;
   useEffect(() => {
-    if (!remindersSupported || !inputs) return;
-    void syncReminders(planAllReminders(inputs, new Date()));
-  }, [inputs]);
+    if (!remindersSupported) return;
+    if (noHouseholds) void syncReminders([]);
+    else if (inputs) void syncReminders(planAllReminders(inputs, new Date()));
+  }, [inputs, noHouseholds]);
 
   // Al volver a primer plano: refrescar (otro miembro pudo pagar algo) y el permiso.
   useEffect(() => {
