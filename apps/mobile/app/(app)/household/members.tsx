@@ -188,7 +188,15 @@ export default function Members() {
             label={es.household.leave}
             loading={busy === 'leave'}
             onPress={() =>
-              run('leave', () => switchHousehold(() => api.leaveHousehold(householdId)), true)
+              run(
+                'leave',
+                async () => {
+                  await switchHousehold(() => api.leaveHousehold(householdId));
+                  // Ya no es de este hogar: la app pasa a otro de los suyos.
+                  router.dismissAll();
+                },
+                true,
+              )
             }
           />
         </View>

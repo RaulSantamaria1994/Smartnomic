@@ -1,15 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { api } from '../../../src/api/client';
+import { router } from 'expo-router';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { api, queryKeys } from '../../../src/api/client';
 import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
-import { useCan } from '../../../src/hooks/data';
+import { useCan, useMembers } from '../../../src/hooks/data';
+import { AppText } from '../../../src/design';
+import { exportHousehold } from '../../../src/export/export-household';
 import { es } from '../../../src/i18n/es';
 import { colors } from '../../../src/theme';
-import { typography } from '../../../src/design/tokens';
+import { spacing, typography } from '../../../src/design/tokens';
 import { useHousehold } from '../../../src/households/active';
 
 /** Nombre del hogar y día de inicio del mes (T092, RF-003). Solo el propietario. */
@@ -21,6 +24,12 @@ export default function HouseholdSettings() {
   const [day, setDay] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [saving, setSaving] = useState(false);
+  const members = useMembers(household?.id);
+  const [exporting, setExporting] = useState(false);
+  const [exported, setExported] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (!household) {
     return (
@@ -51,6 +60,38 @@ export default function HouseholdSettings() {
     }
   }
 
+  // Solo el propietario y si es el único miembro (especificación 013, RF-1307).
+  const canDelete = canEdit && members.data?.members.length === 1;
+
+  async function exportFirst() {
+    setDeleteError(null);
+    setExporting(true);
+    try {
+      await exportHousehold(household!.id);
+      setExported(true);
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : es.auth.errors.unknown);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function deleteHousehold() {
+    setDeleteError(null);
+    if (!confirmDelete) return setConfirmDelete(true);
+    setDeleting(true);
+    try {
+      await api.deleteHousehold(household!.id);
+      // La app pasa a otro de sus hogares (o a «sin hogar» si no queda ninguno).
+      await queryClient.invalidateQueries({ queryKey: queryKeys.me });
+      router.dismissAll();
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : es.auth.errors.unknown);
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  }
+
   return (
     <Screen title={es.householdSettings.title} back>
       {!canEdit && <Text style={styles.muted}>{es.householdSettings.onlyOwner}</Text>}
@@ -73,10 +114,36 @@ export default function HouseholdSettings() {
       <Text style={styles.muted}>{es.householdSettings.monthStartHint}</Text>
       {message && <Message text={message.text} kind={message.kind} />}
       {canEdit && <Button label={es.householdSettings.save} onPress={save} loading={saving} />}
+      {canDelete && (
+        <View style={styles.danger}>
+          <AppText variant="bodyStrong" accessibilityRole="header">
+            {es.households.deleteTitle}
+          </AppText>
+          <AppText variant="caption" tone="muted">
+            {es.households.deleteHint}
+          </AppText>
+          <Button
+            variant="link"
+            label={es.households.exportFirst}
+            onPress={() => void exportFirst()}
+            loading={exporting}
+          />
+          {exported && <Message text={es.households.exported} kind="success" />}
+          {confirmDelete && <Message text={es.households.confirmDelete} />}
+          {deleteError && <Message text={deleteError} />}
+          <Button
+            variant="danger"
+            label={es.households.delete}
+            onPress={() => void deleteHousehold()}
+            loading={deleting}
+          />
+        </View>
+      )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   muted: { ...typography.body, color: colors.muted },
+  danger: { gap: spacing.md, marginTop: spacing.lg },
 });

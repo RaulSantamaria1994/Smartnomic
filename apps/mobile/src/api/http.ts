@@ -28,6 +28,8 @@ export interface RequestOptions<T> {
   body?: unknown;
   /** Esquema de la respuesta: lo que llega se valida antes de usarlo. */
   schema: z.ZodType<T>;
+  /** Cabeceras propias de esta petición (por ejemplo, la zona horaria). */
+  headers?: Record<string, string>;
 }
 
 export type HttpClient = <T>(path: string, options: RequestOptions<T>) => Promise<T>;
@@ -35,7 +37,7 @@ export type HttpClient = <T>(path: string, options: RequestOptions<T>) => Promis
 export function createHttpClient(options: HttpClientOptions): HttpClient {
   const fetch = options.fetch ?? globalThis.fetch;
 
-  return async (path, { method = 'GET', body, schema }) => {
+  return async (path, { method = 'GET', body, schema, headers }) => {
     const sessionHeaders = await options.headers?.();
     let response: Response;
     try {
@@ -44,6 +46,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
         headers: {
           accept: 'application/json',
           ...(body !== undefined && { 'content-type': 'application/json' }),
+          ...headers,
           ...sessionHeaders,
         },
         ...(options.credentials && { credentials: options.credentials }),

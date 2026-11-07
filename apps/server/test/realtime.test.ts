@@ -328,6 +328,14 @@ describe('varios hogares (especificación 013)', () => {
     home.ws.close();
   });
 
+  it('al borrar un hogar, se cierran sus conexiones', async () => {
+    const created = await call(ctx.app, owner, 'POST', '/api/households', { name: 'Pruebas' });
+    const id = created.json().household.id as string;
+    const { closed } = await connect(owner, {}, id);
+    expect((await call(ctx.app, owner, 'DELETE', `/api/households/${id}`)).statusCode).toBe(204);
+    await Promise.race([closed, tick(2000).then(() => Promise.reject(new Error('no se cerró')))]);
+  });
+
   it('al quitarle de un hogar solo se cierra la conexión de ese hogar', async () => {
     const guest = await signUp(ctx.app);
     await join(guest);

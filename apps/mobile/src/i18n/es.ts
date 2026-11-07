@@ -313,6 +313,14 @@ export const es = {
     withOthers: (names: string[]) =>
       names.length === 0 ? 'Solo tú' : `Con ${names.join(', ').replace(/, ([^,]*)$/, ' y $1')}`,
     create: 'Crear hogar',
+    createSubmit: 'Crear',
+    deleteTitle: 'Borrar el hogar',
+    deleteHint:
+      'Eres su único miembro: se borrarán el hogar y todos sus datos. No se puede deshacer. Exporta antes si quieres guardarlos.',
+    exportFirst: 'Exportar los datos antes',
+    exported: 'Datos exportados.',
+    delete: 'Borrar el hogar',
+    confirmDelete: 'Pulsa otra vez para borrar el hogar y todos sus datos para siempre.',
     atLimit: 'Ya estás en 5 hogares, el máximo. Sal de uno o bórralo para crear otro.',
   },
   householdMenu: {
@@ -572,7 +580,7 @@ export const es = {
       `Pulsa otra vez: ${name} será el propietario y tú pasarás a editor.`,
     leave: 'Salir del hogar',
     confirmLeave:
-      'Pulsa otra vez para salir. Dejarás de ver estos datos y tendrás un hogar propio vacío.',
+      'Pulsa otra vez para salir. Dejarás de ver este hogar; lo que apuntaste se queda en él.',
     inviteTitle: 'Invitar a alguien',
     inviteAs: 'Con permiso de',
     createInvitation: 'Crear invitación',

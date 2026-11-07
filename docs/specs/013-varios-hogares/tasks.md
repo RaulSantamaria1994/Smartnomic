@@ -62,13 +62,13 @@ el hogar de la URL, sin cambiar aún lo que ve la app.
 
 ## Fase 3: Historia 2 — Crear un hogar y quitar los que no se usan (P2)
 
-- [ ] H012 [US2] Tests y rutas: crear hogar con `POST /api/households` (límite de 5, también
+- [x] H012 [US2] Tests y rutas: crear hogar con `POST /api/households` (límite de 5, también
       con dos peticiones a la vez; categorías de siempre; zona horaria); borrar hogar con
       `DELETE /api/households/:id` (solo el propietario si es el único miembro; si no, `409`
       o `403`); salir sin crear hogar
 - [x] H013 [US2] Borrar la cuenta con varios hogares: bloqueo con los nombres de los hogares
       en los que es propietario con más miembros; borra los suyos de un solo miembro; tests
-- [ ] H014 [US2] App: «Crear hogar» (`app/(app)/households/new.tsx`), «Borrar el hogar» en
+- [x] H014 [US2] App: «Crear hogar» (`app/(app)/households/new.tsx`), «Borrar el hogar» en
       ajustes (exportar antes, confirmación), salir lleva a otro hogar; textos del límite
 
 **Punto de control**: RF-1305 a RF-1307.
