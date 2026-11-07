@@ -3,7 +3,7 @@
 **Rama de la funcionalidad**: `013-varios-hogares`
 **Creada**: 2026-11-07
 **Plan**: [`plan.md`](plan.md)
-**Estado**: Borrador
+**Estado**: Implementada
 **Entrada**: "Pertenecer a varios hogares a la vez." (Pendiente del MVP: «Cada usuario
 pertenece a un solo hogar en el MVP; pertenecer a varios hogares queda para más adelante».)
 

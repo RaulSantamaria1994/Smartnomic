@@ -275,10 +275,13 @@ categoría; se exportan los datos y se borra una cuenta.
     vencimientos y categorías.
   - **Lector**: solo consultar.
 - **RF-007**: Un miembro que no es propietario DEBE poder salir del hogar; al hacerlo se
-  le crea un hogar propio vacío.
+  le crea un hogar propio vacío. _(Sustituido por RF-1306 de
+  [`013-varios-hogares`](../013-varios-hogares/spec.md): ya no se crea un hogar vacío.)_
 - **RF-008**: En el MVP, cada usuario DEBE pertenecer a un solo hogar. Aceptar una
   invitación cuando ya se tiene un hogar con datos DEBE avisar, ofrecer exportarlos y
-  pedir confirmación.
+  pedir confirmación. _(Sustituido por RF-1301 y RF-1302 de
+  [`013-varios-hogares`](../013-varios-hogares/spec.md): hasta 5 hogares, y aceptar no saca
+  de ninguno.)_
 - **RF-009**: Cada movimiento DEBE mostrar qué miembro lo apuntó, y cada vencimiento
   pagado, quién lo marcó.
 - **RF-010**: Los cambios de un miembro DEBEN verse en los dispositivos del resto al

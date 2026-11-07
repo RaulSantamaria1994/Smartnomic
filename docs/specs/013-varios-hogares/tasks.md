@@ -87,17 +87,17 @@ el hogar de la URL, sin cambiar aún lo que ve la app.
 
 ## Fase 5: Cierre
 
-- [ ] H016 Batería de ataques con un usuario en dos hogares: cada ruta con el hogar ajeno,
+- [x] H016 Batería de ataques con un usuario en dos hogares: cada ruta con el hogar ajeno,
       tiempo real ajeno, crear por encima del límite, borrar un hogar ajeno o con miembros
       (CE-1302)
-- [ ] H017 Punta a punta con tres personas y dos hogares: cambiar de hogar (CE-1301), aceptar
+- [x] H017 Punta a punta con tres personas y dos hogares: cambiar de hogar (CE-1301), aceptar
       con datos (CE-1303), quedarse sin hogar de cada forma (CE-1304), crear y borrar; las
       anteriores siguen pasando (`us4` cambia: quien sale ya no recibe un hogar vacío, vuelve
       al suyo); peticiones al abrir con 5 hogares
-- [ ] H018 [P] axe-core en la lista de hogares, crear hogar, borrar hogar y sin hogar, a 320
+- [x] H018 [P] axe-core en la lista de hogares, crear hogar, borrar hogar y sin hogar, a 320
       y 1280 px (CE-1305)
-- [ ] H019 [P] `expo export --platform android` compila
-- [ ] H020 Actualizar `README.md` y `AGENTS.md`, marcar RF-007 y RF-008 del MVP como
+- [x] H019 [P] `expo export --platform android` compila
+- [x] H020 Actualizar `README.md` y `AGENTS.md`, marcar RF-007 y RF-008 del MVP como
       sustituidos y marcar tareas (el PR, cuando lo pida el propietario)
 
 ---

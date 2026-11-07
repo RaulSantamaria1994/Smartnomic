@@ -197,3 +197,45 @@ darse antes. Se acepta, porque la APK nueva se publica a la vez.
   (CE-1303), quedarse sin hogar de cada forma (CE-1304); las anteriores siguen pasando.
 - axe-core en las pantallas nuevas a 320 y 1280 px (CE-1305).
 - `expo export --platform android`.
+
+## Resultados
+
+- `pnpm check` en verde: 702 tests. Del servidor:
+  - un usuario en dos hogares, con su rol en cada uno;
+  - `requireMember` sin hogar en la URL;
+  - `me` sin hogares;
+  - aceptar sin perder datos y con el límite (también dos a la vez);
+  - crear (límite y carreras) y borrar (propietario único, con miembros, sin ser propietario);
+  - borrar la cuenta con varios hogares;
+  - tiempo real por hogar.
+- De la app: el hogar elegido guardado por cuenta, y los recordatorios de varios hogares.
+- CE-1301: cambiar de hogar son 2 toques (el nombre en la barra y el hogar); los datos del
+  otro se ven en 0,96 s. Al recargar sigue el elegido; lo que se apunta va al hogar elegido.
+- CE-1302: batería de ataques con Lucía miembro de dos hogares y Pedro en un tercero que
+  comparte una persona con ella:
+  - las 40 rutas con hogar responden 403 con el hogar de Pedro;
+  - mezclar el hogar de Marta con ids del de Pedro da 400, 403 o 404, y nada cambia;
+  - el tiempo real ajeno da 403;
+  - un sexto hogar, o aceptar teniendo 5, da 409;
+  - borrar un hogar ajeno o con miembros da 403 o 409.
+  - El hogar de Pedro queda idéntico antes y después.
+- CE-1303: aceptar una invitación con datos en el propio hogar los conserva todos (servidor y
+  navegador), sin aviso de perder datos.
+- CE-1304: sin hogares se llega a «No estás en ningún hogar», sin errores:
+  - al borrar el último, al salir del último y al ser quitado del último (en 45 ms, por tiempo
+    real);
+  - también con un enlace antiguo.
+  - Desde ahí se crea un hogar, se une con un código o se cierra sesión.
+- CE-1305: axe-core sin problemas en «Mes» con el nombre del hogar, «Tus hogares» (también con
+  el límite), «Crear hogar», «Borrar el hogar» y «Sin hogar», a 320 y 1280 px, y en las 29
+  pantallas de antes.
+- Pasan las pruebas de punta a punta anteriores. Tres cambian por la especificación, porque
+  quien acepta una invitación por la API conserva su hogar y su app sigue en el primero:
+  - `r6`, `r9` y `cal2` eligen el hogar invitado, como hace la app al aceptar;
+  - `us4` vuelve a pasar: quien sale vuelve a su hogar.
+- `expo export --platform android` compila.
+- Por comprobar en Android, con el APK:
+  - los recordatorios de varios hogares (tienen tests, pero los avisos solo existen en el
+    móvil);
+  - cuántas peticiones hace la app al abrir con 5 hogares (3 por hogar para los avisos);
+  - la caché guardada de la versión anterior se descarta al actualizar (`CACHE_BUSTER`).
