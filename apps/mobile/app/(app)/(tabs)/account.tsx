@@ -7,7 +7,7 @@ import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
-import { useCan, useMembers, useMe } from '../../../src/hooks/data';
+import { useCan, useMembers } from '../../../src/hooks/data';
 import { exportHousehold } from '../../../src/export/export-household';
 import { clearCache } from '../../../src/cache/query-client';
 import { syncReminders } from '../../../src/reminders/reminders';
@@ -20,6 +20,8 @@ import { useOutbox } from '../../../src/outbox/useOutbox';
 import { AppText, Icon, ListRow, Section, type IconName } from '../../../src/design';
 import { color, spacing } from '../../../src/design/tokens';
 import { switchColors } from '../../../src/components/switchColors';
+import { useHousehold } from '../../../src/households/active';
+import { useHouseholdSwitcher } from '../../../src/households/useSwitcher';
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -31,11 +33,12 @@ export default function Account() {
   const queryClient = useQueryClient();
   const outbox = useOutbox();
   const [confirmSignOut, setConfirmSignOut] = useState(false);
-  const me = useMe();
+  const { me, household: current, member: currentMember } = useHousehold();
+  const switcher = useHouseholdSwitcher();
   const [time, setTime] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [saving, setSaving] = useState(false);
-  const members = useMembers(me.data?.household.id);
+  const members = useMembers(current?.id);
   const can = useCan();
   const [exporting, setExporting] = useState(false);
   const [password, setPassword] = useState('');
@@ -43,14 +46,15 @@ export default function Account() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  if (!me.data) {
+  if (!me.data || !current || !currentMember) {
     return (
       <Screen>
         <ActivityIndicator accessibilityLabel={es.common.loading} />
       </Screen>
     );
   }
-  const { household, member } = me.data;
+  const household = current;
+  const member = currentMember;
 
   async function update(input: { remindersEnabled?: boolean; reminderTime?: string }) {
     setMessage(null);
@@ -118,7 +122,7 @@ export default function Account() {
   }
 
   return (
-    <Screen title={es.tabs.household} bleed fab={can('transactions.write')}>
+    <Screen title={es.tabs.household} switcher={switcher} bleed fab={can('transactions.write')}>
       <Section>
         <MenuRow
           icon="household"

@@ -122,9 +122,9 @@ export function registerMemberRoutes(
     `${base}/leave`,
     { preHandler: access.requireMember('household.leave') },
     async (request) => {
-      const { household, member } = request.membership!;
+      const { member } = request.membership!;
       await db.delete(members).where(eq(members.id, member.id));
-      return meResponse(db, request.user!, household.timezone);
+      return meResponse(db, request.user!);
     },
   );
 

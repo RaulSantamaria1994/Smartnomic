@@ -10,12 +10,13 @@ import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
 import { formatDay } from '../../../src/format';
-import { useCan, useInvitations, useMe, useMembers } from '../../../src/hooks/data';
+import { useCan, useInvitations, useMembers } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { invitationLink } from '../../../src/invite-link';
 import { shareText } from '../../../src/share';
 import { colors, spacing } from '../../../src/theme';
 import { color, typography } from '../../../src/design/tokens';
+import { useHousehold } from '../../../src/households/active';
 
 type Invitable = 'editor' | 'viewer';
 type Feedback = { text: string; kind: 'error' | 'success' } | null;
@@ -23,8 +24,7 @@ type Feedback = { text: string; kind: 'error' | 'success' } | null;
 /** Miembros del hogar, invitaciones y salir o unirse a otro hogar (T081, RF-004…RF-010). */
 export default function Members() {
   const queryClient = useQueryClient();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const can = useCan();
   const manage = can('members.manage');
   const members = useMembers(household?.id);
@@ -188,7 +188,15 @@ export default function Members() {
             label={es.household.leave}
             loading={busy === 'leave'}
             onPress={() =>
-              run('leave', () => switchHousehold(() => api.leaveHousehold(householdId)), true)
+              run(
+                'leave',
+                async () => {
+                  await switchHousehold(() => api.leaveHousehold(householdId));
+                  // Ya no es de este hogar: la app pasa a otro de los suyos.
+                  router.dismissAll();
+                },
+                true,
+              )
             }
           />
         </View>

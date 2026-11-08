@@ -117,10 +117,10 @@ describe('crear invitaciones', () => {
 });
 
 describe('aceptar invitaciones', () => {
-  it('quien acepta pasa a ser miembro con el rol indicado y su hogar vacío se borra', async () => {
+  it('quien acepta entra con el rol indicado y conserva su hogar (especificación 013)', async () => {
     const owner = await signUp(ctx.app, { name: 'Lucía' });
     const marcos = await signUp(ctx.app, { name: 'Marcos' });
-    const oldHousehold = (await me(ctx.app, marcos)).household.id;
+    const ownHousehold = (await me(ctx.app, marcos)).household.id;
     const { householdId, invitation } = await invite(owner, 'editor');
 
     const before = invitationPreviewSchema.parse((await preview(marcos, invitation.code)).json());
@@ -130,7 +130,9 @@ describe('aceptar invitaciones', () => {
       invitedBy: 'Lucía',
       role: 'editor',
       alreadyMember: false,
-      currentHousehold: 'delete',
+      atLimit: false,
+      // Para la app instalada antes de varios hogares (constitución, art. V.4).
+      currentHousehold: 'leave',
       currentHouseholdHasData: false,
     });
 
@@ -138,11 +140,13 @@ describe('aceptar invitaciones', () => {
 
     expect(response.statusCode).toBe(200);
     const after = meResponseSchema.parse(response.json());
-    expect(after.household.id).toBe(householdId);
-    expect(after.member.role).toBe('editor');
+    expect(after.households.map((h) => [h.household.id, h.member.role])).toEqual([
+      [ownHousehold, 'owner'],
+      [householdId, 'editor'],
+    ]);
     expect(
-      await ctx.db.select().from(households).where(eq(households.id, oldHousehold)),
-    ).toHaveLength(0);
+      await ctx.db.select().from(households).where(eq(households.id, ownHousehold)),
+    ).toHaveLength(1);
     const [row] = await ctx.db.select().from(invitations);
     expect(row?.status).toBe('used');
   });
@@ -155,58 +159,89 @@ describe('aceptar invitaciones', () => {
     expect((await accept(guest, ` ${invitation.code.toLowerCase()} `)).statusCode).toBe(200);
   });
 
-  it('si el hogar actual tiene datos, exige confirmación', async () => {
+  it('con datos en su hogar no hace falta confirmar nada: se conservan todos (CE-1303)', async () => {
     const owner = await signUp(ctx.app);
     const guest = await signUp(ctx.app);
+    const ownHousehold = (await me(ctx.app, guest)).household.id;
     await addTransaction(guest);
     const { householdId, invitation } = await invite(owner);
 
     expect(
       invitationPreviewSchema.parse((await preview(guest, invitation.code)).json())
         .currentHouseholdHasData,
-    ).toBe(true);
-    const refused = await accept(guest, invitation.code);
-    expect(refused.statusCode).toBe(409);
-    expect((await me(ctx.app, guest)).household.id).not.toBe(householdId);
-
-    const confirmed = await accept(guest, invitation.code, true);
-    expect(confirmed.statusCode).toBe(200);
-    expect((await me(ctx.app, guest)).household.id).toBe(householdId);
-  });
-
-  it('un miembro (no propietario) de otro hogar sale de él al aceptar, sin borrarlo', async () => {
-    const owner = await signUp(ctx.app);
-    const otherOwner = await signUp(ctx.app);
-    const guest = await signUp(ctx.app);
-    await joinHousehold(ctx.db, otherOwner, guest, 'editor');
-    const otherHousehold = (await me(ctx.app, otherOwner)).household.id;
-    const { householdId, invitation } = await invite(owner);
-
-    expect(
-      invitationPreviewSchema.parse((await preview(guest, invitation.code)).json())
-        .currentHousehold,
-    ).toBe('leave');
+    ).toBe(false);
     expect((await accept(guest, invitation.code)).statusCode).toBe(200);
-    expect((await me(ctx.app, guest)).household.id).toBe(householdId);
-    expect(
-      await ctx.db.select().from(households).where(eq(households.id, otherHousehold)),
-    ).toHaveLength(1);
+
+    const period = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/households/${ownHousehold}/periods/2026-10-01`,
+      headers: { cookie: guest.cookie },
+    });
+    expect(period.statusCode).toBe(200);
+    expect(period.json().transactions).toHaveLength(1);
+    expect((await me(ctx.app, guest)).households.map((h) => h.household.id)).toContain(householdId);
   });
 
-  it('el propietario de un hogar con más miembros no puede aceptar sin pasar antes la propiedad', async () => {
+  it('el propietario de un hogar con más miembros también puede unirse a otro', async () => {
     const owner = await signUp(ctx.app);
     const guest = await signUp(ctx.app);
     const guestPartner = await signUp(ctx.app);
     await joinHousehold(ctx.db, guest, guestPartner, 'editor');
     const { invitation } = await invite(owner);
 
+    const response = await accept(guest, invitation.code);
+    expect(response.statusCode).toBe(200);
+    // Sigue siendo el propietario de su hogar, con su pareja dentro.
+    const own = meResponseSchema.parse(response.json()).households[0]!;
+    expect(own.member.role).toBe('owner');
     expect(
-      invitationPreviewSchema.parse((await preview(guest, invitation.code)).json())
-        .currentHousehold,
-    ).toBe('blocked');
-    const response = await accept(guest, invitation.code, true);
+      await ctx.db.select().from(members).where(eq(members.householdId, own.household.id)),
+    ).toHaveLength(2);
+  });
+
+  it('con 5 hogares no puede unirse a otro: 409 y la invitación sigue sin usar', async () => {
+    const guest = await signUp(ctx.app);
+    for (let i = 0; i < 4; i++) {
+      const other = await signUp(ctx.app);
+      await ctx.db.insert(members).values({
+        householdId: (await me(ctx.app, other)).household.id,
+        userId: guest.id,
+        role: 'viewer',
+      });
+    }
+    const owner = await signUp(ctx.app);
+    const { invitation } = await invite(owner);
+
+    expect(
+      invitationPreviewSchema.parse((await preview(guest, invitation.code)).json()).atLimit,
+    ).toBe(true);
+    const response = await accept(guest, invitation.code);
     expect(response.statusCode).toBe(409);
-    expect(errorResponseSchema.parse(response.json()).error.message).toMatch(/propiedad/);
+    expect(errorResponseSchema.parse(response.json()).error.message).toMatch(/5 hogares/);
+    const [row] = await ctx.db.select().from(invitations).where(eq(invitations.id, invitation.id));
+    expect(row?.status).toBe('pending');
+    expect(await ctx.db.select().from(members).where(eq(members.userId, guest.id))).toHaveLength(5);
+  });
+
+  it('con 4 hogares, dos invitaciones aceptadas a la vez no le llevan a 6', async () => {
+    const guest = await signUp(ctx.app);
+    for (let i = 0; i < 3; i++) {
+      const other = await signUp(ctx.app);
+      await ctx.db.insert(members).values({
+        householdId: (await me(ctx.app, other)).household.id,
+        userId: guest.id,
+        role: 'viewer',
+      });
+    }
+    const a = await invite(await signUp(ctx.app));
+    const b = await invite(await signUp(ctx.app));
+
+    const results = await Promise.all([
+      accept(guest, a.invitation.code),
+      accept(guest, b.invitation.code),
+    ]);
+    expect(results.map((r) => r.statusCode).sort()).toEqual([200, 409]);
+    expect(await ctx.db.select().from(members).where(eq(members.userId, guest.id))).toHaveLength(5);
   });
 
   it('una invitación sirve una sola vez', async () => {

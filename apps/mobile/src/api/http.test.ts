@@ -55,6 +55,21 @@ describe('createHttpClient', () => {
     expect(calls[0]?.init.credentials).toBe('include');
   });
 
+  it('añade las cabeceras propias de la petición (la zona horaria al crear un hogar)', async () => {
+    const { fetch, calls } = fakeFetch(Response.json({ ok: true }));
+    const request = createHttpClient({ baseUrl: '', headers: () => ({ cookie: 's=1' }), fetch });
+    await request('/api/households', {
+      method: 'POST',
+      body: { name: 'Casa' },
+      headers: { 'x-timezone': 'Atlantic/Canary' },
+      schema,
+    });
+    expect(calls[0]?.init.headers).toMatchObject({
+      cookie: 's=1',
+      'x-timezone': 'Atlantic/Canary',
+    });
+  });
+
   it('envía el cuerpo como JSON', async () => {
     const { fetch, calls } = fakeFetch(Response.json({ ok: true }));
     const request = createHttpClient({ baseUrl: '', fetch });

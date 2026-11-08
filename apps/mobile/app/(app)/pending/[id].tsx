@@ -8,9 +8,10 @@ import { goBack, Screen } from '../../../src/components/Screen';
 import { TransactionForm } from '../../../src/components/TransactionForm';
 import { AppText } from '../../../src/design';
 import { spacing } from '../../../src/design/tokens';
-import { todayIn, useCategories, useMe } from '../../../src/hooks/data';
+import { todayIn, useCategories } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { useOutbox } from '../../../src/outbox/useOutbox';
+import { useHousehold } from '../../../src/households/active';
 
 /**
  * Corregir o descartar un movimiento apuntado sin conexión que aún no se ha enviado
@@ -19,8 +20,7 @@ import { useOutbox } from '../../../src/outbox/useOutbox';
  */
 export default function PendingTransaction() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const categories = useCategories(household?.id);
   const outbox = useOutbox();
   const [confirming, setConfirming] = useState(false);

@@ -69,6 +69,16 @@ se puede guardar por falta de conexión va a una bandeja de salida (`apps/mobile
 AsyncStorage por cuenta) y se envía solo después con su mismo id (el `PUT` es idempotente); el
 servidor no cambia. Los totales con pendientes salen de `packages/domain/src/outbox.ts`. En la
 web no hay bandeja, salvo la compilación de pruebas con `EXPO_PUBLIC_E2E_OUTBOX=1`.
+**`013-varios-hogares`**: una persona puede ser miembro de hasta 5 hogares
+(`MAX_HOUSEHOLDS` en `packages/domain`). El servidor comprueba cada petición contra el hogar de
+la URL (`requireMember` con `:householdId`; una ruta con `requireMember` sin él responde 403) y
+`findMembership(db, userId, householdId)` da la pertenencia a ese hogar; no hay «el» hogar de
+un usuario. `GET /api/me` lista `households` y repite el primero en `household`/`member` para
+la APK instalada antes de varios hogares (quitarlos es un segundo paso). En la app, el hogar
+elegido sale de `useHousehold()` (`src/households/active.ts`, guardado por cuenta en el
+dispositivo); no uses `me.household`. Crear un hogar y aceptar invitaciones pasan por
+`lockUserHouseholds` para no superar el máximo con peticiones a la vez. La caché de Android
+lleva versión (`CACHE_BUSTER`): cámbiala si cambia la forma de lo guardado.
 **`012-tiempo-real`**: el servidor avisa por WebSocket (`@fastify/websocket`, dependencia
 añadida por esta funcionalidad) a las apps abiertas de un hogar de qué ha cambiado, sin datos:
 `{ type: 'changed', scope }` (esquema en `packages/api/src/schemas/realtime.ts`). Los avisos

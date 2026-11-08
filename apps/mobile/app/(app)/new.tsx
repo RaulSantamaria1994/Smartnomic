@@ -6,16 +6,16 @@ import { api, queryKeys } from '../../src/api/client';
 import { ApiError } from '../../src/api/http';
 import { goBack, Screen } from '../../src/components/Screen';
 import { TransactionForm } from '../../src/components/TransactionForm';
-import { todayIn, useCategories, useMe } from '../../src/hooks/data';
+import { todayIn, useCategories } from '../../src/hooks/data';
 import { es } from '../../src/i18n/es';
 import { newTransactionId } from '../../src/ids';
 import { useOutbox } from '../../src/outbox/useOutbox';
+import { useHousehold } from '../../src/households/active';
 
 /** Apuntar un movimiento nuevo (T050). */
 export default function NewTransaction() {
   const queryClient = useQueryClient();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const categories = useCategories(household?.id);
   // Un id por formulario: si se reintenta tras un fallo, no se duplica (RF-015).
   const id = useRef(newTransactionId()).current;

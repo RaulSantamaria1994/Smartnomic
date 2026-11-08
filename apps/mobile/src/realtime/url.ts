@@ -1,10 +1,16 @@
 /**
  * Dirección del WebSocket de tiempo real a partir de la de la API: `http` → `ws`, `https` →
- * `wss`. Sin dirección de la API (la web servida por el propio servidor), la de la página.
+ * `wss`. Sin dirección de la API (la web servida por el propio servidor), la de la página. Con
+ * el hogar elegido, los avisos son de ese hogar (especificación 013).
  */
-export function realtimeUrl(apiUrl: string, pageOrigin: string | undefined): string {
+export function realtimeUrl(
+  apiUrl: string,
+  pageOrigin: string | undefined,
+  householdId?: string,
+): string {
   const base = apiUrl || pageOrigin || '';
-  return `${base.replace(/^http/, 'ws').replace(/\/+$/, '')}/api/realtime`;
+  const url = `${base.replace(/^http/, 'ws').replace(/\/+$/, '')}/api/realtime`;
+  return householdId ? `${url}?householdId=${encodeURIComponent(householdId)}` : url;
 }
 
 /**

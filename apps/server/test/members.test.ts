@@ -127,8 +127,9 @@ describe('cambiar el rol y quitar', () => {
     expect((await call(editor, 'GET', `/api/households/${householdId}`)).statusCode).toBe(403);
     const [tx] = await ctx.db.select().from(transactions).where(eq(transactions.id, txId));
     expect(tx?.memberId).toBeNull();
-    // Al volver a abrir la app recibe un hogar propio vacío.
-    expect((await me(ctx.app, editor)).household.id).not.toBe(householdId);
+    // Ya no se le crea un hogar vacío (especificación 013): la app le pide crear o unirse.
+    const after = meResponseSchema.parse((await call(editor, 'GET', '/api/me')).json());
+    expect(after.households).toEqual([]);
   });
 
   it('nada de esto funciona sobre un miembro de otro hogar', async () => {
@@ -150,7 +151,7 @@ describe('cambiar el rol y quitar', () => {
 });
 
 describe('salir del hogar', () => {
-  it('un miembro sale y recibe un hogar propio vacío', async () => {
+  it('un miembro sale y ya no se le crea un hogar vacío (especificación 013, RF-1306)', async () => {
     const owner = await signUp(ctx.app);
     const viewer = await signUp(ctx.app);
     const householdId = await household(owner, [viewer, 'viewer']);
@@ -159,8 +160,8 @@ describe('salir del hogar', () => {
 
     expect(response.statusCode).toBe(200);
     const after = meResponseSchema.parse(response.json());
-    expect(after.household.id).not.toBe(householdId);
-    expect(after.member.role).toBe('owner');
+    expect(after.households).toEqual([]);
+    expect(after.household).toBeNull();
     expect(
       await ctx.db.select().from(members).where(eq(members.householdId, householdId)),
     ).toHaveLength(1);

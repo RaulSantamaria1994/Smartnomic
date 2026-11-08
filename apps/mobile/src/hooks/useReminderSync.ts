@@ -1,9 +1,10 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AppState } from 'react-native';
-import { queryKeys } from '../api/client';
-import { planReminders, reminderRoute } from '../reminders/plan';
+import { api, queryKeys } from '../api/client';
+import { useHousehold, useSwitchHousehold } from '../households/active';
+import { planAllReminders, reminderRoute, type HouseholdReminders } from '../reminders/plan';
 import {
   onReminderOpened,
   permissionStatus,
@@ -12,67 +13,99 @@ import {
   syncReminders,
 } from '../reminders/reminders';
 import { useNotificationPermission } from '../state/permission';
-import { useMe, useRecurring, useSavings, useUpcoming } from './data';
 
 /** Ventana de avisos programados (plan: 60 días, con tope de 50 avisos). */
 const REMINDER_WINDOW_DAYS = 60;
 
 /**
- * Mantiene programados los avisos del dispositivo (RF-029 a RF-035): al abrir la app, al
- * volver a primer plano y cada vez que cambian los datos. Al tocar un aviso, abre su
- * vencimiento.
+ * Mantiene programados los avisos del dispositivo (RF-029 a RF-035) de todos los hogares
+ * (especificación 013, RF-1310): al abrir la app, al volver a primer plano y cada vez que
+ * cambian los datos. Al tocar un aviso, elige su hogar y abre su vencimiento. En la web no hay
+ * avisos: no pide nada.
  */
 export function useReminderSync(): void {
   const queryClient = useQueryClient();
-  const me = useMe();
-  const household = me.data?.household;
-  const member = me.data?.member;
-  const rules = useRecurring(household?.id);
-  const upcoming = useUpcoming(household?.id, REMINDER_WINDOW_DAYS);
-  const goals = useSavings(household?.id).data?.goals;
+  const { me, household } = useHousehold();
+  const switchTo = useSwitchHousehold();
   const setPermission = useNotificationPermission((state) => state.set);
+  const list = remindersSupported ? (me.data?.households ?? []) : [];
+
+  // Pagos recurrentes, vencimientos y huchas de cada hogar (3 consultas por hogar).
+  const results = useQueries({
+    queries: list.flatMap(({ household: h }) => [
+      { queryKey: queryKeys.recurring(h.id), queryFn: () => api.recurring(h.id) },
+      {
+        queryKey: queryKeys.upcoming(h.id, REMINDER_WINDOW_DAYS),
+        queryFn: () => api.upcoming(h.id, REMINDER_WINDOW_DAYS),
+      },
+      { queryKey: queryKeys.savings(h.id), queryFn: () => api.savings(h.id) },
+    ]),
+  });
+
+  // Solo se planifica con los datos de todos los hogares: si no, un hogar aún sin cargar
+  // borraría sus avisos un momento.
+  const loaded = results.length > 0 && results.every((r) => r.data !== undefined);
+  const inputs: HouseholdReminders[] | null = useMemo(() => {
+    if (!loaded) return null;
+    return list.map(({ household: h, member }, i) => {
+      const rules = results[i * 3]!.data as Awaited<ReturnType<typeof api.recurring>>;
+      const upcoming = results[i * 3 + 1]!.data as Awaited<ReturnType<typeof api.upcoming>>;
+      const savings = results[i * 3 + 2]!.data as Awaited<ReturnType<typeof api.savings>>;
+      return {
+        household: h,
+        member,
+        occurrences: upcoming.occurrences,
+        rules: rules.rules,
+        savings: { pending: upcoming.savings, goals: savings.goals },
+      };
+    });
+    // `results` cambia de identidad en cada render; sus datos, no.
+  }, [loaded, ...results.map((r) => r.data), list]);
 
   // Permiso: se pide la primera vez que hay pagos recurrentes de los que avisar.
-  const hasRules = (rules.data?.rules.length ?? 0) > 0;
+  const hasRules = inputs?.some((i) => i.rules.length > 0 && i.member.remindersEnabled) ?? false;
   useEffect(() => {
     if (!remindersSupported) return;
     void (async () => {
       let status = await permissionStatus();
-      if (status === 'undetermined' && hasRules && member?.remindersEnabled) {
-        status = await requestPermission();
-      }
+      if (status === 'undetermined' && hasRules) status = await requestPermission();
       setPermission(status);
     })();
-  }, [hasRules, member?.remindersEnabled, setPermission]);
+  }, [hasRules, setPermission]);
 
-  // Reprogramar con los últimos datos conocidos.
-  const occurrences = upcoming.data?.occurrences;
-  const ruleList = rules.data?.rules;
-  const pendingSavings = upcoming.data?.savings;
+  // Reprogramar con los últimos datos conocidos. Sin ningún hogar, no queda nada que avisar.
+  const noHouseholds = me.data?.households.length === 0;
   useEffect(() => {
-    if (!remindersSupported || !occurrences || !ruleList || !member) return;
-    void syncReminders(
-      planReminders(occurrences, ruleList, member, new Date(), {
-        pending: pendingSavings ?? [],
-        goals: goals ?? [],
-      }),
-    );
-  }, [occurrences, ruleList, member, pendingSavings, goals]);
+    if (!remindersSupported) return;
+    if (noHouseholds) void syncReminders([]);
+    else if (inputs) void syncReminders(planAllReminders(inputs, new Date()));
+  }, [inputs, noHouseholds]);
 
   // Al volver a primer plano: refrescar (otro miembro pudo pagar algo) y el permiso.
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state !== 'active' || !household) return;
-      void queryClient.invalidateQueries({ queryKey: queryKeys.upcoming(household.id) });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.recurring(household.id) });
+      if (state !== 'active') return;
+      const ids = remindersSupported
+        ? (me.data?.households ?? []).map((h) => h.household.id)
+        : household
+          ? [household.id]
+          : [];
+      for (const id of ids) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.upcoming(id) });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.recurring(id) });
+      }
       if (remindersSupported) void permissionStatus().then(setPermission);
     });
     return () => subscription.remove();
-  }, [household, queryClient, setPermission]);
+  }, [me.data, household, queryClient, setPermission]);
 
-  // Tocar un aviso abre el vencimiento (RF-034).
+  // Tocar un aviso elige su hogar y abre el vencimiento (RF-034, RF-1310).
   useEffect(
-    () => onReminderOpened(({ ruleId, dueDate }) => router.push(reminderRoute(ruleId, dueDate))),
-    [],
+    () =>
+      onReminderOpened(({ ruleId, dueDate, householdId }) => {
+        if (householdId) switchTo(householdId);
+        router.push(reminderRoute(ruleId, dueDate));
+      }),
+    [switchTo],
   );
 }

@@ -127,14 +127,22 @@ export function sessionCookie(response: LightMyRequestResponse): string {
   return session;
 }
 
-/** Hogar y rol del usuario, según `GET /api/me`. */
-export async function me(app: FastifyInstance, user: TestUser): Promise<MeResponse> {
+/** `GET /api/me` de alguien que tiene al menos un hogar: `household` y `member`, su primero. */
+export type MeWithHousehold = MeResponse & {
+  household: NonNullable<MeResponse['household']>;
+  member: NonNullable<MeResponse['member']>;
+};
+
+/** Hogar y rol del usuario, según `GET /api/me` (falla si no tiene ningún hogar). */
+export async function me(app: FastifyInstance, user: TestUser): Promise<MeWithHousehold> {
   const response = await app.inject({
     method: 'GET',
     url: '/api/me',
     headers: { cookie: user.cookie },
   });
-  return meResponseSchema.parse(response.json());
+  const body = meResponseSchema.parse(response.json());
+  if (!body.household || !body.member) throw new Error('El usuario no tiene ningún hogar');
+  return body as MeWithHousehold;
 }
 
 /** UUIDv7 nuevo, como los que genera la app. */

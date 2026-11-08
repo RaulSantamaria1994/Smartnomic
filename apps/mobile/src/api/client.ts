@@ -1,4 +1,6 @@
 import {
+  membershipSchema,
+  TIMEZONE_HEADER,
   budgetRecordSchema,
   type BudgetInput,
   calendarResponseSchema,
@@ -144,6 +146,17 @@ export const api = {
       method: 'DELETE',
       schema: z.null(),
     }),
+  /** Crear un hogar del que se es propietario (especificación 013), con la zona horaria del dispositivo. */
+  createHousehold: (name: string) =>
+    request('/api/households', {
+      method: 'POST',
+      body: { name },
+      headers: { [TIMEZONE_HEADER]: Intl.DateTimeFormat().resolvedOptions().timeZone },
+      schema: membershipSchema,
+    }),
+  /** Borrar un hogar en el que se es el único miembro (especificación 013). */
+  deleteHousehold: (householdId: string) =>
+    request(household(householdId), { method: 'DELETE', schema: z.null() }),
   leaveHousehold: (householdId: string) =>
     request(`${household(householdId)}/leave`, { method: 'POST', schema: meResponseSchema }),
   transferOwnership: (householdId: string, memberId: string) =>

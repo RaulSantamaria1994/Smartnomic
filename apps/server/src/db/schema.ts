@@ -133,8 +133,9 @@ export const members = pgTable(
     joinedAt: instant('joined_at').notNull().defaultNow(),
   },
   (table) => [
-    // Un usuario pertenece a un solo hogar en el MVP (RF-008).
-    uniqueIndex('members_user_id_unique').on(table.userId),
+    // Varios hogares por persona (especificación 013), pero solo una vez en cada uno.
+    uniqueIndex('members_household_user_unique').on(table.householdId, table.userId),
+    index('members_user_id_idx').on(table.userId),
     // Exactamente un propietario por hogar.
     uniqueIndex('members_one_owner_per_household')
       .on(table.householdId)

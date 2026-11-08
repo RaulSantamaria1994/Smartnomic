@@ -7,10 +7,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { persistable } from '../src/api/queryKeys';
 import { persister } from '../src/cache/cache';
 import { watchAppFocus } from '../src/cache/focus';
-import { CACHE_MAX_AGE, createQueryClient } from '../src/cache/query-client';
+import { CACHE_BUSTER, CACHE_MAX_AGE, createQueryClient } from '../src/cache/query-client';
 import { useAppFonts } from '../src/design/fonts';
 import { bindSessionEnd, sessionEnd } from '../src/session/session-ended';
 import { color } from '../src/design/tokens';
+import { loadHouseholdChoice } from '../src/households/active';
 
 watchAppFocus();
 // La pantalla de carga sigue hasta que está la fuente de la marca.
@@ -25,10 +26,15 @@ export default function RootLayout() {
     return client;
   });
   const fontsReady = useAppFonts();
+  // El hogar elegido (especificación 013) se lee antes de pintar, como las fuentes.
+  const [choiceReady, setChoiceReady] = useState(false);
+  useEffect(() => {
+    void loadHouseholdChoice().then(() => setChoiceReady(true));
+  }, []);
 
   useEffect(() => {
-    if (fontsReady) void SplashScreen.hideAsync().catch(() => undefined);
-  }, [fontsReady]);
+    if (fontsReady && choiceReady) void SplashScreen.hideAsync().catch(() => undefined);
+  }, [fontsReady, choiceReady]);
 
   // En Android la caché se guarda para verla sin conexión; en la web, no.
   const withCache = (children: ReactNode) =>
@@ -38,6 +44,9 @@ export default function RootLayout() {
         persistOptions={{
           persister,
           maxAge: CACHE_MAX_AGE,
+          // Cambia cuando cambia la forma de lo guardado: la caché anterior se descarta en vez
+          // de leerse mal (013: `me` con varios hogares).
+          buster: CACHE_BUSTER,
           dehydrateOptions: {
             shouldDehydrateQuery: (query) =>
               defaultShouldDehydrateQuery(query) && persistable(query.queryKey),
@@ -50,7 +59,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
-  if (!fontsReady) return null;
+  if (!fontsReady || !choiceReady) return null;
 
   return withCache(
     <SafeAreaProvider>

@@ -58,13 +58,14 @@ export const invitationPreviewSchema = z.object({
   expiresAt: z.iso.datetime(),
   /** Ya eres miembro de ese hogar. */
   alreadyMember: z.boolean(),
+  /** Ya estás en el máximo de hogares: no puedes unirte a otro (especificación 013). */
+  atLimit: z.boolean(),
   /**
-   * Qué pasa con tu hogar actual al aceptar: `delete` (eres su único miembro y se borra),
-   * `leave` (sales de él) o `blocked` (eres su propietario y tiene más miembros: antes
-   * tienes que pasar la propiedad).
+   * Sin uso desde la especificación 013 (aceptar ya no te saca de tus hogares): siempre
+   * `leave`, para la app instalada antes de varios hogares. Se quitará en un segundo paso.
    */
   currentHousehold: z.enum(['delete', 'leave', 'blocked']),
-  /** Tu hogar actual tiene movimientos o pagos recurrentes que se perderían. */
+  /** Sin uso desde la especificación 013: siempre `false`. */
   currentHouseholdHasData: z.boolean(),
 });
 

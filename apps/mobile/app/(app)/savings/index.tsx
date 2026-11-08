@@ -8,13 +8,13 @@ import { Section } from '../../../src/design/Section';
 import { EmptyState } from '../../../src/design/EmptyState';
 import { SavingsRow } from '../../../src/design/SavingsRow';
 import { spacing } from '../../../src/design/tokens';
-import { useCan, useMe, useSavings } from '../../../src/hooks/data';
+import { useCan, useSavings } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
+import { useHousehold } from '../../../src/households/active';
 
 /** Huchas del hogar: en curso, conseguidas y cerradas (especificación 005). */
 export default function SavingsList() {
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const savings = useSavings(household?.id);
   const canWrite = useCan()('savings.write');
 

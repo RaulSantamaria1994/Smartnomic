@@ -27,18 +27,18 @@ import {
   formatShortDate,
   parseShortDate,
 } from '../../../src/format';
-import { todayIn, useCan, useMe, useSavings, useSavingsEntries } from '../../../src/hooks/data';
+import { todayIn, useCan, useSavings, useSavingsEntries } from '../../../src/hooks/data';
 import { useRefreshSavings } from '../../../src/hooks/useRuleMutations';
 import { es } from '../../../src/i18n/es';
 import { newTransactionId } from '../../../src/ids';
+import { useHousehold } from '../../../src/households/active';
 
 type Kind = 'deposit' | 'withdrawal';
 
 /** Detalle de una hucha: progreso, aportar, sacar, historial y deshacer (especificación 005). */
 export default function SavingsDetail() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const savings = useSavings(household?.id);
   const entries = useSavingsEntries(household?.id, goalId);
   const refresh = useRefreshSavings(household?.id);

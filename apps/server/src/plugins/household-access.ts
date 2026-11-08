@@ -6,6 +6,8 @@ import type { Database } from '../db/client';
 import { findMembership, type Membership } from '../households';
 import { ApiError } from './errors';
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export interface SessionUser {
   id: string;
   name: string;
@@ -47,12 +49,15 @@ export function createHouseholdAccess(deps: { auth: Auth; db: Database }): House
     },
     requireMember: (action) => async (request: FastifyRequest, _reply: FastifyReply) => {
       const user = await loadUser(request);
-      const membership = await findMembership(deps.db, user.id);
-      const params = request.params as { householdId?: string } | undefined;
+      const householdId = (request.params as { householdId?: string } | undefined)?.householdId;
+      // El hogar sale siempre de la URL (especificación 013): una ruta sin él no deja pasar a
+      // nadie, en vez de adivinar cuál de sus hogares es.
+      const membership =
+        householdId && UUID.test(householdId)
+          ? await findMembership(deps.db, user.id, householdId)
+          : null;
       // Un hogar ajeno responde igual que uno inexistente para el usuario: 403.
-      if (!membership || (params?.householdId && params.householdId !== membership.household.id)) {
-        throw new ApiError('forbidden', 'No eres miembro de este hogar.');
-      }
+      if (!membership) throw new ApiError('forbidden', 'No eres miembro de este hogar.');
       if (!can(membership.member.role, action)) {
         throw new ApiError('forbidden', 'Tu rol en el hogar no permite hacer esto.');
       }

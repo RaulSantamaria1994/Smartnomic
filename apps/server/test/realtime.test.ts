@@ -24,10 +24,14 @@ let groceries: string;
 type TestSocket = Awaited<ReturnType<FastifyInstance['injectWS']>>;
 
 /** Conexión de tiempo real con la sesión de `user` y lo que va recibiendo. */
-async function connect(user: TestUser | null, headers: Record<string, string> = {}) {
+async function connect(
+  user: TestUser | null,
+  headers: Record<string, string> = {},
+  householdId?: string,
+) {
   const received: RealtimeMessage[] = [];
   const ws: TestSocket = await ctx.app.injectWS(
-    '/api/realtime',
+    householdId ? `/api/realtime?householdId=${householdId}` : '/api/realtime',
     { headers: { ...(user && { cookie: user.cookie }), ...headers } },
     {
       onInit: (socket) =>
@@ -239,7 +243,7 @@ describe('un aviso por cada tipo de cambio (RF-1201)', () => {
     const guest = await signUp(ctx.app);
     await join(guest);
     const stranger = await signUp(ctx.app);
-    const mine = await connect(guest);
+    const mine = await connect(guest, {}, householdId);
     const theirs = await connect(stranger);
     await call(ctx.app, owner, 'PUT', `/api/households/${householdId}/budgets/${groceries}`, {
       amountCents: 1,
@@ -275,8 +279,10 @@ describe('quien deja de ser miembro deja de recibir (RF-1203)', () => {
   it('al quitarlo del hogar, su conexión se cierra', async () => {
     const guest = await signUp(ctx.app);
     await join(guest);
-    const guestMember = (await me(ctx.app, guest)).member.id;
-    const { closed } = await connect(guest);
+    const guestMember = (await me(ctx.app, guest)).households.find(
+      (h) => h.household.id === householdId,
+    )!.member.id;
+    const { closed } = await connect(guest, {}, householdId);
     const removed = await call(
       ctx.app,
       owner,
@@ -290,10 +296,64 @@ describe('quien deja de ser miembro deja de recibir (RF-1203)', () => {
   it('al salir por su cuenta, también', async () => {
     const guest = await signUp(ctx.app);
     await join(guest);
-    const { closed } = await connect(guest);
+    const { closed } = await connect(guest, {}, householdId);
     const left = await call(ctx.app, guest, 'POST', `/api/households/${householdId}/leave`, {});
     expect(left.statusCode, left.body).toBeLessThan(300);
     await Promise.race([closed, tick(2000).then(() => Promise.reject(new Error('no se cerró')))]);
+  });
+});
+
+describe('varios hogares (especificación 013)', () => {
+  it('se conecta al hogar que pide; a uno ajeno o mal escrito, 403', async () => {
+    const stranger = await signUp(ctx.app);
+    await expect(connect(stranger, {}, householdId)).rejects.toThrow(/403/);
+    await expect(connect(owner, {}, 'no-es-un-id')).rejects.toThrow(/403/);
+    const { ws } = await connect(owner, {}, householdId);
+    ws.close();
+  });
+
+  it('cada conexión recibe solo los avisos de su hogar', async () => {
+    const guest = await signUp(ctx.app);
+    await join(guest);
+    const own = (await me(ctx.app, guest)).households[0]!.household.id;
+    const there = await connect(guest, {}, householdId);
+    const home = await connect(guest, {}, own);
+    await call(ctx.app, owner, 'PUT', `/api/households/${householdId}/budgets/${groceries}`, {
+      amountCents: 1,
+    });
+    await waitFor(there.received);
+    await tick(80);
+    expect(home.changes()).toEqual([]);
+    there.ws.close();
+    home.ws.close();
+  });
+
+  it('al borrar un hogar, se cierran sus conexiones', async () => {
+    const created = await call(ctx.app, owner, 'POST', '/api/households', { name: 'Pruebas' });
+    const id = created.json().household.id as string;
+    const { closed } = await connect(owner, {}, id);
+    expect((await call(ctx.app, owner, 'DELETE', `/api/households/${id}`)).statusCode).toBe(204);
+    await Promise.race([closed, tick(2000).then(() => Promise.reject(new Error('no se cerró')))]);
+  });
+
+  it('al quitarle de un hogar solo se cierra la conexión de ese hogar', async () => {
+    const guest = await signUp(ctx.app);
+    await join(guest);
+    const list = (await me(ctx.app, guest)).households;
+    const own = list[0]!.household.id;
+    const guestMember = list.find((h) => h.household.id === householdId)!.member.id;
+    const there = await connect(guest, {}, householdId);
+    const home = await connect(guest, {}, own);
+    let homeClosed = false;
+    home.ws.on('close', () => (homeClosed = true));
+    await call(ctx.app, owner, 'DELETE', `/api/households/${householdId}/members/${guestMember}`);
+    await Promise.race([
+      there.closed,
+      tick(2000).then(() => Promise.reject(new Error('no se cerró'))),
+    ]);
+    await tick(80);
+    expect(homeClosed).toBe(false);
+    home.ws.close();
   });
 });
 

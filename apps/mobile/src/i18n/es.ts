@@ -305,6 +305,30 @@ export const es = {
     delete: 'Borrar mi cuenta',
     confirmDelete: 'Pulsa otra vez para borrar tu cuenta para siempre.',
   },
+  /** Varios hogares (especificación 013). */
+  households: {
+    title: 'Tus hogares',
+    switchLabel: (name: string) => `Hogar: ${name}. Cambiar de hogar`,
+    current: 'Elegido',
+    withOthers: (names: string[]) =>
+      names.length === 0 ? 'Solo tú' : `Con ${names.join(', ').replace(/, ([^,]*)$/, ' y $1')}`,
+    create: 'Crear hogar',
+    createSubmit: 'Crear',
+    deleteTitle: 'Borrar el hogar',
+    deleteHint:
+      'Eres su único miembro: se borrarán el hogar y todos sus datos. No se puede deshacer. Exporta antes si quieres guardarlos.',
+    exportFirst: 'Exportar los datos antes',
+    exported: 'Datos exportados.',
+    delete: 'Borrar el hogar',
+    confirmDelete: 'Pulsa otra vez para borrar el hogar y todos sus datos para siempre.',
+    atLimit: 'Ya estás en 5 hogares, el máximo. Sal de uno o bórralo para crear otro.',
+  },
+  /** Sin ningún hogar (especificación 013). */
+  noHousehold: {
+    title: 'No estás en ningún hogar',
+    hint: 'Crea uno para llevar tus cuentas o únete a otro con el código o el enlace de una invitación.',
+    joinTitle: 'Unirme con una invitación',
+  },
   householdMenu: {
     title: 'Hogar',
     members: 'Miembros e invitaciones',
@@ -562,7 +586,7 @@ export const es = {
       `Pulsa otra vez: ${name} será el propietario y tú pasarás a editor.`,
     leave: 'Salir del hogar',
     confirmLeave:
-      'Pulsa otra vez para salir. Dejarás de ver estos datos y tendrás un hogar propio vacío.',
+      'Pulsa otra vez para salir. Dejarás de ver este hogar; lo que apuntaste se queda en él.',
     inviteTitle: 'Invitar a alguien',
     inviteAs: 'Con permiso de',
     createInvitation: 'Crear invitación',
@@ -593,15 +617,8 @@ export const es = {
     used: 'Esta invitación ya se ha usado. Pide una nueva.',
     revoked: 'Esta invitación se ha anulado. Pide una nueva.',
     alreadyMember: 'Ya eres miembro de este hogar.',
-    blocked:
-      'Eres el propietario de un hogar con más miembros. Antes de unirte a otro, pasa la propiedad a uno de ellos en «Miembros del hogar».',
-    leaveCurrent: 'Al unirte saldrás de tu hogar actual.',
-    deleteCurrent: 'Tu hogar actual se borrará.',
-    loseData:
-      'Tu hogar actual tiene movimientos o pagos recurrentes y se borrarán. Esta acción no se puede deshacer.',
-    confirmLoseData: 'Entiendo que se borrarán mis datos',
-    exportFirst: 'Exportar mis datos antes',
-    exported: 'Datos exportados.',
+    atLimit: 'Ya estás en 5 hogares, el máximo. Sal de uno o bórralo para unirte a otro.',
+    keepOthers: 'Seguirás también en tus otros hogares.',
     accept: 'Unirme',
     goHome: 'Ir al inicio',
   },

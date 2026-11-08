@@ -16,6 +16,14 @@ describe('realtimeUrl (especificación 012)', () => {
       'wss://app.smartnomic.example/api/realtime',
     );
   });
+
+  it('con el hogar elegido, lo pide (especificación 013)', () => {
+    expect(
+      realtimeUrl('https://smartnomic.example', undefined, '0190a0b0-0000-7000-8000-000000000001'),
+    ).toBe(
+      'wss://smartnomic.example/api/realtime?householdId=0190a0b0-0000-7000-8000-000000000001',
+    );
+  });
 });
 
 describe('reconnectDelay (RF-1204)', () => {

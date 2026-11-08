@@ -17,7 +17,7 @@ import {
   formatShortDate,
   parseShortDate,
 } from '../../../../src/format';
-import { todayIn, useCategories, useMe, useRecurring } from '../../../../src/hooks/data';
+import { todayIn, useCategories, useRecurring } from '../../../../src/hooks/data';
 import { useRefreshRecurring } from '../../../../src/hooks/useRuleMutations';
 import { es } from '../../../../src/i18n/es';
 import { newTransactionId } from '../../../../src/ids';
@@ -25,12 +25,12 @@ import { colors, spacing } from '../../../../src/theme';
 import { CategoryIcon } from '../../../../src/design/CategoryIcon';
 import { AppText } from '../../../../src/design/Text';
 import { typography } from '../../../../src/design/tokens';
+import { useHousehold } from '../../../../src/households/active';
 
 /** Pagar (con el importe real) u omitir un vencimiento (T064, RF-024 y RF-025). */
 export default function Occurrence() {
   const { ruleId, dueDate } = useLocalSearchParams<{ ruleId: string; dueDate: string }>();
-  const me = useMe();
-  const household = me.data?.household;
+  const { household } = useHousehold();
   const rules = useRecurring(household?.id);
   const categories = useCategories(household?.id);
   const refresh = useRefreshRecurring(household?.id);

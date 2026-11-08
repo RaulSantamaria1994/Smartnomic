@@ -5,7 +5,7 @@ import type { Auth } from '../auth';
 import { and, gt, inArray } from 'drizzle-orm';
 import type { Database } from '../db/client';
 import { sessions } from '../db/schema';
-import { findMembership } from '../households';
+import { findMembership, firstMembership } from '../households';
 import { ApiError } from '../plugins/errors';
 import type { RealtimeHub } from '../realtime/hub';
 
@@ -24,6 +24,8 @@ declare module 'fastify' {
     realtime?: RealtimeChange[];
   }
 }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Sección de la URL → ámbito del aviso. */
 const SCOPES: Record<string, RealtimeScope> = {
@@ -72,7 +74,7 @@ export function registerRealtimeRoutes(
 ): void {
   const { db, auth, hub } = deps;
   const isMember = async (userId: string, householdId: string) =>
-    (await findMembership(db, userId))?.household.id === householdId;
+    (await findMembership(db, userId, householdId)) !== null;
 
   // Avisos tras cualquier cambio con éxito (especificación 012): un solo sitio para todas las
   // rutas. Con un cambio de miembros, además, se cierran las conexiones de quien ya no está.
@@ -111,8 +113,16 @@ export function registerRealtimeRoutes(
         }
         const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
         if (!session) throw new ApiError('unauthenticated', 'Inicia sesión para continuar.');
-        const membership = await findMembership(db, session.user.id);
-        if (!membership) throw new ApiError('forbidden', 'No eres miembro de ningún hogar.');
+        // El hogar elegido en la app (especificación 013). Sin él, el primero: la app instalada
+        // antes de varios hogares no lo envía (constitución, art. V.4).
+        const wanted = (request.query as { householdId?: unknown } | undefined)?.householdId;
+        const membership =
+          wanted === undefined
+            ? await firstMembership(db, session.user.id)
+            : typeof wanted === 'string' && UUID.test(wanted)
+              ? await findMembership(db, session.user.id, wanted)
+              : null;
+        if (!membership) throw new ApiError('forbidden', 'No eres miembro de este hogar.');
         request.user = { id: session.user.id, name: session.user.name, email: session.user.email };
         request.membership = membership;
         realtimeSessions.set(request, session.session.id);

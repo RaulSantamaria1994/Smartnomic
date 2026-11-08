@@ -191,6 +191,48 @@ describe('borrar la cuenta', () => {
     expect(left).toHaveLength(1);
   });
 
+  it('con varios hogares, el 409 nombra todos aquellos en los que hay que pasar la propiedad (013)', async () => {
+    const owner = await signUp(ctx.app);
+    const partner = await signUp(ctx.app);
+    await joinHousehold(ctx.db, owner, partner, 'editor');
+    await ctx.db
+      .update(households)
+      .set({ name: 'Casa' })
+      .where(eq(households.id, (await me(ctx.app, owner)).household.id));
+    // Otro hogar suyo con más miembros.
+    const other = await signUp(ctx.app);
+    const otherHousehold = (await me(ctx.app, other)).household.id;
+    await ctx.db.update(households).set({ name: 'Piso' }).where(eq(households.id, otherHousehold));
+    await ctx.db.update(members).set({ role: 'editor' }).where(eq(members.userId, other.id));
+    await ctx.db
+      .insert(members)
+      .values({ householdId: otherHousehold, userId: owner.id, role: 'owner' });
+
+    const response = await deleteAccount(owner);
+
+    expect(response.statusCode).toBe(409);
+    const message = errorResponseSchema.parse(response.json()).error.message;
+    expect(message).toContain('«Casa»');
+    expect(message).toContain('«Piso»');
+    expect(await ctx.db.select().from(users).where(eq(users.id, owner.id))).toHaveLength(1);
+  });
+
+  it('con varios hogares: borra los suyos de un solo miembro y sale de los demás (013)', async () => {
+    const lucia = await signUp(ctx.app);
+    const own = (await me(ctx.app, lucia)).household.id;
+    const marta = await signUp(ctx.app);
+    const shared = (await me(ctx.app, marta)).household.id;
+    await ctx.db.insert(members).values({ householdId: shared, userId: lucia.id, role: 'editor' });
+    const txId = await addExpense(lucia, shared, 'De Lucía');
+
+    expect((await deleteAccount(lucia)).statusCode).toBe(204);
+
+    expect(await ctx.db.select().from(households).where(eq(households.id, own))).toHaveLength(0);
+    expect(await ctx.db.select().from(households).where(eq(households.id, shared))).toHaveLength(1);
+    const [tx] = await ctx.db.select().from(transactions).where(eq(transactions.id, txId));
+    expect(tx?.memberId).toBeNull();
+  });
+
   it('sin sesión, 401', async () => {
     const response = await ctx.app.inject({
       method: 'DELETE',
