@@ -87,8 +87,16 @@ la ruta (`/api/households/:householdId/<sección>`); las rutas sin el hogar en l
 mano con `request.realtime`. Una ruta nueva bajo un hogar avisa sola; si su sección no está en
 `SCOPES`, añádela. Las conexiones viven en memoria (`src/realtime/hub.ts`, una sola instancia);
 se cierran (4001) si el usuario deja el hogar o su sesión termina. En la app,
-`src/realtime/useRealtime.ts` decide qué consultas recargar con `src/realtime/scopes.ts`. El
-aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
+`src/realtime/useRealtime.ts` decide qué consultas recargar con `src/realtime/scopes.ts`.
+**`015-ordenar-mes-hogar`**: «Mes» enseña como máximo 3 presupuestos y 5 próximos pagos con «Ver
+todos», y los bloques vacíos son una sola fila; el recorte lo hace `limitRows`
+(`packages/domain/src/lists.ts`), que nunca esconde un pago atrasado. Borrar la cuenta vive en
+`app/(app)/delete-account.tsx` (en «Hogar» solo hay una fila que lleva a ella) y su botón es la
+variante `destructive` de `Button` (rojo relleno, `color.bg.destructive`). Sin cambios en el
+servidor. Faltan por probar con la pila real y en Android las tareas O014, O017 y la prueba con
+el APK.
+
+El aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo
 cerrado del dominio) y otro (`noAiTells.test.ts`) las tarjetas, las pastillas de estado, los

@@ -41,6 +41,8 @@ export const color = {
     accentSoft: palette.green100,
     accentTint: palette.green100,
     danger: palette.redSoft,
+    /** Botón de una acción irreversible (borrar la cuenta): rojo relleno, texto blanco. */
+    destructive: palette.red,
   },
   text: {
     primary: palette.ink,
