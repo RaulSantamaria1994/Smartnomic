@@ -134,8 +134,9 @@ apps/mobile/
   decorativas (`aria-hidden`) como la de progreso. Ingresos y gastos se distinguen también
   por la etiqueta de texto de cada barra, no solo por el color.
 - **Colores** (`color.chart`): en «Ingresos y gastos», cada barra con el color de sus
-  importes en el resto de la app: ingresos en el verde de ingresos y gastos en gris oscuro;
-  el resto de gráficas, en el verde de la app. Todos contrastan 3:1 con el fondo
+  importes en el resto de la app: ingresos en el verde de ingresos y gastos en tinta (antes,
+  gris oscuro, que apenas se distinguía del verde por luminosidad); el resto de gráficas, en
+  el verde de la app. Todos contrastan 3:1 con el fondo y ingresos y gastos 3:1 entre sí
   (`color.test.ts`). Animación: la de la barra de progreso (se rellena al aparecer), sin
   animación con «reducir movimiento».
 - **Refresco**: `queryKeys.charts(h, start)` = `['periods', h, 'charts', start]`. Todo lo que

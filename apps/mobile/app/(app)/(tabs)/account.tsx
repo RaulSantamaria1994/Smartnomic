@@ -163,7 +163,7 @@ export default function Account() {
           </AppText>
           <Switch
             value={member.remindersEnabled}
-            {...switchColors(member.remindersEnabled)}
+            {...switchColors()}
             onValueChange={(value) => void update({ remindersEnabled: value })}
             accessibilityLabel={es.settings.enabled}
             disabled={saving}

@@ -250,7 +250,7 @@ export function RuleForm({ initial, categories, today, onSubmit, extraActions }:
           <AppText variant="body">{es.recurring.active}</AppText>
           <Switch
             value={active}
-            {...switchColors(active)}
+            {...switchColors()}
             onValueChange={setActive}
             accessibilityLabel={es.recurring.active}
           />

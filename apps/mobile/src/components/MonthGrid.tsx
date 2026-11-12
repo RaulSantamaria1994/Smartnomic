@@ -21,8 +21,8 @@ interface DaySummary {
 
 /**
  * Cuadrícula del mes, de lunes a domingo (RF-102). Cada día con vencimientos lleva una
- * marca: roja si hay atrasados, del color principal si hay pendientes y gris si todo está
- * resuelto. Para el lector de pantalla, cada día dice su fecha y cuántos tiene (RF-108).
+ * marca: un círculo rojo si hay atrasados, un aro ámbar si hay pendientes y un punto gris si
+ * todo está resuelto (la forma distingue las marcas aunque no se vea el color). Para el lector de pantalla, cada día dice su fecha y cuántos tiene (RF-108).
  */
 export function MonthGrid({ month, items, today, selected, onSelect }: Props) {
   const summary = new Map<DateString, DaySummary>();
@@ -83,13 +83,13 @@ function Day({
   onPress: () => void;
 }) {
   const count = summary?.count ?? 0;
-  const markColor = !summary
+  const mark = !summary
     ? undefined
     : summary.overdue > 0
-      ? color.mark.overdue
+      ? styles.markOverdue
       : summary.pending > 0
-        ? color.mark.pending
-        : color.mark.resolved;
+        ? styles.markPending
+        : styles.markResolved;
   const label =
     es.calendar.dayLabel(formatDay(date), count, summary?.overdue ?? 0) +
     (isToday ? es.calendar.todaySuffix : '');
@@ -109,7 +109,7 @@ function Day({
         </Text>
       </View>
       <View style={styles.markRow}>
-        {markColor && <View style={[styles.mark, { backgroundColor: markColor }]} />}
+        {mark && <View style={mark} />}
         {count > 1 && <Text style={styles.count}>{count}</Text>}
       </View>
     </Pressable>
@@ -144,7 +144,17 @@ const styles = StyleSheet.create({
   number: { ...typography.body, color: color.text.primary },
   todayText: { ...typography.bodyStrong, color: color.text.accent },
   selectedText: { color: color.text.onAccent },
-  markRow: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 10 },
-  mark: { width: 5, height: 5, borderRadius: 3 },
+  markRow: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 12 },
+  // La marca se distingue también por la forma, no solo por el color: atrasado, círculo
+  // grande y relleno; pendiente, aro; resuelto, punto pequeño y gris.
+  markOverdue: { width: 9, height: 9, borderRadius: 5, backgroundColor: color.mark.overdue },
+  markPending: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: color.mark.pending,
+  },
+  markResolved: { width: 5, height: 5, borderRadius: 3, backgroundColor: color.mark.resolved },
   count: { ...typography.small, color: color.text.muted },
 });
