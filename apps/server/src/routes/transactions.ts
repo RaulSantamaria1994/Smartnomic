@@ -1,11 +1,12 @@
 import { transactionInputSchema, uuidV7Schema, type Transaction } from '@smartnomic/api';
-import { and, eq, isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, eq, getTableColumns, isNotNull, isNull, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Database } from '../db/client';
 import { categories, transactions } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import type { ActivityNotifier } from '../push/activity';
 
 type TransactionRow = typeof transactions.$inferSelect;
 
@@ -29,9 +30,9 @@ const NOT_FOUND = 'Este movimiento no existe o se ha borrado.';
 
 export function registerTransactionRoutes(
   app: FastifyInstance,
-  deps: { db: Database; access: HouseholdAccess },
+  deps: { db: Database; access: HouseholdAccess; activity: Pick<ActivityNotifier, 'record'> },
 ): void {
-  const { db, access } = deps;
+  const { db, access, activity } = deps;
   const url = '/api/households/:householdId/transactions/:transactionId';
 
   // Crear o editar. Idempotente por id: reenviar la misma petición no duplica (RF-015).
@@ -41,7 +42,7 @@ export function registerTransactionRoutes(
     const { household, member } = request.membership!;
 
     const [category] = await db
-      .select({ id: categories.id })
+      .select({ id: categories.id, name: categories.name })
       .from(categories)
       .where(
         and(
@@ -70,8 +71,22 @@ export function registerTransactionRoutes(
         // Nunca se toca un movimiento de otro hogar ni uno borrado.
         setWhere: sql`${transactions.householdId} = ${household.id} AND ${transactions.deletedAt} IS NULL`,
       })
-      .returning();
+      // `xmax = 0`: la fila se acaba de insertar. Si ya existía (editar o reenviar desde la
+      // bandeja sin conexión), cae en la rama de actualizar y no se avisa (especificación 014).
+      .returning({ ...getTableColumns(transactions), inserted: sql<boolean>`(xmax = 0)` });
     if (!row) throw new ApiError('not_found', NOT_FOUND);
+    if (row.inserted) {
+      activity.record({
+        householdId: household.id,
+        memberId: member.id,
+        change: {
+          kind: row.kind,
+          amountCents: row.amountCents,
+          categoryName: category.name,
+          date: row.date,
+        },
+      });
+    }
     return toTransaction(row);
   });
 

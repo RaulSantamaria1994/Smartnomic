@@ -30,6 +30,7 @@ import type { Database } from '../db/client';
 import { members, savingsEntries, savingsGoals, users } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import type { ActivityNotifier } from '../push/activity';
 
 // Huchas para objetivos de ahorro (especificación 005).
 
@@ -195,9 +196,14 @@ export async function setAsideBetween(
 
 export function registerSavingsRoutes(
   app: FastifyInstance,
-  deps: { db: Database; access: HouseholdAccess; now: () => Date },
+  deps: {
+    db: Database;
+    access: HouseholdAccess;
+    now: () => Date;
+    activity: Pick<ActivityNotifier, 'record'>;
+  },
 ): void {
-  const { db, access, now } = deps;
+  const { db, access, now, activity } = deps;
   const base = '/api/households/:householdId/savings';
 
   app.get(base, { preHandler: access.requireMember('household.view') }, async (request) => {
@@ -378,6 +384,19 @@ export function registerSavingsRoutes(
             .returning();
           return inserted!;
         });
+        // Solo al insertar: el reenvío (`repeated`) ya salió arriba y saltar un mes no pasa por aquí.
+        if (row.kind === 'deposit' || row.kind === 'withdrawal') {
+          activity.record({
+            householdId: household.id,
+            memberId: member.id,
+            change: {
+              kind: row.kind,
+              goalId,
+              goalName: goal.name,
+              amountCents: row.amountCents,
+            },
+          });
+        }
         return toEntryDto(row, request.user!.name);
       } catch (error) {
         if (input.dueDate && isDueConflict(error)) {

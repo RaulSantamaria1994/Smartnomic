@@ -55,33 +55,33 @@ fallar antes de implementar.
 
 ### Servidor
 
-- [ ] P008 [P] [US1] Tests de `src/push/expo.ts` con `fetch` falso: trocea de 100 en 100,
+- [x] P008 [P] [US1] Tests de `src/push/expo.ts` con `fetch` falso: trocea de 100 en 100,
       envía `EXPO_ACCESS_TOKEN` si existe, devuelve tickets, consulta recibos; un error HTTP
       lanza un error que solo lleva el estado. Implementación
-- [ ] P009 [P] [US1] Tests de `src/push/messages.ts`: cada tipo de cambio (gasto, ingreso, pago,
+- [x] P009 [P] [US1] Tests de `src/push/messages.ts`: cada tipo de cambio (gasto, ingreso, pago,
       aportar, sacar), varios del mismo tipo, mezclados, sin miembro, importes con miles; datos
       del aviso (`type`, `householdId`, `target`), `channelId: 'actividad'`, `priority`, `ttl`.
       Implementación
-- [ ] P010 [US1] Tests de `src/push/activity.ts` con reloj y emisor falsos y PostgreSQL real:
+- [x] P010 [US1] Tests de `src/push/activity.ts` con reloj y emisor falsos y PostgreSQL real:
       `record` no hace E/S; ventana fija de 5 s que no se alarga; 20 eventos → 1 envío; dos
       autores → 2 envíos; destinatarios = otros miembros del hogar con la preferencia activada
       y sesión viva (no el autor ni sus otros móviles, no otro hogar); sin destinatarios no
       envía; `DeviceNotRegistered` en ticket o recibo borra el token; error del emisor solo se
       registra (logs sin importes ni textos); `flushAll` envía lo pendiente. Implementación
-- [ ] P011 [US1] Crear el notificador en `src/server.ts` (inyectable, como el email) y en
+- [x] P011 [US1] Crear el notificador en `src/server.ts` (inyectable, como el email) y en
       `src/index.ts` con `createExpoPushSender`; `flushAll` en `onClose`; `EXPO_ACCESS_TOKEN`
       en `.env.example`. En los tests, emisor falso en `test/helpers.ts`
-- [ ] P012 [US1] Tests en `test/push-activity.test.ts` por ruta: alta de movimiento avisa;
+- [x] P012 [US1] Tests en `test/push-activity.test.ts` por ruta: alta de movimiento avisa;
       editar, borrar, restaurar y reenviar el mismo `PUT` no avisan; pagar un vencimiento
       avisa, repetirlo y omitir no; aportar y sacar de una hucha avisan, reenviar y saltar un
       mes no; un movimiento con el emisor fallando o lento responde igual y en el mismo tiempo
       (CE-1405)
-- [ ] P013 [US1] Llamadas a `record` en `routes/transactions.ts` (`RETURNING (xmax = 0)`),
+- [x] P013 [US1] Llamadas a `record` en `routes/transactions.ts` (`RETURNING (xmax = 0)`),
       `routes/recurring.ts` (`pay`) y `routes/savings.ts` (`entries`)
 
 ### Registro del dispositivo
 
-- [ ] P014 [US1] Tests en `test/push-devices.test.ts`: `PUT /api/push-device` sin sesión 401,
+- [x] P014 [US1] Tests en `test/push-devices.test.ts`: `PUT /api/push-device` sin sesión 401,
       token malo 400, alta 204, repetir no duplica, otra cuenta en el mismo móvil se lo queda;
       `DELETE` solo borra el propio; cerrar sesión y borrar la cuenta borran el dispositivo.
       Implementación en `src/routes/push-devices.ts` con su límite de peticiones
