@@ -1,12 +1,15 @@
 import { deletePushDeviceSchema, pushDeviceSchema } from '@smartnomic/api';
 import { fromNodeHeaders } from 'better-auth/node';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq, notInArray } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { Auth, AuthRateLimit } from '../auth';
 import type { Database } from '../db/client';
 import { pushDevices } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+
+/** Móviles que puede tener registrados una persona; al pasarse se descartan los más antiguos. */
+export const MAX_DEVICES_PER_USER = 20;
 
 /**
  * Dispositivos de avisos push (especificación 014, RF-1409). El token de un móvil se ata a la
@@ -35,6 +38,23 @@ export function registerPushDeviceRoutes(
         target: pushDevices.token,
         set: { userId, sessionId: session.session.id, updatedAt: new Date() },
       });
+    // Sin tope, registrar tokens en bucle llenaría la tabla: se quedan los más recientes.
+    await db
+      .delete(pushDevices)
+      .where(
+        and(
+          eq(pushDevices.userId, userId),
+          notInArray(
+            pushDevices.token,
+            db
+              .select({ token: pushDevices.token })
+              .from(pushDevices)
+              .where(eq(pushDevices.userId, userId))
+              .orderBy(desc(pushDevices.updatedAt))
+              .limit(MAX_DEVICES_PER_USER),
+          ),
+        ),
+      );
     return reply.status(204).send();
   });
 

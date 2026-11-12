@@ -133,7 +133,7 @@ fallar antes de implementar.
 
 ## Fase 5: Cierre
 
-- [ ] P023 Batería de ataques ampliada: registrar el token de otro, borrar el de otro, tokens
+- [x] P023 Batería de ataques ampliada: registrar el token de otro, borrar el de otro, tokens
       basura, muchos registros, recibir avisos de un hogar ajeno, `PATCH` de la preferencia en
       un hogar ajeno
 - [ ] P024 Prueba en Android con la APK (`eas build --profile preview`) y dos cuentas: app
@@ -141,10 +141,10 @@ fallar antes de implementar.
       otro hogar, sesión cerrada y miembro quitado (CE-1403); 20 movimientos desde la bandeja
       sin conexión (CE-1404); tocar el aviso con otro hogar elegido (CE-1406); permiso denegado;
       canales separados en los ajustes del sistema
-- [ ] P025 [P] Punta a punta en la web: el interruptor se guarda por hogar y se ve en la otra
+- [x] P025 [P] Punta a punta en la web: el interruptor se guarda por hogar y se ve en la otra
       sesión; las pruebas anteriores siguen pasando
-- [ ] P026 [P] axe-core en «Hogar» a 320 y 1280 px; `expo export --platform android` compila
-- [ ] P027 Actualizar `README.md` (configuración de Firebase y EAS) y `AGENTS.md` (estado y
+- [x] P026 [P] axe-core en «Hogar» a 320 y 1280 px; `expo export --platform android` compila
+- [x] P027 Actualizar `README.md` (configuración de Firebase y EAS) y `AGENTS.md` (estado y
       dónde vive cada pieza), apuntar resultados en `plan.md` y marcar tareas
 
 ---

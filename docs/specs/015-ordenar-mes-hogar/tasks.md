@@ -90,7 +90,7 @@ pantalla nueva.
       estados y los imports que queden sin usar; añadir un `MenuRow` «Borrar mi cuenta» (icono
       `trash`) a `/delete-account` debajo de «Cerrar sesión». Orden final: accesos, «Avisos»,
       «Exportar», «Cerrar sesión», «Borrar mi cuenta»
-- [ ] O014 [US2] Comprobar con Playwright los escenarios 1 a 7 de la historia 2: sin campo de
+- [x] O014 [US2] Comprobar con Playwright los escenarios 1 a 7 de la historia 2: sin campo de
       contraseña en «Hogar»; borrar con contraseña y confirmación en dos pasos; contraseña
       incorrecta; propietario de un hogar con más miembros; volver con la flecha atrás (la
       contraseña no se conserva); enlace directo sin sesión va a «Entrar»; «Cerrar sesión» con
@@ -105,7 +105,7 @@ pantalla nueva.
 - [x] O015 [P] axe-core en «Mes», «Hogar» y «Borrar mi cuenta» a 320 y 1280 px (CE-1505)
 - [ ] O016 Capturas «después» de «Mes» y «Hogar» junto a las de O001 para revisión del
       propietario; anotar las cifras en «Resultados»
-- [ ] O017 [P] `expo export --platform web` compila; `pnpm check` en verde (con la base de datos
+- [x] O017 [P] `expo export --platform web` compila; `pnpm check` en verde (con la base de datos
       en marcha para los tests del servidor)
 - [x] O018 Actualizar `AGENTS.md` («Estado actual»: una línea con `limitRows`, `delete-account` y
       el botón `destructive`) y marcar las tareas; la prueba en Android con el APK queda
@@ -178,3 +178,12 @@ completo; O018.
 **Observaciones fuera de alcance:** en «Pagos», el botón «+» tapa el final de «+ Nuevo pago
 recurrente». (El mando del interruptor, que en la web salía verde azulado, se arregló con
 `switchColors.web.ts`.)
+
+**Con la pila real (2026-11-12, servidor y PostgreSQL locales, web servida por el propio servidor):**
+
+- Contraseña incorrecta: error «La contraseña no es correcta.» y la cuenta sigue.
+- Desde «Hogar», la fila «Borrar mi cuenta» abre la pantalla con el campo vacío.
+- Borrar con la contraseña correcta y dos pulsaciones: vuelve a «Entrar»; en la base de datos no
+  quedan usuario ni hogar ni dispositivos, y entrar de nuevo da 401 (CE-1504).
+- El enlace directo a `/delete-account` sin sesión lleva a «Entrar».
+- Sin probar: «Cerrar sesión» con pendientes sin enviar (necesita la compilación con la bandeja).
