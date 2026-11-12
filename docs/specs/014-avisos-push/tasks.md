@@ -106,15 +106,15 @@ fallar antes de implementar.
 
 ## Fase 3: Historia 2 — Desactivar los avisos de un hogar (P2)
 
-- [ ] P018 [US2] Tests en `test/members.test.ts`: `PATCH members/me` con
+- [x] P018 [US2] Tests en `test/members.test.ts`: `PATCH members/me` con
       `activityAlertsEnabled` (solo el propio, en cada hogar por separado, lector también
       puede); con la preferencia apagada no se avisa y en su otro hogar sí (CE-1402); un hogar
       nuevo o una invitación aceptada empiezan con `true`; la exportación la incluye.
       Implementación
-- [ ] P019 [US2] Pantalla «Hogar» (`app/(app)/(tabs)/account.tsx`): interruptor «Cambios de
+- [x] P019 [US2] Pantalla «Hogar» (`app/(app)/(tabs)/account.tsx`): interruptor «Cambios de
       otros miembros» en la sección de avisos, con la nota sobre Expo (RF-1413) y, en la web,
       la de que solo llegan en Android. Textos en `src/i18n/es.ts`; etiqueta accesible
-- [ ] P020 [US2] `CACHE_BUSTER` → `avisos-push-1` en `src/cache/query-client.ts`
+- [x] P020 [US2] `CACHE_BUSTER` → `avisos-push-1` en `src/cache/query-client.ts`
 
 **Punto de control**: RF-1407 y RF-1408.
 

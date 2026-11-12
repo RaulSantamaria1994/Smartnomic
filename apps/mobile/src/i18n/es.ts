@@ -210,6 +210,14 @@ export const es = {
     webNote:
       'Los avisos solo llegan en la app de Android. En el navegador, los pagos que vencen pronto aparecen destacados en la pantalla principal.',
     back: 'Volver',
+    /** Avisos de lo que apuntan otros miembros (especificación 014, RF-1407, RF-1413). */
+    activityTitle: 'Avisos de otros miembros',
+    activityEnabled: 'Cambios de otros miembros',
+    activityHint:
+      'Un aviso cuando otro miembro apunta un movimiento, paga un recibo o mueve una hucha de este hogar.',
+    activityExpoNote: 'El texto del aviso pasa por el servicio de avisos de Expo.',
+    activityWebNote:
+      'Solo llegan en la app de Android; aquí puedes elegir si los quieres en tus móviles.',
   },
   householdSettings: {
     title: 'Ajustes del hogar',
