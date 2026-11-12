@@ -14,8 +14,7 @@ import { useCan, useInvitations, useMembers } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
 import { invitationLink } from '../../../src/invite-link';
 import { shareText } from '../../../src/share';
-import { colors, spacing } from '../../../src/theme';
-import { color, typography } from '../../../src/design/tokens';
+import { color, spacing, typography } from '../../../src/design/tokens';
 import { useHousehold } from '../../../src/households/active';
 
 type Invitable = 'editor' | 'viewer';
@@ -306,9 +305,9 @@ const styles = StyleSheet.create({
   },
   section: { gap: spacing.sm },
   sectionTitle: { ...typography.label, color: color.text.accent, paddingTop: spacing.sm },
-  label: { ...typography.body, color: colors.text },
+  label: { ...typography.body, color: color.text.primary },
   code: { ...typography.label, letterSpacing: 1 },
-  muted: { ...typography.caption, color: colors.muted },
+  muted: { ...typography.caption, color: color.text.muted },
   chips: { flexDirection: 'row', gap: spacing.sm },
   actions: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md },
   invitation: {

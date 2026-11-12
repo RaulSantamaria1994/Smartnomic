@@ -2,8 +2,7 @@ import { monthGrid, parseDate, type DateString } from '@smartnomic/domain';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatDay } from '../format';
 import { es } from '../i18n/es';
-import { colors, spacing } from '../theme';
-import { color, typography } from '../design/tokens';
+import { color, spacing, typography } from '../design/tokens';
 
 interface Props {
   month: string;
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
     ...typography.small,
     flex: 1,
     textAlign: 'center',
-    color: colors.muted,
+    color: color.text.muted,
     paddingVertical: spacing.sm,
   },
   cell: { flex: 1, minHeight: 48, minWidth: 0 },
@@ -142,10 +141,10 @@ const styles = StyleSheet.create({
   today: { borderColor: color.border.focus },
   selected: { backgroundColor: color.bg.accent, borderColor: color.bg.accent },
   pressed: { opacity: 0.7 },
-  number: { ...typography.body, color: colors.text },
+  number: { ...typography.body, color: color.text.primary },
   todayText: { ...typography.bodyStrong, color: color.text.accent },
-  selectedText: { color: colors.onPrimary },
+  selectedText: { color: color.text.onAccent },
   markRow: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 10 },
   mark: { width: 5, height: 5, borderRadius: 3 },
-  count: { ...typography.small, color: colors.muted },
+  count: { ...typography.small, color: color.text.muted },
 });

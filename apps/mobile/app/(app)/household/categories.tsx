@@ -17,9 +17,8 @@ import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
 import { useCan, useCategories } from '../../../src/hooks/data';
 import { es } from '../../../src/i18n/es';
-import { colors, spacing } from '../../../src/theme';
 import { CategoryIcon } from '../../../src/design/CategoryIcon';
-import { categoryPalette, color as tokens, typography } from '../../../src/design/tokens';
+import { categoryPalette, color as tokens, spacing, typography } from '../../../src/design/tokens';
 import { useHousehold } from '../../../src/households/active';
 
 /** Colores para elegir: con contraste suficiente sobre blanco (constitución, art. VIII). */
@@ -265,8 +264,8 @@ const styles = StyleSheet.create({
   section: { gap: spacing.sm },
   // Subtítulo pequeño en verde y listas con separadores, sin tarjetas (especificación 006).
   sectionTitle: { ...typography.label, color: tokens.text.accent, paddingTop: spacing.sm },
-  label: { ...typography.small, color: colors.muted },
-  muted: { ...typography.caption, color: colors.muted },
+  label: { ...typography.small, color: tokens.text.muted },
+  muted: { ...typography.caption, color: tokens.text.muted },
   card: { gap: spacing.sm + 4 },
   row: {
     gap: spacing.xs,
@@ -276,7 +275,7 @@ const styles = StyleSheet.create({
   },
   rowMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44 },
   swatch: { width: 12, height: 12, borderRadius: 6 },
-  name: { ...typography.body, color: colors.text, flex: 1 },
+  name: { ...typography.body, color: tokens.text.primary, flex: 1 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   colorDot: { width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: 'transparent' },
