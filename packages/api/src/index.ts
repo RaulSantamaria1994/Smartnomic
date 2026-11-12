@@ -9,6 +9,7 @@ export * from './schemas/common';
 export * from './schemas/exportCsv';
 export * from './schemas/households';
 export * from './schemas/members';
+export * from './schemas/push';
 export * from './schemas/recurring';
 export * from './schemas/realtime';
 export * from './schemas/savings';

@@ -1,8 +1,17 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { CATEGORY_ICONS, EMOJI_TO_CATEGORY_ICON } from '@smartnomic/domain';
 import { and, eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { budgets, categories, savingsEntries, savingsGoals } from '../src/db/schema';
+import {
+  budgets,
+  categories,
+  members,
+  pushDevices,
+  savingsEntries,
+  savingsGoals,
+  sessions,
+  users,
+} from '../src/db/schema';
 import { me, newId, signUp, useTestServer } from './helpers';
 
 const ctx = useTestServer();
@@ -202,5 +211,104 @@ describe('0007_budgets (especificación 007)', () => {
         .insert(budgets)
         .values(budget(a, expense, { validFrom: '2027-01-01', amountCents: 0 })),
     ).rejects.toThrow();
+  });
+});
+
+describe('0009_push (especificación 014)', () => {
+  const migrationsDir = new URL('../src/db/migrations/', import.meta.url);
+  const PUSH_SQL = () =>
+    readFileSync(
+      new URL(
+        readdirSync(migrationsDir).find((f) => f.startsWith('0009_'))!,
+        migrationsDir,
+      ),
+      'utf8',
+    );
+
+  const token = (n: string) => `ExponentPushToken[${n}]`;
+
+  async function sessionOf(userId: string): Promise<string> {
+    const [row] = await ctx.db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(eq(sessions.userId, userId));
+    return row!.id;
+  }
+
+  it('los miembros nuevos tienen los avisos de actividad activados', async () => {
+    const owner = await signUp(ctx.app);
+    const [member] = await ctx.db.select().from(members).where(eq(members.userId, owner.id));
+    expect(member!.activityAlertsEnabled).toBe(true);
+    expect(member!.remindersEnabled).toBe(true);
+  });
+
+  it('los miembros que ya existían antes de la migración quedan con los avisos activados', async () => {
+    const owner = await signUp(ctx.app);
+    // Se vuelve al estado anterior a la migración y se aplica, con el miembro ya creado.
+    await ctx.db.execute(sql`DROP TABLE push_devices`);
+    await ctx.db.execute(sql`ALTER TABLE members DROP COLUMN activity_alerts_enabled`);
+    await ctx.db.execute(sql.raw(PUSH_SQL()));
+    const [member] = await ctx.db.select().from(members).where(eq(members.userId, owner.id));
+    expect(member!.activityAlertsEnabled).toBe(true);
+  });
+
+  it('la preferencia de actividad es independiente de la de recordatorios', async () => {
+    const owner = await signUp(ctx.app);
+    await ctx.db
+      .update(members)
+      .set({ activityAlertsEnabled: false })
+      .where(eq(members.userId, owner.id));
+    const [member] = await ctx.db.select().from(members).where(eq(members.userId, owner.id));
+    expect(member).toMatchObject({ activityAlertsEnabled: false, remindersEnabled: true });
+  });
+
+  it('un token solo puede figurar una vez, y una persona puede tener varios móviles', async () => {
+    const owner = await signUp(ctx.app);
+    const session = await sessionOf(owner.id);
+    await ctx.db
+      .insert(pushDevices)
+      .values({ token: token('a'), userId: owner.id, sessionId: session });
+    await expect(
+      ctx.db
+        .insert(pushDevices)
+        .values({ token: token('a'), userId: owner.id, sessionId: session }),
+    ).rejects.toThrow();
+    await ctx.db
+      .insert(pushDevices)
+      .values({ token: token('b'), userId: owner.id, sessionId: session });
+    expect(await ctx.db.select().from(pushDevices)).toHaveLength(2);
+  });
+
+  it('un dispositivo no puede apuntar a una sesión que no existe', async () => {
+    const owner = await signUp(ctx.app);
+    await expect(
+      ctx.db
+        .insert(pushDevices)
+        .values({ token: token('a'), userId: owner.id, sessionId: 'no-existe' }),
+    ).rejects.toThrow();
+  });
+
+  it('borrar la sesión borra el dispositivo (RF-1409: cerrar sesión corta los avisos)', async () => {
+    const owner = await signUp(ctx.app);
+    const session = await sessionOf(owner.id);
+    await ctx.db
+      .insert(pushDevices)
+      .values({ token: token('a'), userId: owner.id, sessionId: session });
+    await ctx.db.delete(sessions).where(eq(sessions.id, session));
+    expect(await ctx.db.select().from(pushDevices)).toHaveLength(0);
+  });
+
+  it('borrar la cuenta borra sus dispositivos y no los de otra persona', async () => {
+    const a = await signUp(ctx.app);
+    const b = await signUp(ctx.app);
+    await ctx.db
+      .insert(pushDevices)
+      .values({ token: token('a'), userId: a.id, sessionId: await sessionOf(a.id) });
+    await ctx.db
+      .insert(pushDevices)
+      .values({ token: token('b'), userId: b.id, sessionId: await sessionOf(b.id) });
+    await ctx.db.delete(users).where(eq(users.id, a.id));
+    const left = await ctx.db.select().from(pushDevices);
+    expect(left.map((d) => d.token)).toEqual([token('b')]);
   });
 });

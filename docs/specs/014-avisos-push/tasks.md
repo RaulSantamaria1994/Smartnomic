@@ -34,15 +34,15 @@ fallar antes de implementar.
 
 **Objetivo**: la función común de importes, los esquemas y las tablas.
 
-- [ ] P004 [P] `formatCents` en `packages/domain/src/money.ts` con sus tests (cero, céntimos,
+- [x] P004 [P] `formatCents` en `packages/domain/src/money.ts` con sus tests (cero, céntimos,
       miles, millones, negativos, otra moneda, espacio duro); `apps/mobile/src/format.ts`
       reexporta `formatMoney` desde ella y sus tests siguen pasando
-- [ ] P005 [P] `pushDeviceSchema` (`packages/api/src/schemas/push.ts`) con tests (tokens
+- [x] P005 [P] `pushDeviceSchema` (`packages/api/src/schemas/push.ts`) con tests (tokens
       válidos `ExponentPushToken[…]` y `ExpoPushToken[…]`; vacío, sin corchetes, demasiado
       largo, caracteres raros)
-- [ ] P006 [P] `activityAlertsEnabled` en `memberSchema` (opcional en la respuesta para la APK
+- [x] P006 [P] `activityAlertsEnabled` en `memberSchema` (opcional en la respuesta para la APK
       antigua) y en `updateMyMemberSchema`, con tests
-- [ ] P007 Esquema Drizzle: `members.activity_alerts_enabled` (`DEFAULT true`) y tabla
+- [x] P007 Esquema Drizzle: `members.activity_alerts_enabled` (`DEFAULT true`) y tabla
       `push_devices` (FK a `users` y `sessions` con `ON DELETE CASCADE`, índice por `user_id`);
       `pnpm --filter @smartnomic/server db:generate`; test en `test/migrations.test.ts` de que
       los miembros existentes quedan con `true`
