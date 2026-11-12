@@ -2,6 +2,7 @@
   "expo": {
     "name": "Smartnomic",
     "slug": "smartnomic",
+    "owner": "raulsd",
     "scheme": "smartnomic",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -51,6 +52,11 @@
         }
       ]
     ],
-    "icon": "./assets/icon.png"
+    "icon": "./assets/icon.png",
+    "extra": {
+      "eas": {
+        "projectId": "9d0e2f61-6328-4f92-b8a7-c38e69dc5124"
+      }
+    }
   }
 }
