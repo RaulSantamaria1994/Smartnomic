@@ -11,8 +11,7 @@ import { useCan, useMembers } from '../../../src/hooks/data';
 import { AppText } from '../../../src/design';
 import { exportHousehold } from '../../../src/export/export-household';
 import { es } from '../../../src/i18n/es';
-import { colors } from '../../../src/theme';
-import { spacing, typography } from '../../../src/design/tokens';
+import { color, spacing, typography } from '../../../src/design/tokens';
 import { useHousehold } from '../../../src/households/active';
 
 /** Nombre del hogar y día de inicio del mes (T092, RF-003). Solo el propietario. */
@@ -144,6 +143,6 @@ export default function HouseholdSettings() {
 }
 
 const styles = StyleSheet.create({
-  muted: { ...typography.body, color: colors.muted },
+  muted: { ...typography.body, color: color.text.muted },
   danger: { gap: spacing.md, marginTop: spacing.lg },
 });

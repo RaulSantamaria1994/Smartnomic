@@ -10,8 +10,7 @@ import { Screen } from '../../src/components/Screen';
 import { formatDay } from '../../src/format';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
-import { colors } from '../../src/theme';
-import { typography } from '../../src/design/tokens';
+import { color, typography } from '../../src/design/tokens';
 import { useHousehold, useSwitchHousehold } from '../../src/households/active';
 
 /**
@@ -135,6 +134,6 @@ function blockerText(p: InvitationPreview): string | null {
 }
 
 const styles = StyleSheet.create({
-  text: { ...typography.body, color: colors.text },
-  muted: { ...typography.caption, color: colors.muted },
+  text: { ...typography.body, color: color.text.primary },
+  muted: { ...typography.caption, color: color.text.muted },
 });

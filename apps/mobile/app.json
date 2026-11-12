@@ -30,7 +30,7 @@
       "output": "single",
       "favicon": "./assets/favicon.png",
       "themeColor": "#0E5A4C",
-      "backgroundColor": "#F6F4EF"
+      "backgroundColor": "#FFFFFF"
     },
     "plugins": [
       "expo-router",

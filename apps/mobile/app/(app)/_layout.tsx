@@ -10,7 +10,7 @@ import { useRealtime } from '../../src/realtime/useRealtime';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
 import { sessionEnd } from '../../src/session/session-ended';
-import { colors } from '../../src/theme';
+import { color } from '../../src/design/tokens';
 
 /** Pantallas que necesitan sesión: sin ella, se va a entrar. */
 export default function AppLayout() {
@@ -18,7 +18,7 @@ export default function AppLayout() {
 
   if (isPending) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.background }}>
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: color.bg.canvas }}>
         <ActivityIndicator accessibilityLabel={es.common.loading} />
       </View>
     );
