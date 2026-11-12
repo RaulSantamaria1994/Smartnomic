@@ -125,6 +125,9 @@ export const es = {
     title: 'Pagos recurrentes',
     upcomingTitle: 'Próximos pagos',
     noUpcoming: 'No hay pagos en los próximos 30 días.',
+    /** «Ver todos» de «Mes» (especificación 015): el nombre largo es para el lector de pantalla. */
+    seeAll: 'Ver todos',
+    seeAllLabel: 'Ver todos los pagos',
     manage: 'Gestionar',
     empty:
       'Aún no hay pagos recurrentes. Da de alta el alquiler, la luz o la nómina para verlos aquí.',
@@ -353,6 +356,9 @@ export const es = {
     left: (amount: string) => `Te quedan ${amount}`,
     over: (amount: string) => `Te has pasado ${amount}`,
     edit: 'Editar presupuestos',
+    /** «Ver todos» de «Mes» (especificación 015): el nombre largo es para el lector de pantalla. */
+    seeAll: 'Ver todos',
+    seeAllLabel: 'Ver todos los presupuestos',
     start: 'Ponerle un límite a una categoría',
     startHint: 'Por ejemplo, lo que quieres gastar al mes en el supermercado.',
   },

@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { AppText } from '../design/Text';
 import { color, radius, size, spacing } from '../design/tokens';
 
-type Variant = 'primary' | 'secondary' | 'link' | 'danger';
+type Variant = 'primary' | 'secondary' | 'link' | 'danger' | 'destructive';
 
 interface Props {
   label: string;
@@ -19,7 +19,11 @@ const TEXT_TONE = {
   secondary: 'link',
   link: 'link',
   danger: 'danger',
+  destructive: 'onAccent',
 } as const;
+
+/** Variantes con fondo de color: el ripple y el indicador de carga van en claro. */
+const FILLED: readonly Variant[] = ['primary', 'destructive'];
 
 export function Button({
   label,
@@ -38,7 +42,7 @@ export function Button({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: inactive, busy: Boolean(loading) }}
       android_ripple={{
-        color: variant === 'primary' ? color.text.onAccentMuted : color.bg.accentSoft,
+        color: FILLED.includes(variant) ? color.text.onAccentMuted : color.bg.accentSoft,
       }}
       style={({ pressed }) => [
         styles.base,
@@ -48,7 +52,9 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? color.text.onAccent : color.text.link} />
+        <ActivityIndicator
+          color={FILLED.includes(variant) ? color.text.onAccent : color.text.link}
+        />
       ) : (
         <AppText variant="bodyStrong" tone={TEXT_TONE[variant]}>
           {label}
@@ -78,6 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.text.danger,
   },
+  destructive: { backgroundColor: color.bg.destructive },
   link: { minHeight: size.touch, paddingHorizontal: spacing.sm },
   pressed: { opacity: 0.8 },
   inactive: { opacity: 0.5 },
