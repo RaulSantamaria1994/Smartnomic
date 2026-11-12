@@ -180,6 +180,8 @@ export const es = {
   },
   reminders: {
     channel: 'Vencimientos',
+    /** Canal de Android de los avisos de otros miembros (especificación 014, RF-1408). */
+    activityChannel: 'Cambios de otros miembros',
     pay: 'vence',
     collect: 'cobras',
     today: 'Hoy',

@@ -18,9 +18,7 @@ export async function requestPermission(): Promise<PermissionStatus> {
 
 export async function openNotificationSettings(): Promise<void> {}
 
-/** Al tocar un aviso. En la web no hay avisos: no hace nada. */
-export function onReminderOpened(
-  _handler: (target: { ruleId: string; dueDate: string; householdId?: string }) => void,
-): () => void {
+/** Al tocar una notificación. En la web no hay avisos: no hace nada. */
+export function onNotificationOpened(_handler: (data: unknown) => void): () => void {
   return () => {};
 }

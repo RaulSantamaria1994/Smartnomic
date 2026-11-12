@@ -11,6 +11,7 @@ import {
   addDays,
   compareDates,
   daysBetween,
+  isValidDate,
   limitRows,
   MONTH_BUDGET_ROWS,
   MONTH_UPCOMING_ROWS,
@@ -22,8 +23,8 @@ import {
   shiftPeriod,
   type DateString,
 } from '@smartnomic/domain';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '../../../src/api/http';
@@ -100,6 +101,16 @@ export default function Month() {
   const thisPeriod = household
     ? currentPeriodStart(household.timezone, household.monthStartDay)
     : undefined;
+  // Un aviso de actividad abre «Mes» en el mes del movimiento (`?date=…`, especificación 014,
+  // RF-1406); `at` cambia en cada toque, para que el mismo aviso otra vez vuelva a ese mes.
+  const { date: openDate, at: openedAt } = useLocalSearchParams<{ date?: string; at?: string }>();
+  const monthStartDay = household?.monthStartDay;
+  useEffect(() => {
+    if (!openDate || !isValidDate(openDate) || monthStartDay === undefined) return;
+    setDirection(1);
+    setStart(periodOf(openDate, monthStartDay).start);
+    setShown(PAGE_SIZE);
+  }, [openDate, openedAt, monthStartDay]);
   const periodStart = start ?? thisPeriod;
   const period = usePeriod(household?.id, periodStart);
   const categories = useCategories(household?.id);

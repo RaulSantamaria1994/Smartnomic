@@ -1,12 +1,13 @@
-import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo } from 'react';
 import { AppState } from 'react-native';
 import { api, queryKeys } from '../api/client';
 import { useHousehold, useSwitchHousehold } from '../households/active';
-import { planAllReminders, reminderRoute, type HouseholdReminders } from '../reminders/plan';
+import { notificationTarget, routeIfExists, type KnownHousehold } from '../notifications/target';
+import { planAllReminders, type HouseholdReminders } from '../reminders/plan';
 import {
-  onReminderOpened,
+  onNotificationOpened,
   permissionStatus,
   remindersSupported,
   requestPermission,
@@ -99,13 +100,42 @@ export function useReminderSync(): void {
     return () => subscription.remove();
   }, [me.data, household, queryClient, setPermission]);
 
-  // Tocar un aviso elige su hogar y abre el vencimiento (RF-034, RF-1310).
+  // Tocar una notificación, de un recordatorio o de actividad, elige su hogar y abre su pantalla
+  // (RF-034, RF-1310, especificación 014, RF-1406). Los datos se traducen en `target.ts`.
   useEffect(
     () =>
-      onReminderOpened(({ ruleId, dueDate, householdId }) => {
-        if (householdId) switchTo(householdId);
-        router.push(reminderRoute(ruleId, dueDate));
+      onNotificationOpened((data) => {
+        const target = notificationTarget(data);
+        if (!target) return;
+        if (target.householdId) switchTo(target.householdId);
+        // Una hucha o un pago que ya no existen llevan a «Mes» de ese hogar (RF-1406), según lo
+        // que se sepa de él; sin datos cargados, la pantalla ya avisa de que no existe.
+        const route = target.householdId
+          ? routeIfExists(target.route, knownIn(queryClient, target.householdId))
+          : target.route;
+        // «Mes» es una pestaña: se va a ella en lugar de apilarla sobre lo que hubiera.
+        if (route.pathname === '/') {
+          router.navigate(
+            route.params
+              ? { ...route, params: { ...route.params, at: String(Date.now()) } }
+              : route,
+          );
+        } else router.push(route);
       }),
-    [switchTo],
+    [switchTo, queryClient],
   );
+}
+
+/** Huchas y pagos de un hogar que ya están en la caché, o `null` si aún no se han cargado. */
+function knownIn(queryClient: QueryClient, householdId: string): KnownHousehold {
+  const savings = queryClient.getQueryData<Awaited<ReturnType<typeof api.savings>>>(
+    queryKeys.savings(householdId),
+  );
+  const rules = queryClient.getQueryData<Awaited<ReturnType<typeof api.recurring>>>(
+    queryKeys.recurring(householdId),
+  );
+  return {
+    goalIds: savings ? new Set(savings.goals.map((g) => g.id)) : null,
+    ruleIds: rules ? new Set(rules.rules.map((r) => r.id)) : null,
+  };
 }

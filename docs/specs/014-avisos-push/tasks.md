@@ -88,14 +88,14 @@ fallar antes de implementar.
 
 ### App
 
-- [ ] P015 [P] [US1] `src/push/push.native.ts` y `push.ts` (web vacío): `pushSupported`,
+- [x] P015 [P] [US1] `src/push/push.native.ts` y `push.ts` (web vacío): `pushSupported`,
       `getPushToken` (con el `projectId` de `expo-constants`) y canal `actividad`. Textos del
       canal en `src/i18n/es.ts`
-- [ ] P016 [US1] `usePushRegistration` en `SignedIn`: con permiso, al abrir y al volver a primer
+- [x] P016 [US1] `usePushRegistration` en `SignedIn`: con permiso, al abrir y al volver a primer
       plano registra el token si cambió (test de la decisión «registrar o no»); oyente de
       rotación del token. `api.registerPushDevice` y `api.unregisterPushDevice` en
       `src/api/client.ts`
-- [ ] P017 [US1] Tests de `src/notifications/target.ts` (recordatorio, movimiento → su mes,
+- [x] P017 [US1] Tests de `src/notifications/target.ts` (recordatorio, movimiento → su mes,
       vencimiento, hucha, varios → «Mes», sin hogar, datos malos) e implementación;
       `useReminderSync` lo usa en su oyente y cambia de hogar antes de navegar. Hucha que ya no
       existe → «Mes» de ese hogar (RF-1406)

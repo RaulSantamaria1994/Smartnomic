@@ -70,21 +70,14 @@ export async function openNotificationSettings(): Promise<void> {
   await Linking.openSettings();
 }
 
-/** Al tocar un aviso se abre su vencimiento (RF-034), también si la app estaba cerrada. */
-export function onReminderOpened(
-  handler: (target: { ruleId: string; dueDate: string; householdId?: string }) => void,
-): () => void {
+/**
+ * Al tocar una notificación (un recordatorio de pago o un aviso de actividad) se entregan sus
+ * datos, también si la app estaba cerrada (RF-034, especificación 014, RF-1406). Qué significan
+ * lo decide `notifications/target.ts`: lo que llega aquí no se da por bueno.
+ */
+export function onNotificationOpened(handler: (data: unknown) => void): () => void {
   const open = (response: Notifications.NotificationResponse | null) => {
-    const data = response?.notification.request.content.data as
-      { ruleId?: unknown; dueDate?: unknown; householdId?: unknown } | undefined;
-    if (typeof data?.ruleId === 'string' && typeof data.dueDate === 'string') {
-      handler({
-        ruleId: data.ruleId,
-        dueDate: data.dueDate,
-        // Los avisos programados antes de varios hogares no lo llevan.
-        ...(typeof data.householdId === 'string' && { householdId: data.householdId }),
-      });
-    }
+    if (response) handler(response.notification.request.content.data);
   };
   void Notifications.getLastNotificationResponseAsync().then(open);
   const subscription = Notifications.addNotificationResponseReceivedListener(open);

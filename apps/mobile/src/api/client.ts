@@ -131,6 +131,12 @@ export const api = {
     }),
   exportHousehold: (householdId: string) =>
     request(`${household(householdId)}/export`, { schema: householdExportSchema }),
+  /** Da de alta o reasigna este móvil como destino de avisos push (especificación 014). */
+  registerPushDevice: (token: string) =>
+    request('/api/push-device', { method: 'PUT', body: { token }, schema: z.null() }),
+  /** Da de baja un móvil; 204 aunque ya no figure. */
+  unregisterPushDevice: (token: string) =>
+    request('/api/push-device', { method: 'DELETE', body: { token }, schema: z.null() }),
   deleteAccount: (password: string) =>
     request('/api/account', { method: 'DELETE', body: { password }, schema: z.null() }),
   members: (householdId: string) =>
