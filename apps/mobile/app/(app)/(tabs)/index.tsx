@@ -11,6 +11,9 @@ import {
   addDays,
   compareDates,
   daysBetween,
+  limitRows,
+  MONTH_BUDGET_ROWS,
+  MONTH_UPCOMING_ROWS,
   sortBudgets,
   budgetsWithPending,
   pendingInPeriod,
@@ -294,8 +297,9 @@ export default function Month() {
 }
 
 /**
- * Presupuestos del periodo (especificación 007, historia 2): de más a menos gastado. Sin
- * ninguno, quien puede ponerlos ve una fila para empezar; quien no, nada.
+ * Presupuestos del periodo (especificación 007, historia 2): de más a menos gastado, los 3
+ * primeros y «Ver todos» si hay más (especificación 015). Sin ninguno, quien puede ponerlos ve
+ * una sola fila para empezar; quien no, nada.
  */
 function BudgetSection({
   budgets,
@@ -310,23 +314,22 @@ function BudgetSection({
   if (budgets.length === 0) {
     if (!canWrite) return null;
     return (
-      <Section title={es.budgets.title} separated>
-        <ListRow
-          title={es.budgets.start}
-          detail={es.budgets.startHint}
-          onPress={() => router.push('/budgets')}
-          accessibilityLabel={es.budgets.start}
-          leading={<Icon name="budget" tint={color.text.muted} />}
-        />
-      </Section>
+      <ListRow
+        title={es.budgets.start}
+        detail={es.budgets.startHint}
+        onPress={() => router.push('/budgets')}
+        accessibilityLabel={es.budgets.start}
+        leading={<Icon name="budget" tint={color.text.muted} />}
+      />
     );
   }
   const rows = sortBudgets(
     budgets.map((b) => ({ ...b, name: categories.get(b.categoryId)?.name ?? '—' })),
   );
+  const { shown, hidden } = limitRows(rows, MONTH_BUDGET_ROWS);
   return (
     <Section title={es.budgets.title} separated>
-      {rows.map((b) => {
+      {shown.map((b) => {
         const category = categories.get(b.categoryId);
         return (
           <BudgetRow
@@ -340,10 +343,26 @@ function BudgetSection({
           />
         );
       })}
-      {canWrite && (
+      {hidden > 0 ? (
+        // Lleva a la misma pantalla que «Editar presupuestos», que ya los lista todos.
         <View style={styles.more}>
-          <Button variant="link" label={es.budgets.edit} onPress={() => router.push('/budgets')} />
+          <Button
+            variant="link"
+            label={es.budgets.seeAll}
+            accessibilityLabel={es.budgets.seeAllLabel}
+            onPress={() => router.push('/budgets')}
+          />
         </View>
+      ) : (
+        canWrite && (
+          <View style={styles.more}>
+            <Button
+              variant="link"
+              label={es.budgets.edit}
+              onPress={() => router.push('/budgets')}
+            />
+          </View>
+        )
       )}
     </Section>
   );
@@ -360,34 +379,26 @@ function SavingsSection({
   if (!goals) return null;
   const open = goals.filter((g) => g.plan.status !== 'closed');
   if (open.length === 0 && !canWrite) return null;
+  // Sin huchas, una sola fila para empezar, sin el título encima (especificación 015).
+  if (open.length === 0) {
+    return (
+      <ListRow
+        title={es.savings.startOne}
+        detail={es.savings.emptyHint}
+        onPress={() => router.push('/savings/new')}
+        accessibilityLabel={es.savings.startOne}
+        leading={<CategoryIcon icon="savings" tone={color.text.muted} />}
+      />
+    );
+  }
   return (
     <Section title={es.savings.title} separated>
-      {open.length === 0 ? (
-        <ListRow
-          title={es.savings.startOne}
-          detail={es.savings.emptyHint}
-          onPress={() => router.push('/savings/new')}
-          accessibilityLabel={es.savings.startOne}
-          leading={<CategoryIcon icon="savings" tone={color.text.muted} />}
-        />
-      ) : (
-        <>
-          {open.slice(0, 3).map((goal) => (
-            <SavingsRow
-              key={goal.id}
-              goal={goal}
-              onPress={() => router.push(`/savings/${goal.id}`)}
-            />
-          ))}
-          <View style={styles.more}>
-            <Button
-              variant="link"
-              label={es.savings.seeAll}
-              onPress={() => router.push('/savings')}
-            />
-          </View>
-        </>
-      )}
+      {open.slice(0, 3).map((goal) => (
+        <SavingsRow key={goal.id} goal={goal} onPress={() => router.push(`/savings/${goal.id}`)} />
+      ))}
+      <View style={styles.more}>
+        <Button variant="link" label={es.savings.seeAll} onPress={() => router.push('/savings')} />
+      </View>
     </Section>
   );
 }
@@ -472,19 +483,44 @@ function Upcoming({
       ];
     }),
   ].sort((a, b) => compareDates(a.dueDate, b.dueDate));
+  // Sin ninguna regla, una sola fila (sin acción, como el estado vacío de antes).
+  if (rules.length === 0 && entries.length === 0) {
+    return (
+      <ListRow
+        title={es.recurring.upcomingTitle}
+        detail={
+          <AppText variant="caption" tone="muted" numberOfLines={2}>
+            {es.recurring.empty}
+          </AppText>
+        }
+        leading={<Icon name="recurring" tint={color.text.muted} />}
+        accessibilityLabel={`${es.recurring.upcomingTitle}. ${es.recurring.empty}`}
+      />
+    );
+  }
+  // Los atrasados no se esconden nunca (especificación 015, RF-1503).
+  const { shown, hidden } = limitRows(entries, MONTH_UPCOMING_ROWS, (e) => e.overdue);
   return (
-    <Section title={es.recurring.upcomingTitle} separated={entries.length === 0}>
-      {rules.length === 0 && entries.length === 0 && (
-        <EmptyState icon="recurring" title={es.recurring.empty} />
-      )}
-      {rules.length > 0 && entries.length === 0 && (
+    <Section title={es.recurring.upcomingTitle} separated={entries.length === 0 || hidden > 0}>
+      {entries.length === 0 && (
         <AppText variant="caption" tone="muted" style={styles.none}>
           {es.recurring.noUpcoming}
         </AppText>
       )}
-      {entries.map((entry) => (
+      {shown.map((entry) => (
         <UpcomingRow key={entry.key} entry={entry} today={today} />
       ))}
+      {hidden > 0 && (
+        <View style={styles.more}>
+          <Button
+            variant="link"
+            label={es.recurring.seeAll}
+            accessibilityLabel={es.recurring.seeAllLabel}
+            // La pestaña «Pagos»: `navigate` evita apilarla sobre «Mes».
+            onPress={() => router.navigate('/recurring')}
+          />
+        </View>
+      )}
     </Section>
   );
 }

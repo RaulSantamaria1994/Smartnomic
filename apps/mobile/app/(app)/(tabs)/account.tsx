@@ -7,11 +7,8 @@ import { Button } from '../../../src/components/Button';
 import { Message } from '../../../src/components/Message';
 import { Screen } from '../../../src/components/Screen';
 import { TextField } from '../../../src/components/TextField';
-import { useCan, useMembers } from '../../../src/hooks/data';
+import { useCan } from '../../../src/hooks/data';
 import { exportHousehold } from '../../../src/export/export-household';
-import { clearCache } from '../../../src/cache/query-client';
-import { syncReminders } from '../../../src/reminders/reminders';
-import { authClient } from '../../../src/session/auth-client';
 import { es } from '../../../src/i18n/es';
 import { remindersSupported } from '../../../src/reminders/reminders';
 import { signOut } from '../../../src/session/sign-out';
@@ -27,7 +24,8 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /**
  * Pestaña «Hogar»: miembros, ajustes y categorías del hogar, y los ajustes de cada miembro
- * (avisos, RF-030 y RF-031), exportar, cerrar sesión y borrar la cuenta.
+ * (avisos, RF-030 y RF-031), exportar, cerrar sesión y el acceso a borrar la cuenta (que tiene
+ * su propia pantalla, especificación 015).
  */
 export default function Account() {
   const queryClient = useQueryClient();
@@ -38,13 +36,8 @@ export default function Account() {
   const [time, setTime] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
   const [saving, setSaving] = useState(false);
-  const members = useMembers(current?.id);
   const can = useCan();
   const [exporting, setExporting] = useState(false);
-  const [password, setPassword] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (!me.data || !current || !currentMember) {
     return (
@@ -91,29 +84,6 @@ export default function Account() {
     await outbox.clear();
     await signOut(queryClient);
   }
-
-  async function deleteAccount() {
-    setDeleteError(null);
-    if (!password) return setDeleteError(es.account.passwordRequired);
-    if (!confirmDelete) return setConfirmDelete(true);
-    setDeleting(true);
-    try {
-      await api.deleteAccount(password);
-      // Desde aquí los 401 son por haber borrado la cuenta, no una sesión caducada.
-      sessionEnd.leaving();
-    } catch (e) {
-      setDeleting(false);
-      setConfirmDelete(false);
-      return setDeleteError(e instanceof Error ? e.message : es.auth.errors.unknown);
-    }
-    // La sesión ya no existe en el servidor: se limpia lo que queda en el dispositivo.
-    await Promise.all([clearCache(queryClient), syncReminders([]), outbox.clear()]);
-    await authClient.signOut().catch(() => undefined);
-    router.replace('/entrar');
-  }
-
-  const memberCount = members.data?.members.length ?? 1;
-  const ownerWithOthers = member.role === 'owner' && memberCount > 1;
 
   function saveTime() {
     const value = (time ?? member.reminderTime).trim();
@@ -163,7 +133,7 @@ export default function Account() {
           </AppText>
           <Switch
             value={member.remindersEnabled}
-            {...switchColors(member.remindersEnabled)}
+            {...switchColors()}
             onValueChange={(value) => void update({ remindersEnabled: value })}
             accessibilityLabel={es.settings.enabled}
             disabled={saving}
@@ -192,7 +162,7 @@ export default function Account() {
         />
       </Section>
 
-      <Section title={es.account.title} padded>
+      <Section title={es.account.title} padded separated>
         <Button variant="secondary" label={es.auth.signOut} onPress={() => void leave(false)} />
         {confirmSignOut && (
           <>
@@ -204,47 +174,14 @@ export default function Account() {
             />
           </>
         )}
-        <AppText variant="bodyStrong" accessibilityRole="header">
-          {es.account.deleteTitle}
-        </AppText>
-        <AppText variant="caption" tone="muted">
-          {es.account.deleteHint}
-        </AppText>
-        {ownerWithOthers ? (
-          <>
-            <Message text={es.account.deleteOwnerFirst} />
-            <Button
-              variant="link"
-              label={es.account.goToMembers}
-              onPress={() => router.push('/household/members')}
-            />
-          </>
-        ) : (
-          <>
-            <AppText variant="caption" tone="muted">
-              {memberCount > 1 ? es.account.deleteMember : es.account.deleteOnlyMember}
-            </AppText>
-            <TextField
-              label={es.account.password}
-              value={password}
-              onChangeText={(value) => {
-                setPassword(value);
-                setConfirmDelete(false);
-              }}
-              secureTextEntry
-              autoComplete="current-password"
-              textContentType="password"
-            />
-            {confirmDelete && <Message text={es.account.confirmDelete} />}
-            {deleteError && <Message text={deleteError} />}
-            <Button
-              variant="danger"
-              label={es.account.delete}
-              onPress={() => void deleteAccount()}
-              loading={deleting}
-            />
-          </>
-        )}
+      </Section>
+
+      <Section>
+        <MenuRow
+          icon="trash"
+          label={es.account.deleteTitle}
+          onPress={() => router.push('/delete-account')}
+        />
       </Section>
     </Screen>
   );

@@ -76,7 +76,32 @@ describe('iconTone sobre blanco (especificación 006)', () => {
   });
 });
 
+describe('botón de borrar, rojo relleno (especificación 015, RF-1507)', () => {
+  it('el texto blanco contrasta 4,5:1 con el fondo', () => {
+    expect(contrastRatio(color.text.onAccent, color.bg.destructive)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('el fondo contrasta 3:1 con la pantalla blanca', () => {
+    expect(contrastRatio(color.bg.destructive, color.bg.surface)).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('interruptor (especificación 006)', () => {
+  it('la pista activada y la desactivada contrastan 3:1 con el fondo (WCAG 1.4.11)', () => {
+    expect(contrastRatio(color.switch.track, color.bg.surface)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(color.border.strong, color.bg.surface)).toBeGreaterThanOrEqual(3);
+  });
+
+  it('el mando contrasta 3:1 con la pista activada', () => {
+    expect(contrastRatio(color.switch.thumb, color.switch.track)).toBeGreaterThanOrEqual(3);
+  });
+});
+
 describe('barras de las gráficas (especificación 008)', () => {
+  it('ingresos y gastos se distinguen por luminosidad, no solo por el matiz', () => {
+    expect(contrastRatio(color.chart.income, color.chart.expense)).toBeGreaterThanOrEqual(3);
+  });
+
   it('cada tono contrasta 3:1 con el fondo (WCAG 1.4.11)', () => {
     for (const [name, tone] of Object.entries({
       fill: color.chart.fill,
