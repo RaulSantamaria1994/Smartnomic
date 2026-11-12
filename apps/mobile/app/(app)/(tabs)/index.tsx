@@ -212,6 +212,7 @@ export default function Month() {
             today={upcoming.data?.today}
             hasRules={(rules.data?.rules.length ?? 0) > 0}
             remindersEnabled={member.remindersEnabled}
+            activityAlerts={shared && member.activityAlertsEnabled !== false}
           />
         </View>
       )}

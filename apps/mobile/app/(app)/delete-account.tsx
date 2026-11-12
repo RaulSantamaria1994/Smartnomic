@@ -14,6 +14,7 @@ import { useMembers } from '../../src/hooks/data';
 import { useHousehold } from '../../src/households/active';
 import { es } from '../../src/i18n/es';
 import { useOutbox } from '../../src/outbox/useOutbox';
+import { clearRegistration } from '../../src/push/registration-storage';
 import { syncReminders } from '../../src/reminders/reminders';
 import { authClient } from '../../src/session/auth-client';
 import { sessionEnd } from '../../src/session/session-ended';
@@ -59,7 +60,13 @@ export default function DeleteAccount() {
       return setDeleteError(e instanceof Error ? e.message : es.auth.errors.unknown);
     }
     // La sesión ya no existe en el servidor: se limpia lo que queda en el dispositivo.
-    await Promise.all([clearCache(queryClient), syncReminders([]), outbox.clear()]);
+    // El servidor ya ha borrado los dispositivos con la cuenta; aquí se olvida el registro local.
+    await Promise.all([
+      clearCache(queryClient),
+      syncReminders([]),
+      outbox.clear(),
+      clearRegistration().catch(() => undefined),
+    ]);
     await authClient.signOut().catch(() => undefined);
     router.replace('/entrar');
   }

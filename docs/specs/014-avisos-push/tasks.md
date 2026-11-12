@@ -122,9 +122,9 @@ fallar antes de implementar.
 
 ## Fase 4: Historia 3 — Permisos y dispositivos (P3)
 
-- [ ] P021 [US3] `ReminderBanners`: el aviso de permiso denegado sale también con avisos de
+- [x] P021 [US3] `ReminderBanners`: el aviso de permiso denegado sale también con avisos de
       actividad activados en algún hogar con más miembros (test de la condición)
-- [ ] P022 [US3] `session/sign-out.ts` y borrar la cuenta: `unregisterPushDevice` antes de
+- [x] P022 [US3] `session/sign-out.ts` y borrar la cuenta: `unregisterPushDevice` antes de
       cerrar sesión, sin bloquear si no hay conexión (test con el cliente falso)
 
 **Punto de control**: RF-1409 y RF-1410.

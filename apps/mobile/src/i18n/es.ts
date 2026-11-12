@@ -191,7 +191,7 @@ export const es = {
     setAside: 'apartas para',
     deniedTitle: 'Los avisos están desactivados',
     deniedText:
-      'No recibirás recordatorios de tus pagos. Actívalos en los ajustes del móvil: Notificaciones → Smartnomic.',
+      'No recibirás avisos ni recordatorios de tus pagos. Actívalos en los ajustes del móvil: Notificaciones → Smartnomic.',
     openSettings: 'Abrir ajustes',
     allow: 'Activar avisos',
     soonTitle: (count: number) =>
