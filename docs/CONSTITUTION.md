@@ -61,8 +61,9 @@ cumplirse admite excepciones justificadas por escrito en el PR.
 1. Los importes DEBEN ser enteros en céntimos (`amountCents`). NUNCA se usan decimales en
    coma flotante, `parseFloat` ni `toFixed` para calcular. En Postgres, columnas
    `bigint` (o `integer`), nunca `float`, `real` ni `money`.
-2. El formateo de importes (`1.234,56 €`) DEBE hacerse solo en la interfaz, con
-   `Intl.NumberFormat` y la moneda del hogar.
+2. El formateo de importes (`1.234,56 €`) DEBE hacerse solo al mostrarlos (en la interfaz
+   o en el texto de un aviso push, que el sistema muestra sin pasar por la app), con la
+   función común de `packages/domain` y la moneda del hogar.
 3. Las fechas de movimientos y vencimientos DEBEN ser fechas de calendario sin hora
    (`YYYY-MM-DD`; columna `date` en Postgres). Los instantes (`created_at`, auditoría) se
    guardan en UTC (`timestamptz`).
@@ -108,8 +109,11 @@ cumplirse admite excepciones justificadas por escrito en el PR.
 4. Los logs NUNCA contienen importes, notas, emails ni otros datos personales; solo
    identificadores.
 5. Los endpoints de autenticación DEBEN tener límite de peticiones.
-6. Los datos se alojan en la Unión Europea. El sistema DEBE permitir exportar todos los
-   datos de un usuario (JSON/CSV) y borrar su cuenta por completo.
+6. Los datos que se guardan se alojan en la Unión Europea. El texto de los avisos push
+   puede pasar por Expo Push y Firebase Cloud Messaging para entregarse, solo si el
+   usuario puede desactivarlos y la app le explica por dónde pasan. El sistema DEBE
+   permitir exportar todos los datos de un usuario (JSON/CSV) y borrar su cuenta por
+   completo.
 
 ## Artículo VII. Tests
 
@@ -174,9 +178,18 @@ cumplirse admite excepciones justificadas por escrito en el PR.
    - **MENOR**: se añade un artículo o se amplía uno de forma relevante.
    - **PARCHE**: aclaraciones y redacción, sin cambiar el significado.
 
-**Versión**: 1.1.1 · **Ratificada**: 2026-10-26 · **Última enmienda**: 2026-10-26
+**Versión**: 1.2.0 · **Ratificada**: 2026-10-26 · **Última enmienda**: 2026-11-10
 
 ### Historial de enmiendas
+
+- **1.2.0 (2026-11-10)**: III.2 permite formatear importes en el texto de un aviso push
+  (que se compone en el servidor, porque con la app cerrada el sistema lo muestra tal cual)
+  con una función común de `packages/domain`, y deja de exigir `Intl.NumberFormat`, que la
+  app ya no usaba. VI.6 precisa que se alojan en la UE los datos que se guardan y admite que
+  el texto de los avisos push pase por Expo Push y FCM si se pueden desactivar y se explica.
+  Motivo: avisos push de cambios de otros miembros
+  (`docs/specs/014-avisos-push/spec.md`). Impacto: `formatMoney` pasa de
+  `apps/mobile/src/format.ts` a `packages/domain`; lo demás llega con esa funcionalidad.
 
 - **1.1.1 (2026-10-26)**: las referencias a `docs/specs/PLAN.md`, que desaparece, pasan a
   `docs/specs/`, donde cada funcionalidad tiene su especificación, plan y tareas.
