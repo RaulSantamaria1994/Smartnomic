@@ -11,3 +11,6 @@ expo-env.d.ts
 # Carpetas nativas que genera «expo prebuild» (EAS las crea en cada compilación).
 apps/mobile/android/
 apps/mobile/ios/
+
+# Clave de API de Google (Firebase): se sube a EAS como variable de archivo, no al repositorio.
+apps/mobile/google-services.json

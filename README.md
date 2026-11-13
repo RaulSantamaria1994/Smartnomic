@@ -153,9 +153,12 @@ avisos. Una APK anterior tampoco los recibe hasta actualizarse.
 
 1. `eas init` en `apps/mobile` (ya hecho: `owner` y `extra.eas.projectId` están en `app.json`).
 2. **Firebase** (gratis): crea un proyecto y añade la app Android `com.raulsantamaria.smartnomic`.
-   Descarga `google-services.json` a `apps/mobile/` y añade en `app.json`
-   `android.googleServicesFile`: `"./google-services.json"`. Google indica que este archivo no es un
-   secreto; se sube al repositorio.
+   Descarga `google-services.json` a `apps/mobile/`. **No entra en el repositorio** (está en
+   `.gitignore`: lleva la clave de API de Google). `app.config.js` lo coge de la variable
+   `GOOGLE_SERVICES_JSON` (EAS) o, en local, de ese archivo. Súbelo a EAS como variable secreta de
+   tipo archivo: `eas env:create preview --name GOOGLE_SERVICES_JSON --type file --value
+./google-services.json --visibility secret`. Para el APK de GitHub Actions, guárdalo en base64
+   como secreto `GOOGLE_SERVICES_JSON_BASE64`.
 3. Credenciales de FCM v1: en Firebase, **Configuración → Cuentas de servicio → Generar clave
    privada**, y súbela con `eas credentials` (Android → Push Notifications: Google Service Account
    Key For FCM V1). **Esa clave sí es secreta y no entra en el repositorio.**

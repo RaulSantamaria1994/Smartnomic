@@ -20,9 +20,10 @@ fallar antes de implementar.
 ## Fase 0: Fuera del código (propietario)
 
 - [x] P000 `eas init` en `apps/mobile`: `owner` y `extra.eas.projectId` en `app.json`
-- [ ] P001 Proyecto de Firebase con la app `com.raulsantamaria.smartnomic`;
-      `apps/mobile/google-services.json` y `android.googleServicesFile` en `app.json`
-- [ ] P002 Clave de cuenta de servicio de FCM v1 subida con `eas credentials` (no entra en el
+- [x] P001 Proyecto de Firebase con la app `com.raulsantamaria.smartnomic`;
+      `apps/mobile/google-services.json` (fuera del repositorio) y `googleServicesFile` en
+      `app.config.js` (variable de archivo `GOOGLE_SERVICES_JSON` en EAS)
+- [x] P002 Clave de cuenta de servicio de FCM v1 subida con `eas credentials` (no entra en el
       repositorio)
 - [ ] P003 Opcional: seguridad reforzada de Expo Push y `EXPO_ACCESS_TOKEN` en Railway
 

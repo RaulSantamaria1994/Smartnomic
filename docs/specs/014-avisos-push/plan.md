@@ -170,8 +170,8 @@ Con las dos enmiendas, el plan no incumple ningún artículo.
 1. `eas init` en `apps/mobile`: crea el proyecto de EAS y añade `extra.eas.projectId` a
    `app.json` (lo necesita `getExpoPushTokenAsync`).
 2. Proyecto de Firebase (gratis) con la app `com.raulsantamaria.smartnomic`: descargar
-   `google-services.json` a `apps/mobile/` y añadir `android.googleServicesFile` en `app.json`
-   (Google indica que no es un secreto; se sube al repositorio), y subir la clave de cuenta de
+   `google-services.json` a `apps/mobile/` (fuera del repositorio, en `.gitignore`: `app.config.js`
+   lo toma de la variable de archivo `GOOGLE_SERVICES_JSON` de EAS o del archivo local), y subir la clave de cuenta de
    servicio de FCM v1 con `eas credentials` (esa sí es secreta y no entra en el repositorio).
 3. Opcional: activar la seguridad reforzada de Expo Push y poner `EXPO_ACCESS_TOKEN` en Railway.
 4. Nueva APK con `eas build --profile preview`: la APK instalada no recibe avisos hasta
