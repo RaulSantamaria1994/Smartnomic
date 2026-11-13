@@ -6,7 +6,7 @@ import { persister } from './cache';
 export const CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 /** Versión de lo guardado en Android: al cambiarla, la caché anterior se descarta. */
-export const CACHE_BUSTER = 'varios-hogares-1';
+export const CACHE_BUSTER = 'avisos-push-1';
 
 /**
  * `onError` recibe los errores de todas las consultas y cambios (para detectar una sesión

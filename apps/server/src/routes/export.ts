@@ -89,6 +89,11 @@ export function registerExportRoutes(
         version: 1,
         exportedAt: exportedAt.toISOString(),
         exportedBy: { name: user.name, email: user.email },
+        myPreferences: {
+          remindersEnabled: request.membership!.member.remindersEnabled,
+          reminderTime: request.membership!.member.reminderTime,
+          activityAlertsEnabled: request.membership!.member.activityAlertsEnabled,
+        },
         household: toHousehold(household),
         members: memberRows.map(({ member, name }) => ({
           id: member.id,

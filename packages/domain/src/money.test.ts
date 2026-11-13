@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_CENTS, parseAmount, sumCents } from './money';
+import { formatCents, MAX_CENTS, parseAmount, sumCents } from './money';
 
 function cents(input: string): number {
   const result = parseAmount(input);
@@ -105,5 +105,45 @@ describe('sumCents', () => {
 
   it('rechaza valores que no son céntimos enteros', () => {
     expect(() => sumCents([1.5])).toThrow();
+  });
+});
+
+describe('formatCents (constitución, art. III.2)', () => {
+  const nbsp = (text: string) => text.replace(/\u00a0/g, ' ');
+
+  it('formatea con coma decimal, punto de miles y el símbolo del euro', () => {
+    expect(nbsp(formatCents(4530))).toBe('45,30 €');
+    expect(nbsp(formatCents(123456))).toBe('1.234,56 €');
+    expect(nbsp(formatCents(25_000_000))).toBe('250.000,00 €');
+  });
+
+  it('pone punto de miles también en las cifras de cuatro dígitos', () => {
+    expect(nbsp(formatCents(100_000))).toBe('1.000,00 €');
+    expect(nbsp(formatCents(180_000))).toBe('1.800,00 €');
+  });
+
+  it('formatea millones y el máximo de un movimiento', () => {
+    expect(nbsp(formatCents(100_000_000))).toBe('1.000.000,00 €');
+    expect(nbsp(formatCents(MAX_CENTS))).toBe('99.999.999,99 €');
+  });
+
+  it('siempre lleva dos decimales: cero y céntimos sueltos', () => {
+    expect(nbsp(formatCents(0))).toBe('0,00 €');
+    expect(nbsp(formatCents(5))).toBe('0,05 €');
+    expect(nbsp(formatCents(100))).toBe('1,00 €');
+  });
+
+  it('los importes negativos llevan el signo menos delante', () => {
+    expect(nbsp(formatCents(-56544))).toBe('-565,44 €');
+    expect(nbsp(formatCents(-5))).toBe('-0,05 €');
+  });
+
+  it('usa un espacio duro entre la cifra y el símbolo, para que no se parta la línea', () => {
+    expect(formatCents(4530)).toBe('45,30\u00a0€');
+  });
+
+  it('con otra moneda pone su código en lugar del símbolo', () => {
+    expect(nbsp(formatCents(4530, 'USD'))).toBe('45,30 USD');
+    expect(nbsp(formatCents(4530, 'EUR'))).toBe('45,30 €');
   });
 });

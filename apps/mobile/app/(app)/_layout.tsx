@@ -6,6 +6,7 @@ import { UndoSnackbar } from '../../src/components/UndoSnackbar';
 import { useMe } from '../../src/hooks/me';
 import { useReminderSync } from '../../src/hooks/useReminderSync';
 import { useOutboxSync } from '../../src/outbox/useOutbox';
+import { usePushRegistration } from '../../src/push/usePushRegistration';
 import { useRealtime } from '../../src/realtime/useRealtime';
 import { es } from '../../src/i18n/es';
 import { authClient } from '../../src/session/auth-client';
@@ -31,6 +32,7 @@ export default function AppLayout() {
 function SignedIn() {
   useEffect(() => sessionEnd.started(), []);
   useReminderSync();
+  usePushRegistration();
   useOutboxSync();
   useRealtime();
   const me = useMe();

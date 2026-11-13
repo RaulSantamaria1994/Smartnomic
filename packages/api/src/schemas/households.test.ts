@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createHouseholdSchema, meResponseSchema, updateHouseholdSchema } from './households';
+import {
+  createHouseholdSchema,
+  memberSchema,
+  meResponseSchema,
+  updateHouseholdSchema,
+  updateMyMemberSchema,
+} from './households';
 import { invitationPreviewSchema } from './members';
 
 const household = {
@@ -67,5 +73,49 @@ describe('vista previa de una invitación', () => {
     expect(invitationPreviewSchema.safeParse({ ...preview, atLimit: undefined }).success).toBe(
       false,
     );
+  });
+});
+
+describe('preferencia de avisos de actividad (especificación 014, RF-1407)', () => {
+  it('el miembro lleva activityAlertsEnabled', () => {
+    expect(
+      memberSchema.parse({ ...member, activityAlertsEnabled: false }).activityAlertsEnabled,
+    ).toBe(false);
+  });
+
+  it('es opcional en la respuesta: un servidor anterior no lo envía (art. V.4)', () => {
+    const parsed = memberSchema.parse(member);
+    expect(parsed.activityAlertsEnabled).toBeUndefined();
+    const me = meResponseSchema.parse({
+      user,
+      households: [{ household, member }],
+      household,
+      member,
+    });
+    expect(me.households[0]?.member.activityAlertsEnabled).toBeUndefined();
+  });
+
+  it('no es un booleano: se rechaza', () => {
+    expect(memberSchema.safeParse({ ...member, activityAlertsEnabled: 'sí' }).success).toBe(false);
+  });
+
+  it('PATCH members/me lo acepta solo o junto a los recordatorios', () => {
+    expect(updateMyMemberSchema.parse({ activityAlertsEnabled: false })).toEqual({
+      activityAlertsEnabled: false,
+    });
+    expect(
+      updateMyMemberSchema.safeParse({ remindersEnabled: true, activityAlertsEnabled: true })
+        .success,
+    ).toBe(true);
+  });
+
+  it('PATCH members/me rechaza un valor que no es booleano y un cuerpo vacío', () => {
+    expect(updateMyMemberSchema.safeParse({ activityAlertsEnabled: 'no' }).success).toBe(false);
+    expect(updateMyMemberSchema.safeParse({}).success).toBe(false);
+  });
+
+  it('PATCH members/me sigue aceptando solo los recordatorios, como la app instalada', () => {
+    expect(updateMyMemberSchema.safeParse({ remindersEnabled: false }).success).toBe(true);
+    expect(updateMyMemberSchema.safeParse({ reminderTime: '08:30' }).success).toBe(true);
   });
 });

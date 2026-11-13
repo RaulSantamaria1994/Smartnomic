@@ -21,6 +21,7 @@ import {
 } from '../db/schema';
 import { ApiError } from '../plugins/errors';
 import type { HouseholdAccess } from '../plugins/household-access';
+import type { ActivityNotifier } from '../push/activity';
 import { upcomingSavings } from './savings';
 
 type RuleRow = typeof recurringRules.$inferSelect;
@@ -78,9 +79,14 @@ function scheduleChanged(
 
 export function registerRecurringRoutes(
   app: FastifyInstance,
-  deps: { db: Database; access: HouseholdAccess; now: () => Date },
+  deps: {
+    db: Database;
+    access: HouseholdAccess;
+    now: () => Date;
+    activity: Pick<ActivityNotifier, 'record'>;
+  },
 ): void {
-  const { db, access, now } = deps;
+  const { db, access, now, activity } = deps;
   const base = '/api/households/:householdId/recurring';
 
   app.get(base, { preHandler: access.requireMember('household.view') }, async (request) => {
@@ -308,7 +314,21 @@ export function registerRecurringRoutes(
           if (error instanceof TransactionRollbackError) return undefined;
           throw error;
         });
-      if (resolved) return toResolved(resolved);
+      if (resolved) {
+        // Solo al crear la resolución: repetir el mismo pago o un conflicto no avisan.
+        activity.record({
+          householdId: household.id,
+          memberId: member.id,
+          change: {
+            kind: 'payment',
+            ruleId: rule.id,
+            dueDate,
+            ruleName: rule.name,
+            amountCents: input.amountCents,
+          },
+        });
+        return toResolved(resolved);
+      }
 
       const existing = await existingResolution(rule.id, dueDate);
       // El mismo pago reenviado (mismo movimiento): no es un error.

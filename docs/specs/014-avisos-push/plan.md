@@ -170,8 +170,8 @@ Con las dos enmiendas, el plan no incumple ningún artículo.
 1. `eas init` en `apps/mobile`: crea el proyecto de EAS y añade `extra.eas.projectId` a
    `app.json` (lo necesita `getExpoPushTokenAsync`).
 2. Proyecto de Firebase (gratis) con la app `com.raulsantamaria.smartnomic`: descargar
-   `google-services.json` a `apps/mobile/` y añadir `android.googleServicesFile` en `app.json`
-   (Google indica que no es un secreto; se sube al repositorio), y subir la clave de cuenta de
+   `google-services.json` a `apps/mobile/` (fuera del repositorio, en `.gitignore`: `app.config.js`
+   lo toma de la variable de archivo `GOOGLE_SERVICES_JSON` de EAS o del archivo local), y subir la clave de cuenta de
    servicio de FCM v1 con `eas credentials` (esa sí es secreta y no entra en el repositorio).
 3. Opcional: activar la seguridad reforzada de Expo Push y poner `EXPO_ACCESS_TOKEN` en Railway.
 4. Nueva APK con `eas build --profile preview`: la APK instalada no recibe avisos hasta
@@ -213,3 +213,34 @@ Con las dos enmiendas, el plan no incumple ningún artículo.
 - En Android con la APK (manual): CE-1401 a CE-1406 con dos cuentas, app cerrada, en segundo
   plano y abierta; tocar el aviso con otro hogar elegido; permiso denegado.
 - `expo export --platform android`.
+
+## Resultados (2026-11-12)
+
+Implementado en cuatro fases (`feat/014-avisos-push`). Con PostgreSQL real y el emisor de Expo falso:
+**903 tests** del repositorio en verde (433 del servidor); `expo export` compila para Android y
+la web; axe-core sin violaciones en «Hogar» a 320 y 1280 px.
+
+- **CE-1402, CE-1403, CE-1404, CE-1405**: cubiertos por tests de ruta (preferencia por hogar; autor,
+  otro hogar, ex miembro y sesión cerrada o caducada no reciben; 20 movimientos dan un aviso; con el
+  servicio caído guardar responde 200).
+- **CE-1406** (tocar el aviso abre el hogar y la pantalla correctos): traducción probada
+  (`notifications/target.ts`); falta comprobarlo en Android.
+- **CE-1401** (95 % en menos de 10 s con la app cerrada): pendiente de la prueba real (P024).
+- **Punta a punta en la web con el servidor real** (P025): el interruptor se guarda y otra sesión de
+  la misma persona ve el valor guardado, sin cambiar el de recordatorios.
+
+Decisiones tomadas al implementar, que el plan no fijaba:
+
+- Un token de Expo registrado por otra cuenta **se reasigna** a su sesión (permite que otra cuenta
+  entre en el mismo móvil). El token no sale en ninguna respuesta ni log. Es un riesgo aceptado y
+  acotado: reasignar mueve avisos, no da acceso a datos (test explícito en `push-devices-attacks`).
+- Tope de **20 dispositivos por persona** (`MAX_DEVICES_PER_USER`): se descartan los más antiguos.
+  `PUT`/`DELETE /api/push-device` usan el límite de peticiones de autenticación.
+- El destino de un aviso de un movimiento es «Mes» en el mes de su fecha (`/?date=…`). Varios cambios,
+  «Mes». Una hucha o un pago que ya no existen llevan a «Mes» si el hogar está en caché (`routeIfExists`);
+  sin caché cargada se abre su pantalla, que ya dice que no existe.
+- El aviso de permiso denegado mira el hogar que se está viendo (para saber si tiene más miembros);
+  los demás hogares lo muestran al cambiar a ellos.
+- Borrar la cuenta solo limpia el registro local: el servidor ya borra los dispositivos con la cuenta.
+- La exportación de datos añade `myPreferences` (opcional en el esquema).
+- Pendiente: P001 y P002 (Firebase y credenciales de FCM) y P024 (APK y dos cuentas) son del propietario.

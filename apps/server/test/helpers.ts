@@ -9,7 +9,9 @@ import type { AuthRateLimit } from '../src/auth';
 import { connectDatabase, type Database } from '../src/db/client';
 import { runMigrations } from '../src/db/migrate';
 import { members } from '../src/db/schema';
+import type { PushMessage, PushSender } from '../src/push/expo';
 import { buildServer } from '../src/server';
+import { fakeScheduler, fakeSender } from './push-fakes';
 
 /** Base de datos de los tests: la de docker-compose.yml o la del servicio del CI. */
 export const TEST_DATABASE_URL =
@@ -22,10 +24,19 @@ export const TEST_PASSWORD = 'contrasena-de-prueba';
 /** Hora fija de los tests: martes 27 de octubre de 2026, 11:00 en Madrid. */
 export const TEST_NOW = new Date('2026-10-27T10:00:00Z');
 
+/** Avisos push de la prueba: emisor falso y ventana de agrupación controlada por el test. */
+export interface PushHarness {
+  /** Todos los avisos enviados hasta ahora, en orden. */
+  messages: () => PushMessage[];
+  /** Cierra las ventanas abiertas, envía y espera a que acabe. */
+  flush: () => Promise<void>;
+}
+
 export interface TestContext {
   db: Database;
   app: FastifyInstance;
   api: Api;
+  push: PushHarness;
 }
 
 /**
@@ -41,6 +52,8 @@ export function useTestServer(
     clientIpHeader?: string;
     now?: () => Date;
     realtimePingMs?: number;
+    /** Emisor de avisos push distinto del falso por defecto (por ejemplo, uno que falla). */
+    pushSender?: PushSender;
   } = {},
 ) {
   const context = {} as TestContext;
@@ -55,6 +68,18 @@ export function useTestServer(
 
   beforeEach(async () => {
     await context.db.execute(sql`TRUNCATE users, households RESTART IDENTITY CASCADE`);
+    const fake = fakeSender();
+    const scheduler = fakeScheduler();
+    context.push = {
+      messages: fake.messages,
+      flush: async () => {
+        // Solo las ventanas de agrupación; los recibos (15 min) no se disparan solos.
+        scheduler.jobs.forEach((job, i) => {
+          if (job.ms < 60_000 && !job.fired) scheduler.fire(i);
+        });
+        await context.app.activity.idle();
+      },
+    };
     context.api = createApi({
       db: context.db,
       baseURL: TEST_ORIGIN,
@@ -65,6 +90,7 @@ export function useTestServer(
       api: context.api,
       authRateLimit: options.authRateLimit ?? { max: 1000, timeWindow: '1 minute' },
       now: options.now ?? (() => TEST_NOW),
+      push: { sender: options.pushSender ?? fake.sender, schedule: scheduler.schedule },
       invitationRateLimit: options.invitationRateLimit ?? { max: 1000, timeWindow: '1 minute' },
       ...(options.trustProxy !== undefined && { trustProxy: options.trustProxy }),
       ...(options.clientIpHeader && { clientIpHeader: options.clientIpHeader }),

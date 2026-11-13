@@ -58,6 +58,29 @@ export const sessions = pgTable(
   (table) => [index('sessions_user_id_idx').on(table.userId)],
 );
 
+/**
+ * Dispositivos Android a los que se pueden enviar avisos push (especificación 014). Es de la
+ * cuenta, como `sessions`, y no lleva `household_id`: toda consulta filtra por usuario o sesión.
+ * Un móvil, un token: si otra cuenta entra en el mismo móvil, el registro se reasigna a su
+ * sesión. Cerrar sesión o borrar la cuenta borra el dispositivo (RF-1409).
+ */
+export const pushDevices = pgTable(
+  'push_devices',
+  {
+    /** `ExponentPushToken[…]` de Expo Push. */
+    token: text('token').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    sessionId: text('session_id')
+      .notNull()
+      .references(() => sessions.id, { onDelete: 'cascade' }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [index('push_devices_user_id_idx').on(table.userId)],
+);
+
 export const accounts = pgTable(
   'accounts',
   {
@@ -130,6 +153,11 @@ export const members = pgTable(
     remindersEnabled: boolean('reminders_enabled').notNull().default(true),
     /** Hora local `HH:MM` de sus avisos (RF-030). */
     reminderTime: text('reminder_time').notNull().default('09:00'),
+    /**
+     * Recibe avisos push de lo que apuntan los demás miembros de este hogar (especificación 014,
+     * RF-1407). Independiente de `remindersEnabled` (RF-1408); al entrar en un hogar, activado.
+     */
+    activityAlertsEnabled: boolean('activity_alerts_enabled').notNull().default(true),
     joinedAt: instant('joined_at').notNull().defaultNow(),
   },
   (table) => [

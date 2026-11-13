@@ -5,6 +5,7 @@ import { es } from '../i18n/es';
 import { openNotificationSettings, remindersSupported } from '../reminders/reminders';
 import { useNotificationPermission } from '../state/permission';
 import { color, radius, spacing, typography } from '../design/tokens';
+import { permissionBannerVisible } from '../reminders/banner';
 import { Button } from './Button';
 
 /** Días en que un vencimiento cuenta como «pronto» para destacarlo. */
@@ -19,11 +20,14 @@ export function ReminderBanners({
   today,
   hasRules,
   remindersEnabled,
+  activityAlerts,
 }: {
   occurrences: UpcomingOccurrenceDto[] | undefined;
   today: string | undefined;
   hasRules: boolean;
   remindersEnabled: boolean;
+  /** Avisos de otros miembros activados en este hogar, que tiene más de un miembro (014). */
+  activityAlerts: boolean;
 }) {
   const permission = useNotificationPermission((state) => state.status);
   const overdue = occurrences?.filter((o) => o.overdue).length ?? 0;
@@ -34,7 +38,12 @@ export function ReminderBanners({
 
   return (
     <>
-      {remindersSupported && hasRules && remindersEnabled && permission === 'denied' && (
+      {permissionBannerVisible({
+        supported: remindersSupported,
+        permission,
+        hasReminders: hasRules && remindersEnabled,
+        activityAlerts,
+      }) && (
         <View style={[styles.banner, styles.warning]} accessibilityRole="alert">
           <Text style={styles.title}>{es.reminders.deniedTitle}</Text>
           <Text style={styles.text}>{es.reminders.deniedText}</Text>

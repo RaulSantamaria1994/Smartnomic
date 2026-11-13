@@ -27,6 +27,21 @@ export function sumCents(values: readonly Cents[]): Cents {
 }
 
 /**
+ * «1.234,56 €»: importe para mostrarlo, en la interfaz o en el texto de un aviso (constitución,
+ * art. III.2). Se hace a mano, sin `Intl`, para que salga igual en Android, en la web y en el
+ * servidor, y con punto de miles también en las cifras de cuatro dígitos. El espacio entre la
+ * cifra y el símbolo es duro (`\u00a0`) para que no se parta la línea.
+ */
+export function formatCents(cents: Cents, currency = 'EUR'): string {
+  const sign = cents < 0 ? '-' : '';
+  const absolute = Math.abs(cents);
+  const euros = String(Math.trunc(absolute / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const decimals = String(absolute % 100).padStart(2, '0');
+  const symbol = currency === 'EUR' ? '€' : currency;
+  return `${sign}${euros},${decimals}\u00a0${symbol}`;
+}
+
+/**
  * Convierte lo que escribe el usuario en céntimos. Acepta coma o punto decimal y
  * separadores de miles («1.234,56», «1,234.56», «1.800», «45,3», «45 €»). Con un solo
  * separador, la coma es decimal; el punto también, salvo que agrupe miles («1.800»).

@@ -4,6 +4,7 @@ import { resolveBaseUrl } from './config';
 import { connectDatabase } from './db/client';
 import { runMigrations } from './db/migrate';
 import { createBrevoSender, parseSender, type SendEmail } from './email';
+import { createExpoPushSender } from './push/expo';
 import { buildServer } from './server';
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -50,6 +51,15 @@ async function main() {
     ...(PRODUCTION && { clientIpHeader: CLIENT_IP_HEADER, hsts: true }),
     webRoot: WEB_ROOT,
     ...(api && { api }),
+    // Avisos push de cambios de otros miembros (especificación 014). `EXPO_ACCESS_TOKEN` es
+    // opcional: activa la seguridad reforzada de Expo Push.
+    ...(api && {
+      push: {
+        sender: createExpoPushSender({
+          ...(process.env.EXPO_ACCESS_TOKEN && { accessToken: process.env.EXPO_ACCESS_TOKEN }),
+        }),
+      },
+    }),
   });
   logEmailError = (error) => app.log.error({ err: error }, 'Error al enviar un email');
   if (!database) app.log.warn('Sin DATABASE_URL: solo responde /health y la web.');

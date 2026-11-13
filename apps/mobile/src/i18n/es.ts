@@ -180,6 +180,8 @@ export const es = {
   },
   reminders: {
     channel: 'Vencimientos',
+    /** Canal de Android de los avisos de otros miembros (especificación 014, RF-1408). */
+    activityChannel: 'Cambios de otros miembros',
     pay: 'vence',
     collect: 'cobras',
     today: 'Hoy',
@@ -189,7 +191,7 @@ export const es = {
     setAside: 'apartas para',
     deniedTitle: 'Los avisos están desactivados',
     deniedText:
-      'No recibirás recordatorios de tus pagos. Actívalos en los ajustes del móvil: Notificaciones → Smartnomic.',
+      'No recibirás avisos ni recordatorios de tus pagos. Actívalos en los ajustes del móvil: Notificaciones → Smartnomic.',
     openSettings: 'Abrir ajustes',
     allow: 'Activar avisos',
     soonTitle: (count: number) =>
@@ -208,6 +210,14 @@ export const es = {
     webNote:
       'Los avisos solo llegan en la app de Android. En el navegador, los pagos que vencen pronto aparecen destacados en la pantalla principal.',
     back: 'Volver',
+    /** Avisos de lo que apuntan otros miembros (especificación 014, RF-1407, RF-1413). */
+    activityTitle: 'Avisos de otros miembros',
+    activityEnabled: 'Cambios de otros miembros',
+    activityHint:
+      'Un aviso cuando otro miembro apunta un movimiento, paga un recibo o mueve una hucha de este hogar.',
+    activityExpoNote: 'El texto del aviso pasa por el servicio de avisos de Expo.',
+    activityWebNote:
+      'Solo llegan en la app de Android; aquí puedes elegir si los quieres en tus móviles.',
   },
   householdSettings: {
     title: 'Ajustes del hogar',

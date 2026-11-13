@@ -93,8 +93,26 @@ todos», y los bloques vacíos son una sola fila; el recorte lo hace `limitRows`
 (`packages/domain/src/lists.ts`), que nunca esconde un pago atrasado. Borrar la cuenta vive en
 `app/(app)/delete-account.tsx` (en «Hogar» solo hay una fila que lleva a ella) y su botón es la
 variante `destructive` de `Button` (rojo relleno, `color.bg.destructive`). Sin cambios en el
-servidor. Faltan por probar con la pila real y en Android las tareas O014, O017 y la prueba con
-el APK.
+servidor. Probada con la pila real (servidor y PostgreSQL locales) salvo «Cerrar sesión» con
+pendientes sin enviar; falta la prueba con el APK en Android.
+
+**`014-avisos-push`**: los demás miembros de un hogar reciben un aviso en su Android, también con la
+app cerrada, cuando alguien apunta un movimiento, paga un recibo o mueve una hucha. Las rutas
+(`transactions`, `recurring/pay`, `savings/entries`) apuntan el cambio con
+`activity.record(...)`, que es síncrono y sin E/S; `apps/server/src/push/activity.ts` los agrupa
+(ventana fija de 5 s por hogar y miembro), busca en SQL los dispositivos de los demás miembros con
+la preferencia activada y la sesión viva (no el autor ni sus otros móviles) y envía con
+`push/expo.ts` (`fetch` a Expo Push, sin dependencias). El único sitio donde se escribe el texto de
+un aviso es `push/messages.ts`, con `formatCents` de `packages/domain`. Un fallo del servicio de
+envío nunca afecta a la petición: solo se registra, con ids y recuentos. `push_devices` (migración
+`0009_push`) es de la cuenta y borra en cascada con la sesión o la cuenta; `PUT`/`DELETE
+/api/push-device` atan el token a la sesión y se quedan con los 20 más recientes por persona. La
+preferencia es `members.activity_alerts_enabled` (por persona y hogar, independiente de
+`reminders_enabled`). En la app, `src/push/usePushRegistration.ts` registra el token si cambió o es
+otra sesión, `src/notifications/target.ts` traduce un aviso (o un recordatorio) a hogar y pantalla,
+y cerrar sesión da de baja el dispositivo antes (`src/push/forget.ts`). En los tests del servidor,
+el emisor y el temporizador son falsos (`test/push-fakes.ts`, `ctx.push`). **Configurar Firebase y
+las credenciales de FCM** (README) es cosa del propietario; sin ello no llegan avisos.
 
 El aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera

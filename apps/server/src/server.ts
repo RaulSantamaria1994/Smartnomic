@@ -22,6 +22,7 @@ import { registerInvitationRoutes } from './routes/invitations';
 import { registerMeRoutes } from './routes/me';
 import { registerMemberRoutes } from './routes/members';
 import { registerPeriodRoutes } from './routes/periods';
+import { registerPushDeviceRoutes } from './routes/push-devices';
 import { registerRecurringRoutes } from './routes/recurring';
 import { registerBudgetRoutes } from './routes/budgets';
 import { registerChartRoutes } from './routes/charts';
@@ -29,6 +30,20 @@ import { registerSearchRoutes } from './routes/search';
 import { registerCsvExportRoutes } from './routes/export-csv';
 import { registerSavingsRoutes } from './routes/savings';
 import { registerTransactionRoutes } from './routes/transactions';
+import {
+  createActivityNotifier,
+  noActivityNotifier,
+  type ActivityNotifier,
+  type Schedule,
+} from './push/activity';
+import type { PushSender } from './push/expo';
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    /** Avisos push de actividad (especificación 014); sin servicio de envío, no hace nada. */
+    activity: ActivityNotifier;
+  }
+}
 
 export interface ServerOptions {
   /** `true`: logger con los datos sensibles tapados (ver `logging.ts`). */
@@ -64,6 +79,16 @@ export interface ServerOptions {
   invitationRateLimit?: AuthRateLimit;
   /** Cada cuánto se envía el ping del tiempo real (los tests lo acortan). */
   realtimePingMs?: number;
+  /**
+   * Avisos push de cambios de otros miembros (especificación 014). Sin esto no se avisa a nadie.
+   * `windowMs`, `receiptDelayMs` y `schedule` los fijan los tests (reloj y temporizador falsos).
+   */
+  push?: {
+    sender: PushSender;
+    windowMs?: number;
+    receiptDelayMs?: number;
+    schedule?: Schedule;
+  };
 }
 
 const DEFAULT_AUTH_RATE_LIMIT: AuthRateLimit = { max: 10, timeWindow: '1 minute' };
@@ -120,10 +145,26 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     });
     registerMeRoutes(app, { db, access });
     const now = options.now ?? (() => new Date());
+    const activity: ActivityNotifier = options.push
+      ? createActivityNotifier({
+          db,
+          sender: options.push.sender,
+          log: app.log,
+          now,
+          ...(options.push.windowMs !== undefined && { windowMs: options.push.windowMs }),
+          ...(options.push.receiptDelayMs !== undefined && {
+            receiptDelayMs: options.push.receiptDelayMs,
+          }),
+          ...(options.push.schedule && { schedule: options.push.schedule }),
+        })
+      : noActivityNotifier;
+    // Un cierre del servidor (despliegue) no pierde los avisos que estaban esperando su ventana.
+    app.decorate('activity', activity);
+    app.addHook('onClose', async () => activity.flushAll());
     registerHouseholdRoutes(app, { db, access });
     registerMemberRoutes(app, { db, access });
     registerCategoryRoutes(app, { db, access, now });
-    registerTransactionRoutes(app, { db, access });
+    registerTransactionRoutes(app, { db, access, activity });
     registerPeriodRoutes(app, { db, access });
     registerChartRoutes(app, { db, access });
     registerSearchRoutes(app, { db, access });
@@ -135,9 +176,15 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
       access,
       rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
     });
-    registerRecurringRoutes(app, { db, access, now });
+    registerPushDeviceRoutes(app, {
+      db,
+      auth,
+      access,
+      rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
+    });
+    registerRecurringRoutes(app, { db, access, now, activity });
     registerCalendarRoutes(app, { db, access, now });
-    registerSavingsRoutes(app, { db, access, now });
+    registerSavingsRoutes(app, { db, access, now, activity });
     registerBudgetRoutes(app, { db, access, now });
     registerInvitationRoutes(app, {
       db,

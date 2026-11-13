@@ -82,6 +82,7 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
   | `CORS_ORIGINS`       | Orígenes de la web de Expo en desarrollo, separados por comas                   |
   | `BREVO_API_KEY`      | Clave de la API de Brevo para enviar emails                                     |
   | `EMAIL_FROM`         | Remitente verificado en Brevo («Smartnomic <no-reply@…>»)                       |
+  | `EXPO_ACCESS_TOKEN`  | Opcional: seguridad reforzada de Expo Push (avisos de otros miembros)           |
   | `PORT`, `HOST`       | Puerto (3000) e interfaz (`0.0.0.0`)                                            |
 
 ### Emails (Brevo)
@@ -140,6 +141,31 @@ recargar ni mensajes. La app abre una conexión WebSocket con `/api/realtime`; e
 la cierra y al volver se pone al día. Tras desplegar, conviene comprobar que el proxy de Railway
 mantiene la conexión abierta (el servidor envía un `ping` cada 25 s).
 
+### Avisos push (Expo Push y Firebase)
+
+Cuando un miembro apunta un movimiento, paga un recibo o mueve una hucha, el resto de miembros del
+hogar reciben un aviso en su Android aunque la app esté cerrada (especificación 014). El servidor
+llama a [Expo Push](https://docs.expo.dev/push-notifications/overview/), que entrega el aviso por
+Firebase Cloud Messaging (gratis). **El texto del aviso (hogar, nombre, importe y categoría) pasa por
+Expo y por Google**; la app lo explica junto al interruptor y cada persona puede desactivarlo para
+cada hogar. Sin esta configuración, el servidor arranca y todo funciona, pero los móviles no reciben
+avisos. Una APK anterior tampoco los recibe hasta actualizarse.
+
+1. `eas init` en `apps/mobile` (ya hecho: `owner` y `extra.eas.projectId` están en `app.json`).
+2. **Firebase** (gratis): crea un proyecto y añade la app Android `com.raulsantamaria.smartnomic`.
+   Descarga `google-services.json` a `apps/mobile/`. **No entra en el repositorio** (está en
+   `.gitignore`: lleva la clave de API de Google). `app.config.js` lo coge de la variable
+   `GOOGLE_SERVICES_JSON` (EAS) o, en local, de ese archivo. Súbelo a EAS como variable secreta de
+   tipo archivo: `eas env:create preview --name GOOGLE_SERVICES_JSON --type file --value
+./google-services.json --visibility secret`. Para el APK de GitHub Actions, guárdalo en base64
+   como secreto `GOOGLE_SERVICES_JSON_BASE64`.
+3. Credenciales de FCM v1: en Firebase, **Configuración → Cuentas de servicio → Generar clave
+   privada**, y súbela con `eas credentials` (Android → Push Notifications: Google Service Account
+   Key For FCM V1). **Esa clave sí es secreta y no entra en el repositorio.**
+4. Opcional: activa la seguridad reforzada en la cuenta de Expo (Access tokens) y pon el token en
+   `EXPO_ACCESS_TOKEN` (Railway o `apps/server/.env`).
+5. Compila una APK nueva (`eas build --platform android --profile preview`).
+
 ## Publicar el servidor (Railway)
 
 El repositorio trae un `Dockerfile` (exporta la web y la sirve junto con la API) y un
@@ -151,7 +177,7 @@ El repositorio trae un `Dockerfile` (exporta la web y la sirve junto con la API)
 3. En el servicio del servidor, **Variables**: `PORT` = `3000`, `DATABASE_URL` como
    referencia a la de PostgreSQL, `BETTER_AUTH_SECRET` (`openssl rand -hex 32`) y
    `BETTER_AUTH_URL` con el dominio público. Para los emails, `BREVO_API_KEY` y
-   `EMAIL_FROM`.
+   `EMAIL_FROM`; para reforzar los avisos push, `EXPO_ACCESS_TOKEN` (opcional).
 4. **Settings → Networking → Generate Domain** con el puerto `3000`.
 5. Comprueba `https://<tu-dominio>/health`.
 

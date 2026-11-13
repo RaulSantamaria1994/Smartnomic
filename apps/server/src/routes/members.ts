@@ -21,6 +21,7 @@ export function toMember(row: MemberRow): Member {
     role: row.role,
     remindersEnabled: row.remindersEnabled,
     reminderTime: row.reminderTime,
+    activityAlertsEnabled: row.activityAlertsEnabled,
   };
 }
 

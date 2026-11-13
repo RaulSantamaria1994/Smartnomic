@@ -10,6 +10,7 @@ import { TextField } from '../../../src/components/TextField';
 import { useCan } from '../../../src/hooks/data';
 import { exportHousehold } from '../../../src/export/export-household';
 import { es } from '../../../src/i18n/es';
+import { pushSupported } from '../../../src/push/push';
 import { remindersSupported } from '../../../src/reminders/reminders';
 import { signOut } from '../../../src/session/sign-out';
 import { sessionEnd } from '../../../src/session/session-ended';
@@ -35,6 +36,11 @@ export default function Account() {
   const switcher = useHouseholdSwitcher();
   const [time, setTime] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; kind: 'error' | 'success' } | null>(null);
+  // El resultado de cambiar los avisos de otros miembros se ve junto a su interruptor.
+  const [activityMessage, setActivityMessage] = useState<{
+    text: string;
+    kind: 'error' | 'success';
+  } | null>(null);
   const [saving, setSaving] = useState(false);
   const can = useCan();
   const [exporting, setExporting] = useState(false);
@@ -49,15 +55,18 @@ export default function Account() {
   const household = current;
   const member = currentMember;
 
-  async function update(input: { remindersEnabled?: boolean; reminderTime?: string }) {
-    setMessage(null);
+  async function update(
+    input: { remindersEnabled?: boolean; reminderTime?: string; activityAlertsEnabled?: boolean },
+    report: typeof setMessage = setMessage,
+  ) {
+    report(null);
     setSaving(true);
     try {
       await api.updateMyMember(household.id, input);
       await queryClient.invalidateQueries({ queryKey: queryKeys.me });
-      setMessage({ text: es.settings.saved, kind: 'success' });
+      report({ text: es.settings.saved, kind: 'success' });
     } catch (e) {
-      setMessage({ text: e instanceof Error ? e.message : es.auth.errors.unknown, kind: 'error' });
+      report({ text: e instanceof Error ? e.message : es.auth.errors.unknown, kind: 'error' });
     } finally {
       setSaving(false);
     }
@@ -148,6 +157,31 @@ export default function Account() {
         />
         <Button variant="secondary" label={es.settings.save} onPress={saveTime} loading={saving} />
         {message && <Message text={message.text} kind={message.kind} />}
+      </Section>
+
+      <Section title={es.settings.activityTitle} padded separated>
+        <AppText variant="caption" tone="muted">
+          {es.settings.activityHint}
+        </AppText>
+        <View style={styles.switchRow}>
+          <AppText variant="body" style={styles.flex}>
+            {es.settings.activityEnabled}
+          </AppText>
+          <Switch
+            value={member.activityAlertsEnabled !== false}
+            {...switchColors()}
+            onValueChange={(value) =>
+              void update({ activityAlertsEnabled: value }, setActivityMessage)
+            }
+            accessibilityLabel={es.settings.activityEnabled}
+            disabled={saving}
+          />
+        </View>
+        <AppText variant="caption" tone="muted">
+          {es.settings.activityExpoNote}
+          {!pushSupported && ` ${es.settings.activityWebNote}`}
+        </AppText>
+        {activityMessage && <Message text={activityMessage.text} kind={activityMessage.kind} />}
       </Section>
 
       <Section title={es.account.exportTitle} padded separated>

@@ -15,6 +15,17 @@ export const householdExportSchema = z.object({
   version: z.literal(1),
   exportedAt: z.iso.datetime(),
   exportedBy: z.object({ name: z.string(), email: z.string() }),
+  /**
+   * Las preferencias de avisos de quien exporta en este hogar (especificación 014, RGPD).
+   * Opcional: una exportación anterior no la lleva.
+   */
+  myPreferences: z
+    .object({
+      remindersEnabled: z.boolean(),
+      reminderTime: z.string(),
+      activityAlertsEnabled: z.boolean(),
+    })
+    .optional(),
   household: householdSchema,
   members: z.array(
     z.object({ id: z.uuid(), name: z.string(), role: roleSchema, joinedAt: z.iso.datetime() }),

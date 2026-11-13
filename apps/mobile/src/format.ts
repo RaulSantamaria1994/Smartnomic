@@ -1,22 +1,15 @@
 import type { AmountError, Cents, DateString, Period } from '@smartnomic/domain';
-import { daysBetween, parseDate } from '@smartnomic/domain';
+import { daysBetween, formatCents, parseDate } from '@smartnomic/domain';
 import { es } from './i18n/es';
 
 const LOCALE = 'es-ES';
 
 /**
- * «1.234,56 €». El importe solo se formatea en la interfaz (constitución, art. III.2). Se
- * hace a mano para que salga igual en Android y en el navegador, y con punto de miles
- * también en las cifras de cuatro dígitos.
+ * «1.234,56 €». La función vive en `packages/domain` (`formatCents`, constitución art. III.2)
+ * porque el servidor también la usa en el texto de los avisos; aquí se reexporta con el nombre
+ * que usan las pantallas.
  */
-export function formatMoney(cents: Cents, currency = 'EUR'): string {
-  const sign = cents < 0 ? '-' : '';
-  const absolute = Math.abs(cents);
-  const euros = String(Math.trunc(absolute / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  const decimals = String(absolute % 100).padStart(2, '0');
-  const symbol = currency === 'EUR' ? '€' : currency;
-  return `${sign}${euros},${decimals}\u00a0${symbol}`;
-}
+export const formatMoney = formatCents;
 
 /** Con signo: «+1.800,00 €» o «−45,30 €». */
 export function formatSignedMoney(cents: Cents, kind: 'income' | 'expense', currency = 'EUR') {

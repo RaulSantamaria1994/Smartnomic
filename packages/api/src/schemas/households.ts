@@ -38,13 +38,22 @@ export const memberSchema = z.object({
   remindersEnabled: z.boolean(),
   /** Hora local `HH:MM` de sus avisos (RF-030). */
   reminderTime: timeOfDaySchema,
+  /**
+   * Recibe avisos de lo que apuntan los demás miembros de este hogar (especificación 014,
+   * RF-1407). Opcional en la respuesta: un servidor anterior no lo envía (art. V.4).
+   */
+  activityAlertsEnabled: z.boolean().optional(),
 });
 
 export type Member = z.infer<typeof memberSchema>;
 
 /** Cuerpo de `PATCH /api/households/:householdId/members/me`. */
 export const updateMyMemberSchema = z
-  .object({ remindersEnabled: z.boolean(), reminderTime: timeOfDaySchema })
+  .object({
+    remindersEnabled: z.boolean(),
+    reminderTime: timeOfDaySchema,
+    activityAlertsEnabled: z.boolean(),
+  })
   .partial()
   .refine((value) => Object.keys(value).length > 0, { message: 'No hay nada que cambiar.' });
 
