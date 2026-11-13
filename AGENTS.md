@@ -130,7 +130,8 @@ pnpm install
 docker compose up -d                   # PostgreSQL en local
 pnpm --filter @smartnomic/server db:generate  # migración nueva tras cambiar el esquema
 pnpm --filter @smartnomic/server db:migrate   # aplica las migraciones (usa DATABASE_URL)
-pnpm check                             # formato + lint + tipos + tests (lo mismo que el CI)
+pnpm check                             # secretos + formato + lint + tipos + tests (lo mismo que el CI)
+pnpm check:secrets                     # busca claves y archivos secretos en lo versionado
 pnpm test                              # solo tests
 pnpm format                            # arregla el formato
 pnpm --filter @smartnomic/server dev   # servidor en http://localhost:3000
@@ -162,6 +163,15 @@ Una tarea está terminada cuando:
 - Cumple la constitución (repasa los artículos que toca el cambio).
 - Hay tests para lo nuevo y para cualquier error corregido.
 - La documentación afectada (`AGENTS.md`, `spec.md`, `plan.md`, `tasks.md`, README) está actualizada.
+
+## Secretos
+
+Ninguna clave entra en el repositorio (`google-services.json`, claves de cuentas de servicio,
+keystores, `.env`, tokens): van a EAS, Railway o los secretos de GitHub. `scripts/check-secrets.mjs`
+lo vigila de tres formas: el hook `.githooks/pre-commit` (se activa solo con `pnpm install`), el paso
+`pnpm check:secrets` del CI y `pnpm check`. Si falla, quita el secreto; si ya se subió, rota la
+clave: reescribir el historial no basta en un repositorio público. No uses `--no-verify` para
+saltarlo.
 
 ## Git y PRs
 

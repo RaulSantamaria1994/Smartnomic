@@ -13,7 +13,9 @@
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "check": "pnpm check:secrets && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

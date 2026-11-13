@@ -1,0 +1,5 @@
+#!/bin/sh
+# Antes de cada commit: busca claves y archivos secretos en lo que entra (scripts/check-secrets.mjs).
+# Se activa solo con `pnpm install` (script `prepare`). Para saltarlo en un caso justificado:
+# `git commit --no-verify` (y avisa en el PR).
+exec node scripts/check-secrets.mjs --staged
