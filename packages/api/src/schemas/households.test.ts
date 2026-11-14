@@ -21,7 +21,7 @@ const member = {
   remindersEnabled: true,
   reminderTime: '09:00',
 };
-const user = { id: 'u1', name: 'Lucía', email: 'lucia@example.com' };
+const user = { id: 'u1', name: 'Lucía', email: 'lucia@example.com', hasPassword: true };
 
 describe('me con varios hogares (especificación 013)', () => {
   it('lista los hogares y repite el primero para la app instalada', () => {
@@ -41,6 +41,17 @@ describe('me con varios hogares (especificación 013)', () => {
 
   it('exige la lista de hogares', () => {
     expect(meResponseSchema.safeParse({ user, household, member }).success).toBe(false);
+  });
+
+  it('exige hasPassword en el usuario (especificación 016)', () => {
+    expect(
+      meResponseSchema.safeParse({
+        user: { id: user.id, name: user.name, email: user.email },
+        households: [],
+        household: null,
+        member: null,
+      }).success,
+    ).toBe(false);
   });
 });
 

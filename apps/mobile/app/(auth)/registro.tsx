@@ -2,6 +2,7 @@ import { TIMEZONE_HEADER } from '@smartnomic/api';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Button } from '../../src/components/Button';
+import { ContinueWithGoogle } from '../../src/components/ContinueWithGoogle';
 import { Message } from '../../src/components/Message';
 import { Screen } from '../../src/components/Screen';
 import { TextField } from '../../src/components/TextField';
@@ -69,6 +70,7 @@ export default function SignUp() {
       />
       {error && <Message text={error} />}
       <Button label={es.auth.signUp.submit} onPress={submit} loading={loading} />
+      <ContinueWithGoogle next={next} onError={setError} />
       <Button
         variant="link"
         label={es.auth.signUp.haveAccount}

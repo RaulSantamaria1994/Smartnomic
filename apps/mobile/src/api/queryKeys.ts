@@ -3,6 +3,7 @@ import type { SearchFilters } from '@smartnomic/api';
 /** Claves de la caché de consultas: lo que cuelga de una clave se invalida con ella. */
 export const queryKeys = {
   me: ['me'] as const,
+  loginOptions: ['login-options'] as const,
   categories: (householdId: string) => ['categories', householdId] as const,
   periods: (householdId: string) => ['periods', householdId] as const,
   /** Todos los meses del calendario, para invalidarlos juntos. */
@@ -37,5 +38,6 @@ export const queryKeys = {
  * 009).
  */
 export function persistable(queryKey: readonly unknown[]): boolean {
+  if (queryKey[0] === 'login-options') return false;
   return !(queryKey[0] === 'periods' && queryKey[2] === 'search');
 }

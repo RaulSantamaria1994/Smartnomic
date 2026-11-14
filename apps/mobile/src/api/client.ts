@@ -10,6 +10,8 @@ import {
   csvExportSchema,
   householdExportSchema,
   householdSchema,
+  loginOptionsSchema,
+  type DeleteAccountInput,
   invitationPreviewSchema,
   invitationSchema,
   invitationsResponseSchema,
@@ -56,6 +58,9 @@ const household = (id: string) => `/api/households/${encodeURIComponent(id)}`;
 export const api = {
   health: () => request('/health', { schema: healthResponseSchema }),
   me: () => request('/api/me', { schema: meResponseSchema }),
+  loginOptions: () => request('/api/login-options', { schema: loginOptionsSchema }),
+  putTimezone: (timezone: string) =>
+    request('/api/me/timezone', { method: 'PUT', body: { timezone }, schema: z.null() }),
   categories: (householdId: string) =>
     request(`${household(householdId)}/categories`, { schema: categoriesResponseSchema }),
   period: (householdId: string, start: string) =>
@@ -137,8 +142,8 @@ export const api = {
   /** Da de baja un móvil; 204 aunque ya no figure. */
   unregisterPushDevice: (token: string) =>
     request('/api/push-device', { method: 'DELETE', body: { token }, schema: z.null() }),
-  deleteAccount: (password: string) =>
-    request('/api/account', { method: 'DELETE', body: { password }, schema: z.null() }),
+  deleteAccount: (input: DeleteAccountInput) =>
+    request('/api/account', { method: 'DELETE', body: input, schema: z.null() }),
   members: (householdId: string) =>
     request(`${household(householdId)}/members`, { schema: membersResponseSchema }),
   changeRole: (householdId: string, memberId: string, role: 'editor' | 'viewer') =>

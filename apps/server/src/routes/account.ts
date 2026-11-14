@@ -1,7 +1,9 @@
 import { deleteAccountSchema } from '@smartnomic/api';
+import { emailsMatch } from '@smartnomic/domain';
 import { fromNodeHeaders } from 'better-auth/node';
 import { count, eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
+import { userHasPassword } from '../account';
 import type { Auth, AuthRateLimit } from '../auth';
 import type { Database } from '../db/client';
 import { households, members, users, verifications } from '../db/schema';
@@ -25,13 +27,20 @@ export function registerAccountRoutes(
     '/api/account',
     { preHandler: access.requireSession, config: { rateLimit: deps.rateLimit } },
     async (request, reply) => {
-      const { password } = deleteAccountSchema.parse(request.body ?? {});
+      const { password, email } = deleteAccountSchema.parse(request.body ?? {});
       const user = request.user!;
-      const valid = await auth.api
-        .verifyPassword({ body: { password }, headers: fromNodeHeaders(request.headers) })
-        .then(() => true)
-        .catch(() => false);
-      if (!valid) throw new ApiError('validation_failed', 'La contraseña no es correcta.');
+      if (await userHasPassword(db, user.id)) {
+        if (!password) throw new ApiError('validation_failed', 'Escribe tu contraseña.');
+        const valid = await auth.api
+          .verifyPassword({ body: { password }, headers: fromNodeHeaders(request.headers) })
+          .then(() => true)
+          .catch(() => false);
+        if (!valid) throw new ApiError('validation_failed', 'La contraseña no es correcta.');
+      } else if (!email) {
+        throw new ApiError('validation_failed', 'Escribe tu email.');
+      } else if (!emailsMatch(email, user.email)) {
+        throw new ApiError('validation_failed', 'El email no coincide.');
+      }
 
       // Todos sus hogares (especificación 013): donde es propietario con más miembros hay que
       // pasar antes la propiedad; los que solo tienen a esta persona se borran con la cuenta.

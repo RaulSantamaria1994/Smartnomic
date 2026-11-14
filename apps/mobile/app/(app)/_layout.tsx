@@ -9,6 +9,7 @@ import { useOutboxSync } from '../../src/outbox/useOutbox';
 import { usePushRegistration } from '../../src/push/usePushRegistration';
 import { useRealtime } from '../../src/realtime/useRealtime';
 import { es } from '../../src/i18n/es';
+import { applyDeviceTimezone } from '../../src/session/google';
 import { authClient } from '../../src/session/auth-client';
 import { sessionEnd } from '../../src/session/session-ended';
 import { color } from '../../src/design/tokens';
@@ -30,7 +31,10 @@ export default function AppLayout() {
 }
 
 function SignedIn() {
-  useEffect(() => sessionEnd.started(), []);
+  useEffect(() => {
+    sessionEnd.started();
+    void applyDeviceTimezone();
+  }, []);
   useReminderSync();
   usePushRegistration();
   useOutboxSync();
