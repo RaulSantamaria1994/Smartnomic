@@ -21,3 +21,8 @@ export const sessionCredentials: RequestCredentials = 'include';
 export function resetPasswordRedirect(): string {
   return `${typeof window === 'undefined' ? '' : window.location.origin}/restablecer`;
 }
+
+/** En la web Google vuelve a esta ruta del mismo origen. */
+export function googleCallbackURL(next: string | null): string {
+  return next ?? '/';
+}

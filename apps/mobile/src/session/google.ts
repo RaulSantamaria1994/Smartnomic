@@ -1,6 +1,6 @@
 import { TIMEZONE_HEADER } from '@smartnomic/api';
 import { api } from '../api/client';
-import { authClient } from './auth-client';
+import { authClient, googleCallbackURL } from './auth-client';
 import { authErrorMessage, isAuthCancelled, type AuthClientError } from './auth-errors';
 
 export type GoogleSignInResult = 'ok' | 'cancel' | { error: string };
@@ -9,10 +9,13 @@ export type GoogleSignInResult = 'ok' | 'cancel' | { error: string };
  * Abre Google y, si entra, aplica la zona del dispositivo. Cancelar no es un error
  * (especificación 016, RF-1607).
  */
-export async function continueWithGoogle(callbackURL: string): Promise<GoogleSignInResult> {
+export async function continueWithGoogle(next: string | null): Promise<GoogleSignInResult> {
+  const callbackURL = googleCallbackURL(next);
   const { error } = await authClient.signIn.social({
     provider: 'google',
     callbackURL,
+    errorCallbackURL: callbackURL,
+    newUserCallbackURL: callbackURL,
     fetchOptions: {
       headers: { [TIMEZONE_HEADER]: Intl.DateTimeFormat().resolvedOptions().timeZone },
     },
