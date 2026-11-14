@@ -2,6 +2,7 @@ import { expo } from '@better-auth/expo';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { fromNodeHeaders } from 'better-auth/node';
+import { eq } from 'drizzle-orm';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Database } from './db/client';
 import { accounts, sessions, users, verifications } from './db/schema';
@@ -32,13 +33,15 @@ export interface AuthOptions {
     user: { id: string; name: string },
     headers: Headers | undefined,
   ) => Promise<void>;
+  /** Entrar con Google (especificación 016). Sin él, el botón no existe. */
+  google?: { clientId: string; clientSecret: string };
 }
 
 /** Validez del enlace para restablecer la contraseña, en segundos. */
 export const RESET_PASSWORD_EXPIRES_IN = 60 * 60;
 
 export function createAuth(options: AuthOptions) {
-  const { sendResetPassword, onEmailError, onUserCreated } = options;
+  const { sendResetPassword, onEmailError, onUserCreated, google } = options;
   return betterAuth({
     baseURL: options.baseURL,
     basePath: AUTH_BASE_PATH,
@@ -61,6 +64,22 @@ export function createAuth(options: AuthOptions) {
         revokeSessionsOnPasswordReset: true,
       }),
     },
+    account: {
+      accountLinking: { enabled: true, trustedProviders: ['google'] },
+    },
+    ...(google && {
+      socialProviders: {
+        google: {
+          clientId: google.clientId,
+          clientSecret: google.clientSecret,
+          prompt: 'select_account' as const,
+          mapProfileToUser: (profile: { name?: string | null; email?: string | null }) => ({
+            name: profile.name ?? '',
+            email: profile.email ?? '',
+          }),
+        },
+      },
+    }),
     // La app nativa entra con el esquema «smartnomic://»; en desarrollo, Expo Go usa «exp://».
     trustedOrigins: [
       'smartnomic://',
@@ -72,6 +91,10 @@ export function createAuth(options: AuthOptions) {
       user: {
         create: {
           after: async (user, context) => {
+            // La foto de Google no se guarda (RF-1606).
+            if (user.image) {
+              await options.db.update(users).set({ image: null }).where(eq(users.id, user.id));
+            }
             await onUserCreated?.(user, context?.headers);
           },
         },

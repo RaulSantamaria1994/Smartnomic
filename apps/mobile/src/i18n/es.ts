@@ -47,6 +47,11 @@ export const es = {
       missingToken: 'Este enlace no es válido. Pide uno nuevo.',
       requestNew: 'Pedir un enlace nuevo',
     },
+    google: {
+      continue: 'Continuar con Google',
+      privacy:
+        'Google nos da tu nombre y tu email para identificarte. No le enviamos tus movimientos ni tus hogares.',
+    },
     signOut: 'Cerrar sesión',
     validation: {
       nameRequired: 'Escribe tu nombre.',
@@ -315,6 +320,8 @@ export const es = {
     goToMembers: 'Ir a «Miembros del hogar»',
     password: 'Tu contraseña, para confirmar',
     passwordRequired: 'Escribe tu contraseña.',
+    email: 'Tu email, para confirmar',
+    emailRequired: 'Escribe tu email.',
     delete: 'Borrar mi cuenta',
     confirmDelete: 'Pulsa otra vez para borrar tu cuenta para siempre.',
   },

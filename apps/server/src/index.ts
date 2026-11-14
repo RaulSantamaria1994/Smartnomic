@@ -40,6 +40,7 @@ async function main() {
       production: PRODUCTION,
       ...(PRODUCTION && { clientIpHeader: CLIENT_IP_HEADER }),
       ...(sendEmail && { sendEmail, onEmailError: (error) => logEmailError(error) }),
+      ...googleCredentials(),
     });
   }
 
@@ -66,6 +67,15 @@ async function main() {
   if (database && !sendEmail) {
     app.log.warn('Sin BREVO_API_KEY o EMAIL_FROM: recuperar la contraseña no está disponible.');
   }
+  if (
+    database &&
+    !googleCredentials() &&
+    (process.env.GOOGLE_CLIENT_ID?.trim() || process.env.GOOGLE_CLIENT_SECRET?.trim())
+  ) {
+    app.log.warn(
+      'Falta GOOGLE_CLIENT_ID o GOOGLE_CLIENT_SECRET: entrar con Google no está disponible.',
+    );
+  }
   app.addHook('onClose', async () => database?.close());
 
   for (const signal of ['SIGTERM', 'SIGINT'] as const) {
@@ -84,6 +94,14 @@ function emailSender(): SendEmail | undefined {
   if (!apiKey || !from) return undefined;
   const apiUrl = process.env.BREVO_API_URL;
   return createBrevoSender({ apiKey, sender: parseSender(from), ...(apiUrl && { apiUrl }) });
+}
+
+/** Credenciales de Google Identity. Hacen falta las dos; si falta una, el botón no se muestra. */
+function googleCredentials(): { google: { clientId: string; clientSecret: string } } | undefined {
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  if (!clientId || !clientSecret) return undefined;
+  return { google: { clientId, clientSecret } };
 }
 
 /** En producción el secreto es obligatorio; en desarrollo se usa uno fijo. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { trackList, withoutKey, type Tracked } from './animatedList';
+import { trackList, withoutKey, type Tracked } from './trackList';
 
 const key = (s: string) => s;
 const view = (list: Tracked<string>[]) => list.map((t) => `${t.key}:${t.state}`);

@@ -23,5 +23,6 @@ describe('queryKeys.search (especificación 009)', () => {
     expect(persistable(queryKeys.period('h1', '2026-10-01'))).toBe(true);
     expect(persistable(queryKeys.charts('h1', '2026-10-01'))).toBe(true);
     expect(persistable(queryKeys.me)).toBe(true);
+    expect(persistable(queryKeys.loginOptions)).toBe(false);
   });
 });

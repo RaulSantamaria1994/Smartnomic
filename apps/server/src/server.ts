@@ -13,6 +13,7 @@ import { registerSecurityHeaders } from './plugins/security-headers';
 import websocket from '@fastify/websocket';
 import { RealtimeHub } from './realtime/hub';
 import { registerAccountRoutes } from './routes/account';
+import { registerLoginOptionsRoutes } from './routes/login-options';
 import { registerRealtimeRoutes } from './routes/realtime';
 import { registerCalendarRoutes } from './routes/calendar';
 import { registerCategoryRoutes } from './routes/categories';
@@ -143,7 +144,8 @@ export async function buildServer(options: ServerOptions = {}): Promise<FastifyI
     registerAuthRoutes(app, auth, {
       rateLimit: options.authRateLimit ?? DEFAULT_AUTH_RATE_LIMIT,
     });
-    registerMeRoutes(app, { db, access });
+    registerLoginOptionsRoutes(app, auth);
+    registerMeRoutes(app, { db, access, ...(options.now && { now: options.now }) });
     const now = options.now ?? (() => new Date());
     const activity: ActivityNotifier = options.push
       ? createActivityNotifier({

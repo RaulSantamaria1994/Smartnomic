@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { householdSchema } from './households';
 import { recurringRuleSchema, resolvedOccurrenceSchema } from './recurring';
-import { roleSchema } from './common';
+import { roleSchema, timeZoneSchema } from './common';
 import { savingsEntryRecordSchema, savingsGoalRecordSchema } from './savings';
 import { categorySchema, transactionSchema } from './transactions';
 import { budgetRecordSchema } from './budgets';
@@ -42,9 +42,28 @@ export const householdExportSchema = z.object({
 
 export type HouseholdExport = z.infer<typeof householdExportSchema>;
 
-/** Cuerpo de `DELETE /api/account`: se pide la contraseña para confirmar (RF-039). */
-export const deleteAccountSchema = z.object({
-  password: z.string().min(1, 'Escribe tu contraseña.'),
-});
+/**
+ * Cuerpo de `DELETE /api/account`: contraseña si la cuenta tiene; si no (solo Google), el
+ * email (especificación 016, RF-1609). El servidor no se fía del campo: mira si hay
+ * contraseña.
+ */
+export const deleteAccountSchema = z
+  .object({
+    password: z.string().min(1, 'Escribe tu contraseña.').optional(),
+    email: z.string().min(1, 'Escribe tu email.').optional(),
+  })
+  .refine((value) => Boolean(value.password || value.email), {
+    message: 'Escribe tu contraseña.',
+  });
 
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
+
+/** `GET /api/login-options`: si se puede entrar con Google (especificación 016). */
+export const loginOptionsSchema = z.object({ google: z.boolean() });
+
+export type LoginOptions = z.infer<typeof loginOptionsSchema>;
+
+/** `PUT /api/me/timezone`: zona del dispositivo tras entrar con Google. */
+export const putTimezoneSchema = z.object({ timezone: timeZoneSchema });
+
+export type PutTimezoneInput = z.infer<typeof putTimezoneSchema>;

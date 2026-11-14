@@ -16,8 +16,9 @@ las huchas para objetivos de ahorro (`docs/specs/005-hucha`), los presupuestos p
 búsqueda de movimientos (`docs/specs/009-busqueda`), la exportación a CSV con filtros
 (`docs/specs/010-exportar-csv`), apuntar movimientos sin conexión en Android
 (`docs/specs/011-sin-conexion`), los cambios en tiempo real entre miembros
-(`docs/specs/012-tiempo-real`) y pertenecer a varios hogares a la vez
-(`docs/specs/013-varios-hogares`) también están terminados.
+(`docs/specs/012-tiempo-real`), pertenecer a varios hogares a la vez
+(`docs/specs/013-varios-hogares`) y entrar con Google
+(`docs/specs/016-entrar-google`) también están terminados.
 Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
 (ver «Resultado de los criterios de éxito» en su `plan.md`).
 
@@ -48,12 +49,16 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
 - `GET /health` responde `{"ok":true}`.
 - `/api/auth/*`: registro, inicio y cierre de sesión y recuperar la contraseña (Better
   Auth). Las peticiones POST tienen un límite de 10 por minuto e IP.
-- `GET /api/me`: usuario, hogar y rol. `GET /api/households/:id`: datos del hogar.
+- `GET /api/login-options`: si se puede entrar con Google.
+- `GET /api/me`: usuario (`hasPassword` incluido), hogares y rol. `PUT /api/me/timezone`:
+  zona del dispositivo tras un alta con Google.
+- `GET /api/households/:id`: datos del hogar.
 - `PATCH /api/households/:id`: nombre e inicio de mes (solo el propietario).
 - `GET|POST /api/households/:id/categories` y `PATCH …/categories/:catId`: categorías del
   hogar; crear, renombrar, archivar y restaurar.
 - `GET /api/households/:id/export`: todos los datos del hogar en JSON.
-- `DELETE /api/account`: borrar la cuenta, confirmando con la contraseña.
+- `DELETE /api/account`: borrar la cuenta, confirmando con la contraseña o, si no hay, con
+  el email.
 - `PUT|DELETE /api/households/:id/transactions/:txId` y `POST …/restore`: apuntar o
   editar (idempotente por el UUIDv7 que genera la app), borrar y deshacer.
 - `GET /api/households/:id/periods/:start`: resumen y movimientos de un periodo.
@@ -74,16 +79,35 @@ Al arrancar con `DATABASE_URL`, el servidor aplica las migraciones pendientes.
   web en `/`, en el mismo origen que la API.
 - Variables (ver `apps/server/.env.example`):
 
-  | Variable             | Para qué                                                                        |
-  | -------------------- | ------------------------------------------------------------------------------- |
-  | `DATABASE_URL`       | PostgreSQL. Sin ella, el servidor solo responde `/health`                       |
-  | `BETTER_AUTH_SECRET` | Firma las sesiones. Obligatoria en producción                                   |
-  | `BETTER_AUTH_URL`    | URL pública (`https://…`). En Railway, si falta, se usa `RAILWAY_PUBLIC_DOMAIN` |
-  | `CORS_ORIGINS`       | Orígenes de la web de Expo en desarrollo, separados por comas                   |
-  | `BREVO_API_KEY`      | Clave de la API de Brevo para enviar emails                                     |
-  | `EMAIL_FROM`         | Remitente verificado en Brevo («Smartnomic <no-reply@…>»)                       |
-  | `EXPO_ACCESS_TOKEN`  | Opcional: seguridad reforzada de Expo Push (avisos de otros miembros)           |
-  | `PORT`, `HOST`       | Puerto (3000) e interfaz (`0.0.0.0`)                                            |
+  | Variable               | Para qué                                                                        |
+  | ---------------------- | ------------------------------------------------------------------------------- |
+  | `DATABASE_URL`         | PostgreSQL. Sin ella, el servidor solo responde `/health`                       |
+  | `BETTER_AUTH_SECRET`   | Firma las sesiones. Obligatoria en producción                                   |
+  | `BETTER_AUTH_URL`      | URL pública (`https://…`). En Railway, si falta, se usa `RAILWAY_PUBLIC_DOMAIN` |
+  | `CORS_ORIGINS`         | Orígenes de la web de Expo en desarrollo, separados por comas                   |
+  | `BREVO_API_KEY`        | Clave de la API de Brevo para enviar emails                                     |
+  | `EMAIL_FROM`           | Remitente verificado en Brevo («Smartnomic <no-reply@…>»)                       |
+  | `EXPO_ACCESS_TOKEN`    | Opcional: seguridad reforzada de Expo Push (avisos de otros miembros)           |
+  | `GOOGLE_CLIENT_ID`     | Cliente OAuth web de Google. Sin las dos, el botón no se muestra                |
+  | `GOOGLE_CLIENT_SECRET` | Secreto de ese cliente. Nunca en el repositorio                                 |
+  | `PORT`, `HOST`         | Puerto (3000) e interfaz (`0.0.0.0`)                                            |
+
+### Entrar con Google
+
+En **Entrar** y **Crear cuenta** hay un botón «Continuar con Google» si el servidor tiene las
+dos variables. Email y contraseña se quedan. Si el Gmail coincide con una cuenta ya creada,
+entra en esa. Google solo nos da nombre y email; se explica junto al botón.
+
+1. En [Google Cloud Console](https://console.cloud.google.com/), el mismo proyecto de Firebase
+   de los avisos: **Pantalla de consentimiento OAuth** (externa, nombre Smartnomic). En modo
+   prueba, añade los Gmail que vayan a entrar.
+2. **Credenciales → ID de cliente de OAuth → Aplicación web**. Orígenes:
+   `http://localhost:3000`, `http://localhost:8081` y la URL pública. Redirecciones:
+   `http://localhost:3000/api/auth/callback/google` y
+   `https://<dominio>/api/auth/callback/google` (el `BETTER_AUTH_URL` exacto, sin barra al
+   final).
+3. `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` en `apps/server/.env` y en Railway. **No
+   entran en el repositorio.** Sin ellas el servidor arranca y se entra solo con email.
 
 ### Emails (Brevo)
 

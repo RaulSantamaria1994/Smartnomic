@@ -20,9 +20,8 @@ import { authClient } from '../../src/session/auth-client';
 import { sessionEnd } from '../../src/session/session-ended';
 
 /**
- * «Borrar mi cuenta» (especificación 015): el flujo que antes vivía al final de «Hogar», sin
- * cambios, en su propia pantalla. Pide la contraseña y una segunda pulsación para confirmar.
- * Al salir de la pantalla se pierde lo escrito, contraseña incluida.
+ * «Borrar mi cuenta» (especificaciones 015 y 016): contraseña si la hay; si no, el email.
+ * Al salir de la pantalla se pierde lo escrito.
  */
 export default function DeleteAccount() {
   const queryClient = useQueryClient();
@@ -30,6 +29,7 @@ export default function DeleteAccount() {
   const { me, household, member } = useHousehold();
   const members = useMembers(household?.id);
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -42,16 +42,21 @@ export default function DeleteAccount() {
     );
   }
 
+  const hasPassword = me.data.user.hasPassword;
   const memberCount = members.data?.members.length ?? 1;
   const ownerWithOthers = member.role === 'owner' && memberCount > 1;
 
   async function deleteAccount() {
     setDeleteError(null);
-    if (!password) return setDeleteError(es.account.passwordRequired);
+    if (hasPassword) {
+      if (!password) return setDeleteError(es.account.passwordRequired);
+    } else if (!email.trim()) {
+      return setDeleteError(es.account.emailRequired);
+    }
     if (!confirmDelete) return setConfirmDelete(true);
     setDeleting(true);
     try {
-      await api.deleteAccount(password);
+      await api.deleteAccount(hasPassword ? { password } : { email });
       // Desde aquí los 401 son por haber borrado la cuenta, no una sesión caducada.
       sessionEnd.leaving();
     } catch (e) {
@@ -89,17 +94,32 @@ export default function DeleteAccount() {
             <AppText variant="caption" tone="muted">
               {memberCount > 1 ? es.account.deleteMember : es.account.deleteOnlyMember}
             </AppText>
-            <TextField
-              label={es.account.password}
-              value={password}
-              onChangeText={(value) => {
-                setPassword(value);
-                setConfirmDelete(false);
-              }}
-              secureTextEntry
-              autoComplete="current-password"
-              textContentType="password"
-            />
+            {hasPassword ? (
+              <TextField
+                label={es.account.password}
+                value={password}
+                onChangeText={(value) => {
+                  setPassword(value);
+                  setConfirmDelete(false);
+                }}
+                secureTextEntry
+                autoComplete="current-password"
+                textContentType="password"
+              />
+            ) : (
+              <TextField
+                label={es.account.email}
+                value={email}
+                onChangeText={(value) => {
+                  setEmail(value);
+                  setConfirmDelete(false);
+                }}
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                textContentType="emailAddress"
+              />
+            )}
             {confirmDelete && <Message text={es.account.confirmDelete} />}
             {deleteError && <Message text={deleteError} />}
             <Button

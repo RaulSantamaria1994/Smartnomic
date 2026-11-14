@@ -7,6 +7,12 @@ export interface AuthClientError {
   message?: string | undefined;
 }
 
+/** El usuario cerró la ventana de Google: no se muestra error (RF-1607). */
+export function isAuthCancelled(error: AuthClientError): boolean {
+  const hay = `${error.code ?? ''} ${error.message ?? ''}`.toLowerCase();
+  return hay.includes('cancel') || hay.includes('dismiss');
+}
+
 /** Mensaje en español para un error de autenticación. */
 export function authErrorMessage(error: AuthClientError): string {
   if (error.status === 429) return es.auth.errors.tooManyRequests;
@@ -16,6 +22,7 @@ export function authErrorMessage(error: AuthClientError): string {
       return es.auth.errors.invalidCredentials;
     case 'USER_ALREADY_EXISTS':
     case 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL':
+    case 'UNABLE_TO_LINK_ACCOUNT':
       return es.auth.errors.emailInUse;
     case 'PASSWORD_TOO_SHORT':
       return es.auth.errors.passwordTooShort;

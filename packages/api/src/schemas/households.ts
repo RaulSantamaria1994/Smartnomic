@@ -70,7 +70,16 @@ export type Membership = z.infer<typeof membershipSchema>;
  * de varios hogares (constitución, art. V.4); sin hogares son `null`.
  */
 export const meResponseSchema = z.object({
-  user: z.object({ id: z.string(), name: z.string(), email: z.string() }),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string(),
+    /**
+     * Si la cuenta tiene contraseña (email y contraseña). Si no, solo entra con Google
+     * (especificación 016) y borrar la cuenta pide el email en lugar de la contraseña.
+     */
+    hasPassword: z.boolean(),
+  }),
   households: z.array(membershipSchema),
   household: householdSchema.nullable(),
   member: memberSchema.nullable(),

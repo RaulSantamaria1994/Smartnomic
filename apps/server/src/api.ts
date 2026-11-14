@@ -14,6 +14,8 @@ export interface ApiOptions {
   /** Sin él, recuperar la contraseña no está disponible. */
   sendEmail?: SendEmail;
   onEmailError?: (error: unknown) => void;
+  /** Entrar con Google (especificación 016). */
+  google?: { clientId: string; clientSecret: string };
 }
 
 /**
@@ -38,6 +40,7 @@ export function createApi(options: ApiOptions): Api {
       sendResetPassword: ({ to, url }) => sendEmail({ to, ...resetPasswordEmail(url) }),
     }),
     ...(onEmailError && { onEmailError }),
+    ...(options.google && { google: options.google }),
     onUserCreated: async (user, headers) => {
       await ensureHousehold(db, user, headers?.get(TIMEZONE_HEADER));
     },

@@ -6,13 +6,15 @@ import {
 } from '@smartnomic/api';
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { households, members, sessions, transactions, users } from '../src/db/schema';
+import { accounts, households, members, sessions, transactions, users } from '../src/db/schema';
 import {
   call,
+  insertGoogleUser,
   joinHousehold,
   me,
   newId,
   signUp,
+  TEST_NOW,
   TEST_ORIGIN,
   TEST_PASSWORD,
   useTestServer,
@@ -238,6 +240,112 @@ describe('borrar la cuenta', () => {
       method: 'DELETE',
       url: '/api/account',
       payload: { password: TEST_PASSWORD },
+    });
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('solo Google: el email correcto (mayúsculas y espacios) borra; el distinto no', async () => {
+    const user = await insertGoogleUser(ctx.app, ctx.db, { email: 'lucia@example.com' });
+    const wrong = await call(ctx.app, user, 'DELETE', '/api/account', {
+      email: 'otra@example.com',
+    });
+    expect(wrong.statusCode).toBe(400);
+    expect(errorResponseSchema.parse(wrong.json()).error.message).toBe('El email no coincide.');
+    expect(await ctx.db.select().from(users).where(eq(users.id, user.id))).toHaveLength(1);
+
+    const onlyPassword = await call(ctx.app, user, 'DELETE', '/api/account', {
+      password: TEST_PASSWORD,
+    });
+    expect(onlyPassword.statusCode).toBe(400);
+    expect(await ctx.db.select().from(users).where(eq(users.id, user.id))).toHaveLength(1);
+
+    const ok = await call(ctx.app, user, 'DELETE', '/api/account', {
+      email: '  Lucia@Example.com ',
+    });
+    expect(ok.statusCode).toBe(204);
+    expect(await ctx.db.select().from(users).where(eq(users.id, user.id))).toEqual([]);
+  });
+
+  it('con contraseña, el email no basta; con las dos filas tampoco', async () => {
+    const user = await signUp(ctx.app, { email: 'juan@example.com' });
+    const onlyEmail = await call(ctx.app, user, 'DELETE', '/api/account', {
+      email: user.email,
+    });
+    expect(onlyEmail.statusCode).toBe(400);
+    expect(await ctx.db.select().from(users).where(eq(users.id, user.id))).toHaveLength(1);
+
+    await ctx.db.insert(accounts).values({
+      id: crypto.randomUUID(),
+      accountId: `google-test-${user.id}`,
+      providerId: 'google',
+      userId: user.id,
+    });
+    const stillEmail = await call(ctx.app, user, 'DELETE', '/api/account', { email: user.email });
+    expect(stillEmail.statusCode).toBe(400);
+    expect((await deleteAccount(user)).statusCode).toBe(204);
+  });
+});
+
+describe('PUT /api/me/timezone (especificación 016)', () => {
+  it('con dos hogares no se toca ninguno', async () => {
+    const user = await signUp(ctx.app);
+    const first = (await me(ctx.app, user)).household.id;
+    expect(
+      (await call(ctx.app, user, 'POST', '/api/households', { name: 'Otro' })).statusCode,
+    ).toBe(201);
+    expect(
+      (await call(ctx.app, user, 'PUT', '/api/me/timezone', { timezone: 'Atlantic/Canary' }))
+        .statusCode,
+    ).toBe(204);
+    const [row] = await ctx.db.select().from(households).where(eq(households.id, first));
+    expect(row?.timezone).toBe('Europe/Madrid');
+  });
+
+  it('alta reciente, un hogar en Madrid y zona válida: se cambia', async () => {
+    const user = await signUp(ctx.app);
+    const householdId = (await me(ctx.app, user)).household.id;
+    const response = await call(ctx.app, user, 'PUT', '/api/me/timezone', {
+      timezone: 'Atlantic/Canary',
+    });
+    expect(response.statusCode).toBe(204);
+    const [row] = await ctx.db.select().from(households).where(eq(households.id, householdId));
+    expect(row?.timezone).toBe('Atlantic/Canary');
+  });
+
+  it('zona ya distinta, cuenta vieja o zona inválida: no se toca o 400', async () => {
+    const user = await signUp(ctx.app, { timezone: 'Europe/Berlin' });
+    const householdId = (await me(ctx.app, user)).household.id;
+    expect(
+      (await call(ctx.app, user, 'PUT', '/api/me/timezone', { timezone: 'Atlantic/Canary' }))
+        .statusCode,
+    ).toBe(204);
+    const [kept] = await ctx.db.select().from(households).where(eq(households.id, householdId));
+    expect(kept?.timezone).toBe('Europe/Berlin');
+
+    const old = await signUp(ctx.app);
+    await ctx.db
+      .update(users)
+      .set({ createdAt: new Date(TEST_NOW.getTime() - 16 * 60 * 1000) })
+      .where(eq(users.id, old.id));
+    const oldHousehold = (await me(ctx.app, old)).household.id;
+    expect(
+      (await call(ctx.app, old, 'PUT', '/api/me/timezone', { timezone: 'Atlantic/Canary' }))
+        .statusCode,
+    ).toBe(204);
+    const [oldRow] = await ctx.db.select().from(households).where(eq(households.id, oldHousehold));
+    expect(oldRow?.timezone).toBe('Europe/Madrid');
+
+    expect(
+      (await call(ctx.app, user, 'PUT', '/api/me/timezone', { timezone: 'Marte/Olympus' }))
+        .statusCode,
+    ).toBe(400);
+  });
+
+  it('sin sesión, 401', async () => {
+    const response = await ctx.app.inject({
+      method: 'PUT',
+      url: '/api/me/timezone',
+      payload: { timezone: 'Atlantic/Canary' },
     });
     expect(response.statusCode).toBe(401);
   });

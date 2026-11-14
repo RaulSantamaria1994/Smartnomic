@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated } from 'react-native';
 import { animate, DURATION, useReduceMotion } from '../design/motion';
-import { trackList, withoutKey, type Tracked } from './animatedList';
+import { trackList, withoutKey, type Tracked } from './trackList';
 
 /**
  * Lista cuyas filas nuevas aparecen fundidas y las que se borran o se deshacen desaparecen

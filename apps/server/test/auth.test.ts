@@ -53,6 +53,14 @@ describe('registro', () => {
   });
 });
 
+describe('GET /api/login-options (especificación 016)', () => {
+  it('sin Google, el botón no está disponible', async () => {
+    const response = await ctx.app.inject({ method: 'GET', url: '/api/login-options' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ google: false });
+  });
+});
+
 describe('GET /api/me', () => {
   it('sin sesión responde 401 con el formato de error', async () => {
     const response = await ctx.app.inject({ method: 'GET', url: '/api/me' });
@@ -72,7 +80,12 @@ describe('GET /api/me', () => {
 
     expect(response.statusCode).toBe(200);
     const me = meResponseSchema.parse(response.json());
-    expect(me.user).toEqual({ id: user.id, name: 'Marcos', email: user.email });
+    expect(me.user).toEqual({
+      id: user.id,
+      name: 'Marcos',
+      email: user.email,
+      hasPassword: true,
+    });
     expect(me.household?.name).toBe('Hogar de Marcos');
     expect(me.member?.role).toBe('owner');
   });

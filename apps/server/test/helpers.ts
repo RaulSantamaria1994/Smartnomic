@@ -8,7 +8,7 @@ import { createApi, type Api } from '../src/api';
 import type { AuthRateLimit } from '../src/auth';
 import { connectDatabase, type Database } from '../src/db/client';
 import { runMigrations } from '../src/db/migrate';
-import { members } from '../src/db/schema';
+import { accounts, members } from '../src/db/schema';
 import type { PushMessage, PushSender } from '../src/push/expo';
 import { buildServer } from '../src/server';
 import { fakeScheduler, fakeSender } from './push-fakes';
@@ -54,6 +54,8 @@ export function useTestServer(
     realtimePingMs?: number;
     /** Emisor de avisos push distinto del falso por defecto (por ejemplo, uno que falla). */
     pushSender?: PushSender;
+    /** Claves falsas de Google (especificación 016); sin red. */
+    google?: { clientId: string; clientSecret: string };
   } = {},
 ) {
   const context = {} as TestContext;
@@ -85,6 +87,7 @@ export function useTestServer(
       baseURL: TEST_ORIGIN,
       secret: 'secreto-de-los-tests-de-integracion-0123456789',
       production: false,
+      ...(options.google && { google: options.google }),
     });
     context.app = await buildServer({
       api: context.api,
@@ -141,6 +144,26 @@ export async function signUp(
   }
   const { user } = response.json<{ user: { id: string } }>();
   return { id: user.id, email, name, cookie: sessionCookie(response) };
+}
+
+/**
+ * Cuenta que solo entra con Google: se registra con contraseña (para tener sesión) y se
+ * quita la credencial (especificación 016).
+ */
+export async function insertGoogleUser(
+  app: FastifyInstance,
+  db: Database,
+  options: { name?: string; email?: string; timezone?: string } = {},
+): Promise<TestUser> {
+  const user = await signUp(app, options);
+  await db.delete(accounts).where(eq(accounts.userId, user.id));
+  await db.insert(accounts).values({
+    id: crypto.randomUUID(),
+    accountId: `google-test-${user.id}`,
+    providerId: 'google',
+    userId: user.id,
+  });
+  return user;
 }
 
 export function sessionCookie(response: LightMyRequestResponse): string {
