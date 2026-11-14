@@ -83,6 +83,7 @@ export function createAuth(options: AuthOptions) {
     // La app nativa entra con el esquema «smartnomic://»; en desarrollo, Expo Go usa «exp://».
     trustedOrigins: [
       'smartnomic://',
+      'smartnomic://*',
       ...(options.production ? [] : ['exp://']),
       ...(options.trustedOrigins ?? []),
     ],

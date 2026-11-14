@@ -30,7 +30,7 @@ export function ContinueWithGoogle({
   async function press() {
     onError(null);
     setLoading(true);
-    const result = await continueWithGoogle(next ?? '/');
+    const result = await continueWithGoogle(next);
     setLoading(false);
     if (result === 'cancel') return;
     if (result !== 'ok') return onError(result.error);

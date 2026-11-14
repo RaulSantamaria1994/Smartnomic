@@ -102,8 +102,9 @@ tiene `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (`GET /api/login-options`). Be
 cuenta de contraseña. El callback no trae la zona del dispositivo: `PUT /api/me/timezone` la aplica
 si el hogar es nuevo y sigue en Madrid (`applySignupTimezone` en `apps/server/src/account.ts`).
 Borrar la cuenta pide la contraseña si `hasPassword`; si no, el email (`emailsMatch` en
-`packages/domain`). La foto de Google no se guarda. Sin las claves el botón no se muestra. Probado el baile
-real en la web (G024). Falta axe (G023) y la APK (G025).
+`packages/domain`). La foto de Google no se guarda. Sin las claves el botón no se muestra. En Android el
+callback es `smartnomic://` (`googleCallbackURL`), no `/`. Probado el baile real en la web
+(G024). Falta axe (G023) y la APK (G025).
 
 **`014-avisos-push`**: los demás miembros de un hogar reciben un aviso en su Android, también con la
 app cerrada, cuando alguien apunta un movimiento, paga un recibo o mueve una hucha. Las rutas

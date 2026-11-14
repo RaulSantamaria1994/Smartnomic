@@ -34,6 +34,22 @@ describe('entrar con Google (especificación 016)', () => {
     expect(hayGoogle).toBe(true);
   });
 
+  it('acepta el esquema de la app como callback (G025)', async () => {
+    const response = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/sign-in/social',
+      headers: { origin: 'smartnomic://', 'expo-origin': 'smartnomic://' },
+      payload: { provider: 'google', callbackURL: 'smartnomic:///' },
+    });
+    expect(response.statusCode).toBeLessThan(500);
+    const body = typeof response.body === 'string' ? response.body : '';
+    const location = response.headers.location;
+    const hayGoogle =
+      body.includes('accounts.google.com') ||
+      (typeof location === 'string' && location.includes('accounts.google.com'));
+    expect(hayGoogle).toBe(true);
+  });
+
   it('una cuenta solo Google no tiene contraseña', async () => {
     const user = await insertGoogleUser(ctx.app, ctx.db, { name: 'Lucía' });
     const me = meResponseSchema.parse(

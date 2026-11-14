@@ -101,10 +101,11 @@ tokens). Email y contraseña usan `provider_id = 'credential'`; Google, `'google
   persistir). Si `google`, botón `secondary` «Continuar con Google» debajo del envío del
   formulario y una nota (`es.auth.google.privacy`). Sin icono de marca: el sistema de diseño
   no tiene el G de colores y no hace falta para el requisito.
-- `authClient.signIn.social({ provider: 'google', callbackURL: next ?? '/' })` con
+- `authClient.signIn.social({ provider: 'google', callbackURL })` con
   `fetchOptions.headers` de `x-timezone` (por si el alta ocurre en esa petición). `next` sigue
-  pasando por `safeNext` (solo `/invitacion/…`). En nativo el plugin convierte la ruta a
-  `smartnomic://`. Tras éxito: `PUT /api/me/timezone` y `router.replace(next ?? '/')`. Si el
+  pasando por `safeNext` (solo `/invitacion/…`). En la web `callbackURL` es la ruta; en nativo
+  es `Linking.createURL` con el esquema `smartnomic` (si se manda `/`, Chrome se queda en la
+  web). Tras éxito: `PUT /api/me/timezone` y `router.replace(next ?? '/')`. Si el
   usuario cancela la ventana, no se muestra error (RF-1607); red u otros errores, el mensaje
   de siempre más códigos nuevos en `authErrorMessage` (`UNABLE_TO_LINK_ACCOUNT`, etc. →
   desconocido o el de email en uso si aplica).
@@ -150,6 +151,9 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
   `PUT` de zona, el hogar se queda en Madrid. Raro; no hay ajustes de zona hoy. Se acepta.
 - **APK antigua**: no tiene el botón; email y contraseña siguen. `hasPassword` de más en
   `/api/me` no la rompe.
+- **Callback `/` en Android**: si Google abre Chrome, `/` se resuelve a la web de Railway y
+  la sesión se queda en el navegador. En nativo el `callbackURL` es `smartnomic://…`
+  (`googleCallbackURL` en `auth-client.native.ts`).
 
 ## Pruebas y cierre
 

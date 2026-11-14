@@ -9,7 +9,13 @@ import { API_URL } from '../config';
 export const authClient = createAuthClient({
   baseURL: API_URL,
   plugins: [
-    expoClient({ scheme: 'smartnomic', storagePrefix: 'smartnomic', storage: SecureStore }),
+    expoClient({
+      scheme: 'smartnomic',
+      storagePrefix: 'smartnomic',
+      storage: SecureStore,
+      // Si Google abre Chrome (selector de cuenta), la pestaña no se pierde al ir a 2FA.
+      webBrowserOptions: { showInRecents: true },
+    }),
   ],
 });
 
@@ -24,4 +30,12 @@ export const sessionCredentials: RequestCredentials = 'omit';
 /** El enlace del email abre la app («smartnomic://restablecer» o, en Expo Go, «exp://…»). */
 export function resetPasswordRedirect(): string {
   return Linking.createURL('/restablecer');
+}
+
+/**
+ * Tras Google, el servidor redirige aquí. Tiene que ser el esquema de la app: si mandamos
+ * `/`, Chrome se queda en la web de Railway y la APK nunca recibe la sesión.
+ */
+export function googleCallbackURL(next: string | null): string {
+  return Linking.createURL(next ?? '/', { scheme: 'smartnomic' });
 }
