@@ -154,6 +154,9 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
 - **Callback `/` en Android**: si Google abre Chrome, `/` se resuelve a la web de Railway y
   la sesión se queda en el navegador. En nativo el `callbackURL` es `smartnomic://…`
   (`googleCallbackURL` en `auth-client.native.ts`).
+- **Android abre la app de cero**: el selector de Google cierra el Custom Tab y el intent
+  `smartnomic://…?cookie=` arranca de nuevo. `captureAuthCallback` guarda esa cookie antes
+  de pintar (G025).
 
 ## Pruebas y cierre
 

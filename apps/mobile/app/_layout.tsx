@@ -9,6 +9,7 @@ import { persister } from '../src/cache/cache';
 import { watchAppFocus } from '../src/cache/focus';
 import { CACHE_BUSTER, CACHE_MAX_AGE, createQueryClient } from '../src/cache/query-client';
 import { useAppFonts } from '../src/design/fonts';
+import { captureAuthCallback, subscribeAuthCallback } from '../src/session/google-callback';
 import { bindSessionEnd, sessionEnd } from '../src/session/session-ended';
 import { color } from '../src/design/tokens';
 import { loadHouseholdChoice } from '../src/households/active';
@@ -29,7 +30,11 @@ export default function RootLayout() {
   // El hogar elegido (especificación 013) se lee antes de pintar, como las fuentes.
   const [choiceReady, setChoiceReady] = useState(false);
   useEffect(() => {
-    void loadHouseholdChoice().then(() => setChoiceReady(true));
+    const sub = subscribeAuthCallback();
+    void Promise.all([loadHouseholdChoice(), captureAuthCallback()]).then(() =>
+      setChoiceReady(true),
+    );
+    return () => sub.remove();
   }, []);
 
   useEffect(() => {

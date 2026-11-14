@@ -37,5 +37,7 @@ export function resetPasswordRedirect(): string {
  * `/`, Chrome se queda en la web de Railway y la APK nunca recibe la sesión.
  */
 export function googleCallbackURL(next: string | null): string {
-  return Linking.createURL(next ?? '/', { scheme: 'smartnomic' });
+  // `/entrar`: si Android abre la app de cero, cae en la pila de auth, que redirige al
+  // haber sesión. `/` pintaría «Mes» sin cookie y volvería a Entrar.
+  return Linking.createURL(next ?? '/entrar', { scheme: 'smartnomic' });
 }
