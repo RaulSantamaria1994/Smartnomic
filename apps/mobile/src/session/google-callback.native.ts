@@ -29,3 +29,10 @@ export function subscribeAuthCallback(): { remove: () => void } {
     void applyAuthCallbackUrl(url);
   });
 }
+
+/** Tras un «cancel» de AuthSession: la cookie puede haber llegado por el deep link. */
+export async function sessionFromGoogleCallback(): Promise<boolean> {
+  await captureAuthCallback();
+  const { data } = await authClient.getSession();
+  return Boolean(data);
+}

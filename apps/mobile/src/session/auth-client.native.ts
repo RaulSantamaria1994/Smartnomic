@@ -13,8 +13,10 @@ export const authClient = createAuthClient({
       scheme: 'smartnomic',
       storagePrefix: 'smartnomic',
       storage: SecureStore,
-      // Si Google abre Chrome (selector de cuenta), la pestaña no se pierde al ir a 2FA.
-      webBrowserOptions: { showInRecents: true },
+      // showInRecents + createTask: el selector de Google no mata la pestaña.
+      // useProxyActivity: false: esa actividad, al cerrarse, relanza la APK con el
+      // intent del icono (sin ?cookie=) y parece que la app arranca de cero.
+      webBrowserOptions: { showInRecents: true, createTask: true, useProxyActivity: false },
     }),
   ],
 });
@@ -37,7 +39,7 @@ export function resetPasswordRedirect(): string {
  * `/`, Chrome se queda en la web de Railway y la APK nunca recibe la sesión.
  */
 export function googleCallbackURL(next: string | null): string {
-  // `/entrar`: si Android abre la app de cero, cae en la pila de auth, que redirige al
-  // haber sesión. `/` pintaría «Mes» sin cookie y volvería a Entrar.
-  return Linking.createURL(next ?? '/entrar', { scheme: 'smartnomic' });
+  // Ruta vacía → `smartnomic://`. AuthSession comprueba `url.startsWith(callback)`:
+  // Android a veces entrega `smartnomic://entrar` en vez de `smartnomic:///entrar`.
+  return Linking.createURL(next ?? '', { scheme: 'smartnomic' });
 }

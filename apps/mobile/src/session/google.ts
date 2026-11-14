@@ -2,6 +2,7 @@ import { TIMEZONE_HEADER } from '@smartnomic/api';
 import { api } from '../api/client';
 import { authClient, googleCallbackURL } from './auth-client';
 import { authErrorMessage, isAuthCancelled, type AuthClientError } from './auth-errors';
+import { sessionFromGoogleCallback } from './google-callback';
 
 export type GoogleSignInResult = 'ok' | 'cancel' | { error: string };
 
@@ -21,7 +22,11 @@ export async function continueWithGoogle(next: string | null): Promise<GoogleSig
     },
   });
   if (error) {
-    if (isAuthCancelled(error as AuthClientError)) return 'cancel';
+    if (isAuthCancelled(error as AuthClientError)) {
+      // Android da por cancelado el Custom Tab cuando la app vuelve al frente, a veces
+      // un instante antes de entregar `?cookie=`. Si ya hay sesión, el login sí acabó.
+      return (await sessionFromGoogleCallback()) ? 'ok' : 'cancel';
+    }
     return { error: authErrorMessage(error as AuthClientError) };
   }
   return 'ok';

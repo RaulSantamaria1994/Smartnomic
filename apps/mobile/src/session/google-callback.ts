@@ -4,3 +4,7 @@ export async function captureAuthCallback(): Promise<void> {}
 export function subscribeAuthCallback(): { remove: () => void } {
   return { remove() {} };
 }
+
+export async function sessionFromGoogleCallback(): Promise<boolean> {
+  return false;
+}

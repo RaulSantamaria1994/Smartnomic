@@ -154,9 +154,10 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
 - **Callback `/` en Android**: si Google abre Chrome, `/` se resuelve a la web de Railway y
   la sesión se queda en el navegador. En nativo el `callbackURL` es `smartnomic://…`
   (`googleCallbackURL` en `auth-client.native.ts`).
-- **Android abre la app de cero**: el selector de Google cierra el Custom Tab y el intent
-  `smartnomic://…?cookie=` arranca de nuevo. `captureAuthCallback` guarda esa cookie antes
-  de pintar (G025).
+- **Android abre la app de cero**: el selector de Google pone la app en segundo plano.
+  Expo, con `useProxyActivity` (por defecto), al volver relanza el icono sin `?cookie=`.
+  En nativo va `useProxyActivity: false` y `captureAuthCallback` guarda la cookie del
+  deep link si AuthSession da el Custom Tab por cerrado (G025).
 
 ## Pruebas y cierre
 
