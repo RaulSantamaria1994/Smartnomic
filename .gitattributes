@@ -1,2 +1,5 @@
+# Todo el texto se guarda y se descarga con LF, también en Windows.
+* text=auto eol=lf
+
 # Los hooks son scripts de shell: con CRLF (Windows) dejan de funcionar.
 .githooks/* text eol=lf
