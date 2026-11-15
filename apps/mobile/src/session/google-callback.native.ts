@@ -8,7 +8,7 @@ const cookies = storageAdapter(SecureStore);
 /** Misma clave que `expoClient({ storagePrefix: 'smartnomic' })`. */
 const COOKIE_KEY = 'smartnomic_cookie';
 
-async function applyAuthCallbackUrl(url: string | null): Promise<void> {
+export async function applyAuthCallbackUrl(url: string | null): Promise<void> {
   if (!url) return;
   const header = cookieFromAuthCallbackUrl(url);
   if (!header) return;
@@ -36,3 +36,8 @@ export async function sessionFromGoogleCallback(): Promise<boolean> {
   const { data } = await authClient.getSession();
   return Boolean(data);
 }
+
+void Linking.getInitialURL().then((url) => void applyAuthCallbackUrl(url));
+Linking.addEventListener('url', ({ url }) => {
+  void applyAuthCallbackUrl(url);
+});

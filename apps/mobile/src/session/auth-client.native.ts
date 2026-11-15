@@ -13,10 +13,6 @@ export const authClient = createAuthClient({
       scheme: 'smartnomic',
       storagePrefix: 'smartnomic',
       storage: SecureStore,
-      // showInRecents + createTask: el selector de Google no mata la pestaña.
-      // useProxyActivity: false: esa actividad, al cerrarse, relanza la APK con el
-      // intent del icono (sin ?cookie=) y parece que la app arranca de cero.
-      webBrowserOptions: { showInRecents: true, createTask: true, useProxyActivity: false },
     }),
   ],
 });
@@ -39,7 +35,6 @@ export function resetPasswordRedirect(): string {
  * `/`, Chrome se queda en la web de Railway y la APK nunca recibe la sesión.
  */
 export function googleCallbackURL(next: string | null): string {
-  // Ruta vacía → `smartnomic://`. AuthSession comprueba `url.startsWith(callback)`:
-  // Android a veces entrega `smartnomic://entrar` en vez de `smartnomic:///entrar`.
-  return Linking.createURL(next ?? '', { scheme: 'smartnomic' });
+  // Tres barras: Chrome acepta `smartnomic:///entrar` mejor que `smartnomic://`.
+  return Linking.createURL(next ?? '/entrar', { scheme: 'smartnomic', isTripleSlashed: true });
 }
