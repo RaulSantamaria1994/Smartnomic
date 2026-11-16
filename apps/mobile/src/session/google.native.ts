@@ -1,6 +1,7 @@
 import { TIMEZONE_HEADER } from '@smartnomic/api';
 import { AppState, type AppStateStatus } from 'react-native';
 import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { API_URL } from '../config';
 import { es } from '../i18n/es';
 import { googleCallbackURL } from './auth-client';
@@ -17,8 +18,10 @@ export type GoogleSignInResult = 'ok' | 'cancel' | { error: string };
 export { applyDeviceTimezone } from './google-timezone';
 
 /**
- * En Android el Custom Tab de Expo se cierra al elegir la cuenta y AuthSession pierde
- * la cookie. Se abre Chrome y se espera el deep link `smartnomic://…?cookie=` (G025).
+ * El selector de cuenta de Google es una actividad nativa. Si el navegador va en
+ * otra tarea (`Linking.openURL` o Custom Tab con `createTask: true`), al elegir
+ * cuenta Android reanuda la app y el OAuth no termina. La pestaña tiene que vivir
+ * en la misma tarea (`createTask: false`) (G025).
  */
 export async function continueWithGoogle(next: string | null): Promise<GoogleSignInResult> {
   const callbackURL = googleCallbackURL(next);
@@ -80,7 +83,12 @@ async function startGoogleInBrowser(callbackURL: string): Promise<GoogleSignInRe
   const googleUrl = googleSignInUrlFromResponse(body, location);
   if (!googleUrl) return { error: es.auth.errors.unknown };
   try {
-    await Linking.openURL(expoAuthorizationProxyUrl(API_URL, googleUrl));
+    await WebBrowser.openBrowserAsync(expoAuthorizationProxyUrl(API_URL, googleUrl), {
+      // Misma tarea que la app: el selector de cuenta vuelve a esta pestaña, no al login.
+      createTask: false,
+      useProxyActivity: false,
+      showInRecents: true,
+    });
   } catch {
     return { error: authErrorMessage({ status: 0 } as AuthClientError) };
   }

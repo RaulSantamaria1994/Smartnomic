@@ -104,13 +104,14 @@ tokens). Email y contraseña usan `provider_id = 'credential'`; Google, `'google
 - En la **web**, `authClient.signIn.social({ provider: 'google', callbackURL })` con
   `fetchOptions.headers` de `x-timezone`. `callbackURL` es la ruta. Tras éxito:
   `PUT /api/me/timezone` y `router.replace(next ?? '/')`.
-- En **Android**, no se usa el Custom Tab de `expo-web-browser` (el selector de cuenta lo
-  cierra y AuthSession pierde la cookie). `continueWithGoogle` en `google.native.ts` hace
-  `POST /api/auth/sign-in/social`, abre Chrome con `Linking.openURL` al
-  `expo-authorization-proxy` y espera el deep link `smartnomic:///entrar?cookie=`.
-  `captureAuthCallback` guarda esa cookie si Android mata el proceso. Cancelar (volver a
-  la app sin cookie) no es un error (RF-1607). `next` sigue pasando por `safeNext`.
-  Red u otros errores: `authErrorMessage`.
+- En **Android**, `continueWithGoogle` (`google.native.ts`) hace `POST /api/auth/sign-in/social`
+  y abre el `expo-authorization-proxy` con `WebBrowser.openBrowserAsync` en la **misma
+  tarea** (`createTask: false`). Si el navegador va en otra tarea (`Linking.openURL` o
+  Custom Tab por defecto), el selector nativo de Google reanuda la app y el OAuth no
+  termina. Se espera `smartnomic:///entrar?cookie=` (`waitForGoogleRedirect`); volver al
+  frente no cancela al instante. `captureAuthCallback` guarda la cookie si Android mata el
+  proceso. Cancelar (cerrar la pestaña) no es un error (RF-1607). `next` sigue por
+  `safeNext`. Red u otros errores: `authErrorMessage`.
 - **Borrar mi cuenta**: si `me.user.hasPassword`, el campo de contraseña de hoy; si no, un
   campo de email. El botón y los dos toques no cambian. Propietario con más miembros, igual.
 - `CACHE_BUSTER` → `entrar-google-1` (cambia la forma de `user` en `me`).
@@ -133,15 +134,15 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
 
 ## Investigación y decisiones
 
-| Decisión             | Elegido                                                                               | Alternativas descartadas                                                                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Flujo OAuth          | Código de autorización en el navegador (Chrome en Android; la web en el mismo origen) | SDK nativo + idToken: dependencia nueva, cliente Android y SHA-1 de cada keystore; Custom Tab de Expo: el selector de cuenta cierra la pestaña |
-| Vincular por email   | `accountLinking` con Google como proveedor de confianza                               | Exigir la contraseña para vincular: Juan vería una cuenta vacía o un error (choca con RF-1604)                                                 |
-| Zona horaria         | `PUT /api/me/timezone` al volver de Google, con guarda de alta reciente               | Cookie en el callback: en Android el callback va por Chrome, no por la app, y no vería la cookie                                               |
-| ¿Hay Google?         | `GET /api/login-options`                                                              | Variable `EXPO_PUBLIC_*`: obliga a recompilar la web; un servidor sin claves dejaría un botón que falla                                        |
-| Confirmar el borrado | Contraseña si hay; si no, email                                                       | Reabrir Google: más flujo nativo. Obligar a poner contraseña: choca con la aclaración 3                                                        |
-| Foto                 | No copiarla                                                                           | Guardarla y no mostrarla: dato personal de más, sin uso                                                                                        |
-| Marca del botón      | Texto «Continuar con Google», variante `secondary`                                    | Colores oficiales de Google: chocan con los tokens (006) y no están en el catálogo de iconos                                                   |
+| Decisión             | Elegido                                                                                                     | Alternativas descartadas                                                                                                            |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Flujo OAuth          | Código de autorización en el navegador (Custom Tab en la misma tarea en Android; la web en el mismo origen) | SDK nativo + idToken: dependencia nueva y SHA-1; `Linking.openURL` / Custom Tab en otra tarea: el selector de cuenta reanuda la app |
+| Vincular por email   | `accountLinking` con Google como proveedor de confianza                                                     | Exigir la contraseña para vincular: Juan vería una cuenta vacía o un error (choca con RF-1604)                                      |
+| Zona horaria         | `PUT /api/me/timezone` al volver de Google, con guarda de alta reciente                                     | Cookie en el callback: en Android el callback va por Chrome, no por la app, y no vería la cookie                                    |
+| ¿Hay Google?         | `GET /api/login-options`                                                                                    | Variable `EXPO_PUBLIC_*`: obliga a recompilar la web; un servidor sin claves dejaría un botón que falla                             |
+| Confirmar el borrado | Contraseña si hay; si no, email                                                                             | Reabrir Google: más flujo nativo. Obligar a poner contraseña: choca con la aclaración 3                                             |
+| Foto                 | No copiarla                                                                                                 | Guardarla y no mostrarla: dato personal de más, sin uso                                                                             |
+| Marca del botón      | Texto «Continuar con Google», variante `secondary`                                                          | Colores oficiales de Google: chocan con los tokens (006) y no están en el catálogo de iconos                                        |
 
 ## Riesgos
 
@@ -156,9 +157,10 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
 - **Callback `/` en Android**: si Google abre Chrome, `/` se resuelve a la web de Railway y
   la sesión se queda en el navegador. En nativo el `callbackURL` es `smartnomic://…`
   (`googleCallbackURL` en `auth-client.native.ts`).
-- **Custom Tab en Android**: el selector de cuenta cierra la pestaña y la app vuelve a
-  Entrar sin sesión. En nativo Google se abre en Chrome (`Linking.openURL`) y la cookie
-  llega por `smartnomic://…?cookie=` (`waitForGoogleRedirect` + `captureAuthCallback`) (G025).
+- **Selector de cuenta en Android**: es una actividad nativa. Si el navegador está en otra
+  tarea, al pulsar la cuenta Android reanuda la app y el OAuth no acaba. La pestaña va en
+  la misma tarea (`createTask: false`) y `waitForGoogleRedirect` no trata el primer plano
+  como cancelar (G025).
 
 ## Pruebas y cierre
 
