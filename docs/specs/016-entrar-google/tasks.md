@@ -56,7 +56,8 @@ día.
 
 - [x] G005 [US1] `createAuth` / `createApi` aceptan `google?: { clientId, clientSecret }`. Si
       viene: `socialProviders.google` con `prompt: 'select_account'` y `mapProfileToUser` solo
-      `name` y `email`; `account.accountLinking` `{ enabled: true, trustedProviders: ['google'] }`;
+      `name` y `email`; `account.accountLinking` `{ enabled: true, trustedProviders: ['google'],
+      requireLocalEmailVerified: false }`;
       el gancho de alta deja `users.image` a `null`. Sin `google`, el comportamiento de hoy.
       `apps/server/src/auth.ts`, `api.ts`
 - [x] G006 [US1] Tests en `test/auth.test.ts`: sin `google`, `GET /api/login-options` →

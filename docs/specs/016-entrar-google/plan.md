@@ -81,8 +81,10 @@ tokens). Email y contraseña usan `provider_id = 'credential'`; Google, `'google
 - `createAuth` / `createApi` aceptan `google?: { clientId: string; clientSecret: string }`.
   Si viene, `socialProviders.google` con `prompt: 'select_account'` (para poder cambiar de
   cuenta de Google) y `mapProfileToUser` solo con `name` y `email`.
-  `account.accountLinking`: `{ enabled: true, trustedProviders: ['google'] }` — Google verifica
-  el email, así que se vincula a la cuenta de contraseña del mismo email (RF-1604).
+  `account.accountLinking`: `{ enabled: true, trustedProviders: ['google'],
+  requireLocalEmailVerified: false }` — el alta con contraseña no verifica el email
+  (`users.email_verified` queda en false). Better Auth, por defecto, no vincula Google a esa
+  fila y Juan vuelve a Entrar sin cookie. Google ya comprueba el correo (RF-1604).
 - `index.ts`: si están `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`, se las pasa a `createApi`;
   si falta una, aviso en el log (sin valores) y el botón no existirá. Igual que Brevo.
 - `GET /api/login-options` junto a las rutas de cuenta/sesión, no bajo `/api/auth/*` (eso lo
@@ -134,15 +136,15 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
 
 ## Investigación y decisiones
 
-| Decisión             | Elegido                                                                                                             | Alternativas descartadas                                                                                     |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Flujo OAuth          | Código de autorización en el navegador (Custom Tab en otra tarea y recientes en Android; la web en el mismo origen) | SDK nativo + idToken: dependencia nueva y SHA-1; Custom Tab en la misma tarea: la huella destruye la pestaña |
-| Vincular por email   | `accountLinking` con Google como proveedor de confianza                                                             | Exigir la contraseña para vincular: Juan vería una cuenta vacía o un error (choca con RF-1604)               |
-| Zona horaria         | `PUT /api/me/timezone` al volver de Google, con guarda de alta reciente                                             | Cookie en el callback: en Android el callback va por Chrome, no por la app, y no vería la cookie             |
-| ¿Hay Google?         | `GET /api/login-options`                                                                                            | Variable `EXPO_PUBLIC_*`: obliga a recompilar la web; un servidor sin claves dejaría un botón que falla      |
-| Confirmar el borrado | Contraseña si hay; si no, email                                                                                     | Reabrir Google: más flujo nativo. Obligar a poner contraseña: choca con la aclaración 3                      |
-| Foto                 | No copiarla                                                                                                         | Guardarla y no mostrarla: dato personal de más, sin uso                                                      |
-| Marca del botón      | Texto «Continuar con Google», variante `secondary`                                                                  | Colores oficiales de Google: chocan con los tokens (006) y no están en el catálogo de iconos                 |
+| Decisión             | Elegido                                                                                                             | Alternativas descartadas                                                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Flujo OAuth          | Código de autorización en el navegador (Custom Tab en otra tarea y recientes en Android; la web en el mismo origen) | SDK nativo + idToken: dependencia nueva y SHA-1; Custom Tab en la misma tarea: la huella destruye la pestaña                                                                    |
+| Vincular por email   | `accountLinking` con Google de confianza y `requireLocalEmailVerified: false`                                       | Exigir la contraseña para vincular: Juan vería una cuenta vacía o un error (choca con RF-1604). Dejar el default de Better Auth: las cuentas de contraseña no entran con Google |
+| Zona horaria         | `PUT /api/me/timezone` al volver de Google, con guarda de alta reciente                                             | Cookie en el callback: en Android el callback va por Chrome, no por la app, y no vería la cookie                                                                                |
+| ¿Hay Google?         | `GET /api/login-options`                                                                                            | Variable `EXPO_PUBLIC_*`: obliga a recompilar la web; un servidor sin claves dejaría un botón que falla                                                                         |
+| Confirmar el borrado | Contraseña si hay; si no, email                                                                                     | Reabrir Google: más flujo nativo. Obligar a poner contraseña: choca con la aclaración 3                                                                                         |
+| Foto                 | No copiarla                                                                                                         | Guardarla y no mostrarla: dato personal de más, sin uso                                                                                                                         |
+| Marca del botón      | Texto «Continuar con Google», variante `secondary`                                                                  | Colores oficiales de Google: chocan con los tokens (006) y no están en el catálogo de iconos                                                                                    |
 
 ## Riesgos
 
@@ -162,6 +164,11 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
   huella. La pestaña va en otra tarea y en recientes (`createTask: true`,
   `showInRecents: true`, sin proxy). Volver al frente no cancela la espera del deep link
   (G025).
+- **Cuenta de contraseña sin verificar**: Better Auth no vincula Google si
+  `email_verified` es false (defensa contra un registro previo con el Gmail de otra
+  persona). Aquí no hay verificación de email; `requireLocalEmailVerified: false` cumple
+  RF-1604. El riesgo de secuestro por registrarse antes con ese correo se acepta, igual
+  que R1 de la auditoría (el alta ya revela si el email existe).
 
 ## Pruebas y cierre
 
@@ -177,6 +184,8 @@ web** (el OAuth termina en el servidor, no hace falta cliente Android ni SHA-1).
   - usuario con las dos filas: hace falta la contraseña;
   - `PUT /api/me/timezone`: alta reciente y un hogar en Madrid → se cambia; dos hogares, o
     zona ya distinta, o cuenta vieja → no se toca; zona inválida → 400; sin sesión → 401;
+  - Google con el email de una cuenta de contraseña (`email_verified` false) vincula y
+    entra en esa misma fila, no crea otra (RF-1604);
   - crear cuenta con email que ya existe (también si es solo Google) → el error de hoy;
   - batería de ataques: borrar la cuenta de otro, timezone de otro (no hay: es «yo»).
 - App: `authErrorMessage` con cancelar; `hasPassword` decide el campo de borrar.
@@ -248,8 +257,9 @@ pasa a `trackList.ts`.
 
 Decisiones tomadas al implementar, que el plan no fijaba:
 
-- `accountLinking` con Google de confianza queda **siempre** activo. Sin claves no hay
-  proveedor que vincular; el alta con email no cambia.
+- `accountLinking` con Google de confianza queda **siempre** activo, con
+  `requireLocalEmailVerified: false` (el alta con contraseña no verifica el email). Sin
+  claves no hay proveedor que vincular; el alta con email no cambia.
 - La zona del dispositivo no viaja en el callback de Google (en Android el Custom Tab no
   comparte cookies con la app). `PUT /api/me/timezone` se llama al montar la sesión
   (`SignedIn` en `app/(app)/_layout.tsx`), no solo tras pulsar el botón: cubre el redirect

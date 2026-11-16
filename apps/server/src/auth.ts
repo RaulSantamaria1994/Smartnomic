@@ -65,7 +65,14 @@ export function createAuth(options: AuthOptions) {
       }),
     },
     account: {
-      accountLinking: { enabled: true, trustedProviders: ['google'] },
+      // El alta con contraseña no verifica el email (`email_verified` queda en false). Better
+      // Auth, por defecto, no vincula Google a esa fila (`requireLocalEmailVerified`). Sin
+      // esto, Juan vuelve a Entrar sin cookie (RF-1604). Google ya comprueba el correo.
+      accountLinking: {
+        enabled: true,
+        trustedProviders: ['google'],
+        requireLocalEmailVerified: false,
+      },
     },
     ...(google && {
       socialProviders: {
