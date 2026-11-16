@@ -126,6 +126,12 @@ y cerrar sesión da de baja el dispositivo antes (`src/push/forget.ts`). En los 
 el emisor y el temporizador son falsos (`test/push-fakes.ts`, `ctx.push`). **Configurar Firebase y
 las credenciales de FCM** (README) es cosa del propietario; sin ello no llegan avisos.
 
+**`017-play-privacidad`**: páginas públicas `/privacidad` y `/borrar-cuenta` (texto en
+`apps/mobile/src/legal/privacy.ts`) para la ficha de Google Play. Tras entrar desde
+borrar-cuenta, `safeNext` admite `/delete-account`. El perfil EAS `production` genera AAB;
+la clave de firma no está en el repo. Sigue faltando publicar el consentimiento OAuth de
+Google, Data safety y la prueba cerrada de Play.
+
 El aspecto de la app sale del sistema de diseño de `apps/mobile/src/design/` (tokens y
 componentes); ESLint impide usar colores, tamaños, pesos o familias de letra sueltos fuera
 de él; un test impide los emoji (los iconos de categoría son identificadores de un catálogo

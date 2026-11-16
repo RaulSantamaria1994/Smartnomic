@@ -325,6 +325,13 @@ export const es = {
     delete: 'Borrar mi cuenta',
     confirmDelete: 'Pulsa otra vez para borrar tu cuenta para siempre.',
   },
+  /** Textos legales públicos (especificación 017, Play Store). */
+  legal: {
+    privacyTitle: 'Privacidad',
+    privacyLink: 'Política de privacidad',
+    deleteTitle: 'Borrar la cuenta',
+    deleteSignIn: 'Entrar para borrar mi cuenta',
+  },
   /** Varios hogares (especificación 013). */
   households: {
     title: 'Tus hogares',

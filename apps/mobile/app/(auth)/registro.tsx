@@ -76,6 +76,11 @@ export default function SignUp() {
         label={es.auth.signUp.haveAccount}
         onPress={() => router.replace(next ? { pathname: '/entrar', params: { next } } : '/entrar')}
       />
+      <Button
+        variant="link"
+        label={es.legal.privacyLink}
+        onPress={() => router.push('/privacidad')}
+      />
     </Screen>
   );
 }
