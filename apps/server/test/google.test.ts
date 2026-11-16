@@ -1,6 +1,8 @@
 import { loginOptionsSchema, meResponseSchema } from '@smartnomic/api';
+import { handleOAuthUserInfo } from 'better-auth/oauth2';
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
+import type { Auth } from '../src/auth';
 import { accounts, users } from '../src/db/schema';
 import { insertGoogleUser, signUp, TEST_ORIGIN, TEST_PASSWORD, useTestServer } from './helpers';
 
@@ -72,6 +74,24 @@ describe('entrar con Google (especificación 016)', () => {
     expect(await ctx.db.select().from(users).where(eq(users.email, user.email))).toHaveLength(1);
   });
 
+  it('Google entra en la cuenta de contraseña del mismo email aunque no esté verificada (RF-1604)', async () => {
+    const user = await signUp(ctx.app, { email: 'juan@example.com' });
+    const [local] = await ctx.db.select().from(users).where(eq(users.id, user.id));
+    expect(local?.emailVerified).toBe(false);
+
+    const result = await googleCallback(ctx.api.auth, {
+      email: user.email,
+      googleId: 'google-sub-juan',
+      name: 'Juan',
+    });
+    expect(result.error).toBeNull();
+    expect(result.data?.user.id).toBe(user.id);
+
+    const googleRows = await ctx.db.select().from(accounts).where(eq(accounts.userId, user.id));
+    expect(googleRows.some((row) => row.providerId === 'google')).toBe(true);
+    expect(await ctx.db.select().from(users).where(eq(users.email, user.email))).toHaveLength(1);
+  });
+
   it('con contraseña y fila de Google, hasPassword sigue true y se entra con email', async () => {
     const user = await signUp(ctx.app, { email: 'juan@example.com' });
     await ctx.db.insert(accounts).values({
@@ -95,3 +115,26 @@ describe('entrar con Google (especificación 016)', () => {
     expect(signIn.statusCode).toBe(200);
   });
 });
+
+/** El callback de Google, sin red: misma función que usa Better Auth al volver del proveedor. */
+async function googleCallback(
+  auth: Auth,
+  profile: { email: string; googleId: string; name: string },
+) {
+  const context = await auth.$context;
+  return handleOAuthUserInfo({ context } as Parameters<typeof handleOAuthUserInfo>[0], {
+    userInfo: {
+      id: profile.googleId,
+      name: profile.name,
+      email: profile.email,
+      emailVerified: true,
+      image: null,
+    },
+    account: {
+      providerId: 'google',
+      accountId: profile.googleId,
+      accessToken: 'test-access',
+    },
+    isTrustedProvider: true,
+  });
+}

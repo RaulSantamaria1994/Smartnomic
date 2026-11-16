@@ -98,8 +98,9 @@ pendientes sin enviar; falta la prueba con el APK en Android.
 
 **`016-entrar-google`**: en **Entrar** y **Crear cuenta** hay «Continuar con Google» si el servidor
 tiene `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (`GET /api/login-options`). Better Auth
-(`socialProviders.google`, `accountLinking` con Google de confianza) vincula el mismo email a la
-cuenta de contraseña. El callback no trae la zona del dispositivo: `PUT /api/me/timezone` la aplica
+(`socialProviders.google`, `accountLinking` con Google de confianza y
+`requireLocalEmailVerified: false`, porque el alta con contraseña no verifica el email)
+vincula el mismo email a la cuenta de contraseña. El callback no trae la zona del dispositivo: `PUT /api/me/timezone` la aplica
 si el hogar es nuevo y sigue en Madrid (`applySignupTimezone` en `apps/server/src/account.ts`).
 Borrar la cuenta pide la contraseña si `hasPassword`; si no, el email (`emailsMatch` en
 `packages/domain`). La foto de Google no se guarda. Sin las claves el botón no se muestra. En Android Google se abre en un Custom Tab de otra
