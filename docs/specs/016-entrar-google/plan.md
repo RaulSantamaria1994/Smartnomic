@@ -81,10 +81,10 @@ tokens). Email y contraseña usan `provider_id = 'credential'`; Google, `'google
 - `createAuth` / `createApi` aceptan `google?: { clientId: string; clientSecret: string }`.
   Si viene, `socialProviders.google` con `prompt: 'select_account'` (para poder cambiar de
   cuenta de Google) y `mapProfileToUser` solo con `name` y `email`.
-  `account.accountLinking`: `{ enabled: true, trustedProviders: ['google'],
-  requireLocalEmailVerified: false }` — el alta con contraseña no verifica el email
-  (`users.email_verified` queda en false). Better Auth, por defecto, no vincula Google a esa
-  fila y Juan vuelve a Entrar sin cookie. Google ya comprueba el correo (RF-1604).
+  `account.accountLinking` con Google de confianza y `requireLocalEmailVerified: false`: el
+  alta con contraseña no verifica el email (`users.email_verified` queda en false). Better
+  Auth, por defecto, no vincula Google a esa fila y Juan vuelve a Entrar sin cookie. Google
+  ya comprueba el correo (RF-1604).
 - `index.ts`: si están `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`, se las pasa a `createApi`;
   si falta una, aviso en el log (sin valores) y el botón no existirá. Igual que Brevo.
 - `GET /api/login-options` junto a las rutas de cuenta/sesión, no bajo `/api/auth/*` (eso lo
