@@ -66,6 +66,11 @@ export default function SignIn() {
           router.replace(next ? { pathname: '/registro', params: { next } } : '/registro')
         }
       />
+      <Button
+        variant="link"
+        label={es.legal.privacyLink}
+        onPress={() => router.push('/privacidad')}
+      />
     </Screen>
   );
 }

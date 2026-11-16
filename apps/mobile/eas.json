@@ -12,6 +12,14 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://smartnomicserver-production.up.railway.app"
       }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://smartnomicserver-production.up.railway.app"
+      }
     }
   }
 }

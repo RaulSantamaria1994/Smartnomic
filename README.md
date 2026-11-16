@@ -18,9 +18,11 @@ búsqueda de movimientos (`docs/specs/009-busqueda`), la exportación a CSV con 
 (`docs/specs/011-sin-conexion`), los cambios en tiempo real entre miembros
 (`docs/specs/012-tiempo-real`), pertenecer a varios hogares a la vez
 (`docs/specs/013-varios-hogares`) y entrar con Google
-(`docs/specs/016-entrar-google`) también están terminados.
-Queda probarlo en Android con el APK y medir con personas los criterios que lo necesitan
-(ver «Resultado de los criterios de éxito» en su `plan.md`).
+(`docs/specs/016-entrar-google`) también están terminados. La privacidad pública y la URL
+de borrado para Play (`docs/specs/017-play-privacidad`) están en `/privacidad` y
+`/borrar-cuenta`. Queda la ficha de Play (Data safety, consentimiento OAuth en
+producción, AAB firmado y prueba cerrada) y medir con personas los criterios que lo
+necesitan (ver «Resultado de los criterios de éxito» en su `plan.md`).
 
 ## Requisitos
 
@@ -247,6 +249,26 @@ eas build --platform android --profile preview
 ```
 
 Al terminar, EAS da un enlace y un QR para descargar el APK en el móvil.
+
+### App Bundle para Google Play
+
+El perfil `production` de `apps/mobile/eas.json` genera un **AAB** (lo que pide Play), no un
+APK. La clave de firma no entra en el repositorio: EAS la guarda o se usan los secretos
+`ANDROID_KEYSTORE_*` descritos arriba.
+
+```sh
+cd apps/mobile
+eas build --platform android --profile production
+```
+
+**URLs para la ficha de Play** (mismo origen que la API, cuando Railway sirve la web):
+
+- Privacidad: `https://<tu-dominio>/privacidad`
+- Borrar la cuenta: `https://<tu-dominio>/borrar-cuenta` (entra en la web y confirma)
+
+Siguen haciendo falta la política en la ficha, Data safety, el consentimiento OAuth de
+Google en producción y la prueba cerrada (12 testers, 14 días). Ver
+`docs/specs/017-play-privacidad/`.
 
 ## Diseño
 

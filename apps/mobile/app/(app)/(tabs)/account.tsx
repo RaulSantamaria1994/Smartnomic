@@ -212,6 +212,11 @@ export default function Account() {
 
       <Section>
         <MenuRow
+          icon="user"
+          label={es.legal.privacyTitle}
+          onPress={() => router.push('/privacidad')}
+        />
+        <MenuRow
           icon="trash"
           label={es.account.deleteTitle}
           onPress={() => router.push('/delete-account')}

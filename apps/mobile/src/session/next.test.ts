@@ -6,6 +6,10 @@ describe('safeNext', () => {
     expect(safeNext('/invitacion/ABCDE23456')).toBe('/invitacion/ABCDE23456');
   });
 
+  it('acepta borrar la cuenta (Play, RF-1704)', () => {
+    expect(safeNext('/delete-account')).toBe('/delete-account');
+  });
+
   it('rechaza cualquier otra cosa', () => {
     expect(safeNext('https://malo.example')).toBeNull();
     expect(safeNext('//malo.example/invitacion/X')).toBeNull();
