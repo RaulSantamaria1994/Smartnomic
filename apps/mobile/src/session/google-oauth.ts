@@ -1,7 +1,7 @@
 import { cookieFromAuthCallbackUrl } from './google-callback-url';
 
-/** Tras el selector de cuenta la app puede volver al frente; el OAuth sigue en la pestaña. */
-export const GOOGLE_REDIRECT_SETTLE_MS = 8_000;
+/** Tope si no llega el deep link (huella / 2FA pueden tardar). */
+export const GOOGLE_REDIRECT_TIMEOUT_MS = 90_000;
 
 /** URL de cuentas de Google que devuelve POST /api/auth/sign-in/social. */
 export function googleSignInUrlFromResponse(
@@ -30,20 +30,19 @@ export function expoAuthorizationProxyUrl(apiUrl: string, authorizationURL: stri
 export type AppLifecycle = 'active' | 'background' | 'inactive';
 
 /**
- * Espera el deep link con `?cookie=`. Volver al frente no cancela al instante: el selector
- * nativo de Google reanuda la app mientras el OAuth sigue en la pestaña (G025).
+ * Espera `?cookie=`. La huella o el 2FA reanudan la app: eso no cancela. Solo se
+ * cancela al agotar el tiempo sin cookie (G025).
  */
 export async function waitForGoogleRedirect(io: {
   subscribeUrl: (handler: (url: string) => void) => { remove: () => void };
   subscribeAppState: (handler: (state: AppLifecycle) => void) => { remove: () => void };
   getInitialURL: () => Promise<string | null>;
   sleep: (ms: number) => Promise<void>;
-  settleMs?: number;
+  timeoutMs?: number;
 }): Promise<string | null> {
-  const settleMs = io.settleMs ?? GOOGLE_REDIRECT_SETTLE_MS;
+  const timeoutMs = io.timeoutMs ?? GOOGLE_REDIRECT_TIMEOUT_MS;
   return new Promise((resolve) => {
     let done = false;
-    let sawBackground = false;
     const finish = (url: string | null) => {
       if (done) return;
       done = true;
@@ -56,16 +55,12 @@ export async function waitForGoogleRedirect(io: {
     };
     const urlSub = io.subscribeUrl(take);
     const appSub = io.subscribeAppState((state) => {
-      if (state === 'background' || state === 'inactive') {
-        sawBackground = true;
-        return;
-      }
-      if (state !== 'active' || !sawBackground) return;
-      void io.sleep(settleMs).then(async () => {
-        if (done) return;
-        take(await io.getInitialURL());
-        if (!done) finish(null);
-      });
+      if (state !== 'active') return;
+      void io.getInitialURL().then(take);
+    });
+    void io.getInitialURL().then(take);
+    void io.sleep(timeoutMs).then(() => {
+      if (!done) finish(null);
     });
   });
 }

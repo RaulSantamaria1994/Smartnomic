@@ -6,7 +6,7 @@ import { API_URL } from '../config';
 import { es } from '../i18n/es';
 import { googleCallbackURL } from './auth-client';
 import { authErrorMessage, type AuthClientError } from './auth-errors';
-import { applyAuthCallbackUrl } from './google-callback';
+import { applyAuthCallbackUrl, sessionFromGoogleCallback } from './google-callback';
 import {
   expoAuthorizationProxyUrl,
   googleSignInUrlFromResponse,
@@ -18,16 +18,17 @@ export type GoogleSignInResult = 'ok' | 'cancel' | { error: string };
 export { applyDeviceTimezone } from './google-timezone';
 
 /**
- * El selector de cuenta de Google es una actividad nativa. Si el navegador va en
- * otra tarea (`Linking.openURL` o Custom Tab con `createTask: true`), al elegir
- * cuenta Android reanuda la app y el OAuth no termina. La pestaña tiene que vivir
- * en la misma tarea (`createTask: false`) (G025).
+ * La huella y el 2FA de Google son otra actividad. Con `createTask: false` (misma
+ * tarea que la APK, `singleTask`) Android destruye el Custom Tab y el OAuth muere.
+ * La pestaña va en otra tarea, visible en recientes, sin la actividad proxy que
+ * relanza el icono (G025).
  */
 export async function continueWithGoogle(next: string | null): Promise<GoogleSignInResult> {
   const callbackURL = googleCallbackURL(next);
-  const started = await startGoogleInBrowser(callbackURL);
-  if (started !== 'ok') return started;
-  const url = await waitForGoogleRedirect({
+  const googleUrl = await requestGoogleUrl(callbackURL);
+  if (typeof googleUrl !== 'string') return googleUrl;
+  // La cookie puede llegar mientras Chrome sigue abierto (huella). Hay que escuchar ya.
+  const waiting = waitForGoogleRedirect({
     subscribeUrl: (handler) =>
       Linking.addEventListener('url', ({ url }) => {
         handler(url);
@@ -41,12 +42,26 @@ export async function continueWithGoogle(next: string | null): Promise<GoogleSig
     getInitialURL: () => Linking.getInitialURL(),
     sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   });
-  if (!url) return 'cancel';
-  await applyAuthCallbackUrl(url);
-  return 'ok';
+  try {
+    await WebBrowser.openBrowserAsync(expoAuthorizationProxyUrl(API_URL, googleUrl), {
+      // Otra tarea + recientes: la huella no mata la pestaña. Sin proxy: no relanza el icono.
+      createTask: true,
+      useProxyActivity: false,
+      showInRecents: true,
+    });
+  } catch {
+    return { error: authErrorMessage({ status: 0 } as AuthClientError) };
+  }
+  const url = await waiting;
+  if (url) {
+    await applyAuthCallbackUrl(url);
+    return 'ok';
+  }
+  if (await sessionFromGoogleCallback()) return 'ok';
+  return 'cancel';
 }
 
-async function startGoogleInBrowser(callbackURL: string): Promise<GoogleSignInResult> {
+async function requestGoogleUrl(callbackURL: string): Promise<string | GoogleSignInResult> {
   let response: Response;
   try {
     response = await fetch(`${API_URL}/api/auth/sign-in/social`, {
@@ -80,17 +95,5 @@ async function startGoogleInBrowser(callbackURL: string): Promise<GoogleSignInRe
       }),
     };
   }
-  const googleUrl = googleSignInUrlFromResponse(body, location);
-  if (!googleUrl) return { error: es.auth.errors.unknown };
-  try {
-    await WebBrowser.openBrowserAsync(expoAuthorizationProxyUrl(API_URL, googleUrl), {
-      // Misma tarea que la app: el selector de cuenta vuelve a esta pestaña, no al login.
-      createTask: false,
-      useProxyActivity: false,
-      showInRecents: true,
-    });
-  } catch {
-    return { error: authErrorMessage({ status: 0 } as AuthClientError) };
-  }
-  return 'ok';
+  return googleSignInUrlFromResponse(body, location) ?? { error: es.auth.errors.unknown };
 }
