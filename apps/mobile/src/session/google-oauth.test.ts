@@ -49,16 +49,15 @@ describe('waitForGoogleRedirect (G025)', () => {
       },
       subscribeAppState: () => ({ remove() {} }),
       getInitialURL: async () => null,
-      sleep: async () => undefined,
+      sleep: () => new Promise(() => undefined),
     });
     sendUrl('smartnomic:///?cookie=session%3Dabc');
     await expect(result).resolves.toBe('smartnomic:///?cookie=session%3Dabc');
   });
 
-  it('si la cookie llega al volver al frente, gana frente a cancelar', async () => {
+  it('la huella reanuda la app: sin cookie no cancela, la cookie posterior sí', async () => {
     let sendUrl: (url: string) => void = () => undefined;
     let sendState: (state: AppLifecycle) => void = () => undefined;
-    let resumeSleep: () => void = () => undefined;
     const result = waitForGoogleRedirect({
       subscribeUrl: (handler) => {
         sendUrl = handler;
@@ -68,38 +67,37 @@ describe('waitForGoogleRedirect (G025)', () => {
         sendState = handler;
         return { remove() {} };
       },
+      getInitialURL: async () => 'smartnomic:///',
+      sleep: () => new Promise(() => undefined),
+    });
+    sendState('background');
+    sendState('active');
+    sendUrl('smartnomic:///?cookie=session%3Dabc');
+    await expect(result).resolves.toBe('smartnomic:///?cookie=session%3Dabc');
+  });
+
+  it('si el deep link ya está en getInitialURL, no espera al evento', async () => {
+    const result = waitForGoogleRedirect({
+      subscribeUrl: () => ({ remove() {} }),
+      subscribeAppState: () => ({ remove() {} }),
+      getInitialURL: async () => 'smartnomic:///?cookie=session%3Dabc',
+      sleep: () => new Promise(() => undefined),
+    });
+    await expect(result).resolves.toBe('smartnomic:///?cookie=session%3Dabc');
+  });
+
+  it('cancela solo al agotar el tiempo sin cookie', async () => {
+    let resumeSleep: () => void = () => undefined;
+    const result = waitForGoogleRedirect({
+      subscribeUrl: () => ({ remove() {} }),
+      subscribeAppState: () => ({ remove() {} }),
       getInitialURL: async () => null,
       sleep: () =>
         new Promise((resolve) => {
           resumeSleep = resolve;
         }),
-      settleMs: 1,
+      timeoutMs: 1,
     });
-    sendState('background');
-    sendState('active');
-    sendUrl('smartnomic:///?cookie=session%3Dabc');
-    resumeSleep();
-    await expect(result).resolves.toBe('smartnomic:///?cookie=session%3Dabc');
-  });
-
-  it('cancela si la app vuelve al frente y no hay cookie', async () => {
-    let sendState: (state: AppLifecycle) => void = () => undefined;
-    let resumeSleep: () => void = () => undefined;
-    const result = waitForGoogleRedirect({
-      subscribeUrl: () => ({ remove() {} }),
-      subscribeAppState: (handler) => {
-        sendState = handler;
-        return { remove() {} };
-      },
-      getInitialURL: async () => 'smartnomic:///',
-      sleep: () =>
-        new Promise((resolve) => {
-          resumeSleep = resolve;
-        }),
-      settleMs: 1,
-    });
-    sendState('background');
-    sendState('active');
     resumeSleep();
     await expect(result).resolves.toBeNull();
   });
