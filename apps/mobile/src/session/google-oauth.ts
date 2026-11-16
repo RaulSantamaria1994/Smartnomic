@@ -1,6 +1,7 @@
 import { cookieFromAuthCallbackUrl } from './google-callback-url';
 
-export const GOOGLE_REDIRECT_SETTLE_MS = 800;
+/** Tras el selector de cuenta la app puede volver al frente; el OAuth sigue en la pestaña. */
+export const GOOGLE_REDIRECT_SETTLE_MS = 8_000;
 
 /** URL de cuentas de Google que devuelve POST /api/auth/sign-in/social. */
 export function googleSignInUrlFromResponse(
@@ -29,8 +30,8 @@ export function expoAuthorizationProxyUrl(apiUrl: string, authorizationURL: stri
 export type AppLifecycle = 'active' | 'background' | 'inactive';
 
 /**
- * Espera el deep link con `?cookie=` tras abrir el navegador. Si la persona vuelve a la
- * app y no llega cookie, es un cancelar (RF-1607).
+ * Espera el deep link con `?cookie=`. Volver al frente no cancela al instante: el selector
+ * nativo de Google reanuda la app mientras el OAuth sigue en la pestaña (G025).
  */
 export async function waitForGoogleRedirect(io: {
   subscribeUrl: (handler: (url: string) => void) => { remove: () => void };
